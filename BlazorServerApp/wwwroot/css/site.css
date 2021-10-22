@@ -9,7 +9,13 @@ a, .btn-link {
 }
 
 .TextBox{
-    width:100%;
+    width:200px;
+    max-width:400px
+}
+
+.TextBoxLong {
+    width: 800px;
+    max-width: max-content;
 }
 
 .IngredientsTitle{
@@ -106,13 +112,11 @@ a, .btn-link {
 /*Popup begin*/
 .wordblock__container {
     display: inline-flex;
-    position: absolute;
+    position: fixed;
     top: 10%;
     right: 0px;
     z-index: 10000;
-    top: 0;
-    padding-top: 100px;
-    padding-right: 30px;
+    top: 100px;
     transform-origin: right;
     animation: growing 0.4s ease-out forwards;
 }
@@ -154,13 +158,14 @@ a, .btn-link {
 
 
 .wordblock__x {
-    width: 1.2em;
+    width: 4em;
     background-color: red;
     color: white;
     cursor: pointer;
     text-align: center;
     border-radius: 0px 3px 3px 0px;
     user-select: none;
+    padding-left: 5px;
 }
 
     .wordblock__x:hover {

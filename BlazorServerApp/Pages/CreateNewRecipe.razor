@@ -24,42 +24,114 @@
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipeDescriptionLabel">Recipe Description*</label></div>
-                        <div class="FieldData"><InputTextArea class="TextBox" id="recipeDescriptionInput" @bind-Value="newRecipe.Description"   /></div>
+                        <div class="FieldData"><InputTextArea style="width: 100%;" id="recipeDescriptionInput" @bind-Value="newRecipe.Description" /></div>
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipeIngredientsLabel">Ingredients* </label></div>
                         <div class="container">
                             <div class="row row-cols-1">
-                                
-                            @for (int i = 0; i < ingredientsCounter && i < DisplayRecipeModel.INGREDIENTSCAPACITY; i++)
-                            {
-                                int copyOfI = i;
-                                <div class="col" style="flex-basis: unset;">
-                                    <div class="FieldData">
-                                        <div class="InputFieldContainer">
-                                            <input id="@("recipePreparationTimeInput" + i)" class="TimeInputField" value="@newRecipe.quantities[i]" @onchange="@(e => newRecipe.quantities[copyOfI] = int.Parse(e.Value.ToString()))" />
 
+                                @for (int i = 0; i < newRecipe.Ingredients.Count; i++)
+                                {
+                                    DisplayIngredientModel copyOfIngredient = newRecipe.Ingredients[i];
+                                    <div class="col" style="flex-basis: unset;">
+                                        <div class="FieldData">
+                                            <div class="InputFieldContainer">
+                                                <InputNumber id="@("recipePreparationTimeInput" + i)" class="TimeInputField" @bind-Value="@copyOfIngredient.Quantity" />
+                                            </div>
+                                            <div class="InputFieldContainer">
+                                                <InputSelect id="@("recipieIngredientsQuanity" + i)" @bind-Value="copyOfIngredient.Unit">
+                                                    @foreach (var value in DisplayRecipeModel.SUPPORTEDUNITS)
+                                                        {
+                                                        <option>@value</option>
+                                                        }
+                                                </InputSelect>
+                                            </div>
+                                            <div class="InputFieldContainer">
+                                                <input class="TextBox" id="@("recipeIngredientsInput" + i)" @bind-value="@copyOfIngredient.Name" />
+                                            </div>
+                                            <div class="FieldLine">
+                                                <button class="btn btn-danger" @onclick="@(e=>DeleteIngredient(i-1))">✕</button>
+                                            </div>
                                         </div>
-                                        <div class="InputFieldContainer">
-                                            <select id="@("recipieIngredientsQuanity" + i)" @onchange="@(e => newRecipe.unitsList[copyOfI] = e.Value.ToString())">
-                                                @foreach (var value in DisplayRecipeModel.SUPPORTEDUNITS)
-                                                    {
-                                                    <option>@value</option>
-                                                    }
-                                            </select>
-                                        </div>
-                                        <div class="InputFieldContainer" style="width:100%;">
-
-                                            <input class="TextBox" style=" max-width: 400px; width: 100%;" id="@("recipeIngredientsInput" + i)" value="@newRecipe.ingredientsNames[i]" @onchange="@(e => newRecipe.ingredientsNames[copyOfI] = e.Value.ToString())" />
-                                        </div>
-                                        <div class="FieldLine"></div>
                                     </div>
-                                </div>
-                            }
-                                </div><button class="btn btn-primary" @onclick="IncrementCount">Add More Rows</button>
-                            
+                                }
+                                @if (newRecipe.Ingredients.Count >= DisplayRecipeModel.INGREDIENTSCAPACITY)
+                                {
+                                    <p class="alert-danger">Sorry, you can't add any more rows</p>
+                                    <ErrorNotification ErrorMessage="@($"You can't add any more rows. Only a dominos pizza needs more than {DisplayRecipeModel.INGREDIENTSCAPACITY} rows! ")" />
+
+                                }
+                                else
+                                {
+                                    <button class="btn btn-primary" @onclick="IncrementCount">Add Ingredient</button>}
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="EquipmentLable">Equipment* </label></div>
+                        <div class="container">
+                            <div class="row row-cols-1">
+                                @for (int i = 0; i < newRecipe.Equipment.Count; i++)
+                                {
+                                    DisplayEquipmentModel copyOfEquipment = newRecipe.Equipment[i];
+                                    <div class="col" style="flex-basis: unset;">
+                                        <div class="FieldData">
+                                            <div class="InputFieldContainer">
+                                                <InputText id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfEquipment.Name" />
+                                            </div>
+                                            <div class="FieldLine">
+                                                <button class="btn btn-danger" @onclick="@(e=>DeleteEquipment(i-1))">✕</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+
+                                @if (newRecipe.Equipment.Count >= DisplayRecipeModel.EQUIPMENTCAPACITY)
+                                {
+                                    <p class="alert-danger">Sorry, you can't add any more rows</p>
+                                    <ErrorNotification ErrorMessage="@($"You can't add any more rows. Only a car would need more than {DisplayRecipeModel.EQUIPMENTCAPACITY} pieces of equipment!  ")" />
+
+                                }
+                                else
+                                {
+                                    <button class="btn btn-primary" @onclick="AddEquipment">Add Equipment</button>
+                                }
                             </div>
                         </div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="MethodLabel">Method* </label></div>
+                        <ol>
+                            @for (int i = 0; i < newRecipe.Method.Count; i++)
+                            {
+                                DisplayMethodList copyOfMethod = newRecipe.Method[i];
+                                <li>
+
+                                    <div class="FieldData">
+                                        <div class="InputFieldContainer">
+                                            <InputText class="" style="width: 400px; max-width: unset;" id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfMethod.Step" />
+                                        </div>
+                                        <div class="FieldLine">
+                                            <button class="btn btn-danger" @onclick="@(e=>DeleteStep(i-1))">✕</button>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ol>
+                        @if (newRecipe.Method.Count >= DisplayRecipeModel.METHODCAPACITY)
+                        {
+                            <p class="alert-danger">Sorry, you can't add any more rows</p>
+                            <ErrorNotification ErrorMessage="@($"You can't add any more rows. Only a skyscraper would need more than {DisplayRecipeModel.METHODCAPACITY} instructions! Remove some and try again. ")" />
+
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary" @onclick="AddMethod">Add Instruction</button>
+                        }
+                    </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipeServingsLabel">Servings </label></div>
                         <div class="FieldData"><InputNumber id="recipeServingsInput" class="QuantityInputField" @bind-Value="newRecipe.Servings" /></div>
@@ -67,9 +139,10 @@
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipeCookingTimeLabel">Cooking Time </label></div>
                         <div class="FieldData">
-                        <div class="InputFieldContainer"><InputNumber id="recipeCookingTimeInput" class="TimeInputField" @bind-Value="newRecipe.CookingTime" /></div>
-                        <div class="InputLabelContainer"><p>Minutes</p></div></div>
-                        
+                            <div class="InputFieldContainer"><InputNumber id="recipeCookingTimeInput" class="TimeInputField" @bind-Value="newRecipe.CookingTime" /></div>
+                            <div class="InputLabelContainer"><p>Minutes</p></div>
+                        </div>
+
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipePreparationTimeLabel">Preperation Time </label></div>
@@ -77,13 +150,25 @@
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipeMealTypeLabel">Meal Type </label></div>
-                        <div class="FieldData"><InputSelect id="recipeMealTypeInput" @bind-Value="newRecipe.MealType">
-                            @foreach (var value in Enum.GetValues(typeof(DisplayRecipeModel.mealType)))
-                            {
-                                <option>@value</option>
-                            }
+                        <div class="FieldData">
+                            <InputSelect id="recipeMealTypeInput" @bind-Value="newRecipe.MealType">
+                                @foreach (var value in Enum.GetValues(typeof(DisplayRecipeModel.mealType)))
+                                {
+                                    <option>@value</option>
+                                }
                             </InputSelect>
 
+                        </div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="difficultySetterLabel">Difficulty </label></div>
+                        <div class="InputFieldContainer">
+                            <InputSelect id="difficultySetterInput" @bind-Value="newRecipe.Difficulty">
+                                @foreach (var value in DisplayRecipeModel.DIFICULTY)
+                                {
+                                    <option>@value</option>
+                                }
+                            </InputSelect>
                         </div>
                     </div>
                     <div class="FormViewFieldLineSpacer"></div>
@@ -93,26 +178,55 @@
         </tr>
     </tbody>
 </table>
-
-@foreach(var item in newRecipe.ingredientsNames)
-            {
-                <p>Thing: @item</p>
-            }
-
     @code {
         private DisplayRecipeModel newRecipe = new DisplayRecipeModel();
-        private int ingredientsCounter = 2;
-        string[] temporaryIngredientsList = new string[30];
-        string[] temporaryUnitsList = new string[30];
 
         private async Task InsertRecipe()
         {
 
         }
 
+        protected override Task OnInitializedAsync()
+        {
+            newRecipe.InsertEmptyIngredient(3);
+            newRecipe.InsertEmptyEquipment(2);
+            newRecipe.InsertEmptyMethod(5);
+
+            return base.OnInitializedAsync();
+        }
+
+        private void DeleteIngredient(int index)
+        {
+            newRecipe.Ingredients.RemoveAt(index);
+        }
+
+        private void DeleteEquipment(int index)
+        {
+            newRecipe.Equipment.RemoveAt(index);
+        }
+
+        private void DeleteStep(int index)
+        {
+            newRecipe.Method.RemoveAt(index);
+        }
+
         private void IncrementCount()
         {
-            ingredientsCounter++;
+            if (newRecipe.Ingredients.Count != DisplayRecipeModel.INGREDIENTSCAPACITY)
+            {
+                newRecipe.InsertEmptyIngredient(2);
+                
+            }
+        }
+
+        private void AddEquipment()
+        {
+            newRecipe.InsertEmptyEquipment();
+        }
+
+        private void AddMethod()
+        {
+            newRecipe.InsertEmptyMethod();
         }
 
 

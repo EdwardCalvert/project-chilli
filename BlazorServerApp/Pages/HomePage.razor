@@ -1,37 +1,29 @@
 ﻿@page "/"
 @inherits Models.RecipeListBase
 <h3>Recipes</h3>
-
-<div class="container-fluid">
-    <div class="col-12"><img src="/loading.gif" alt="LoadingGiff" height="20" /></div>
-    <div class="h4">Loading ...</div>
-</div>
-
-@if (Error != null&& isVisible)
+<LoadingElement />
+@if (Error != null)
 {
-    <div class="wordblock__container ">
-        <span class="wordblock__word @wordClassModifier"> ⚠ An unexpected error occured:@Error .If the issue persists, go to the <a href="/support" style="color: white">Support page</a>. </span>
-        <span class="wordblock__x"
-              @onmousedown='(_=>OnMouseDown())'
-              @onmouseup="(_=> OnMouseUp())"
-              @onmouseout="(_=>OnMouseOut())">✕</span>
-    </div>
-}
-<a href="/Recipe" class="No-Decoration " style="min-width: 18rem; max-width: 30.5%">
-    <div class="RecipeCard">
-        <div class="card m-3" >
-            <div class="card-header No-Decoration ColourBlack">
-                <h1>Apple Amber </h1>
+    <ErrorNotification ErrorMessage="This is a sample error message. Please visit the support page if you need further help. " />
 
-            </div>
-            <div class="card-body No-Decoration ColourBlack">
-                <p>Cooking time: 40 minutes </p>
-                <p>Preperation time: 10 mintues</p>
-                <p>Reviews: ⭐⭐⭐⭐⭐</p>
+}
+<div style=" min-width: 18rem; max-width: 30.5%">
+    <a href="/Recipe" class="No-Decoration ">
+        <div class="RecipeCard">
+            <div class="card m-3">
+                <div class="card-header No-Decoration ColourBlack">
+                    <h1>Apple Amber </h1>
+
+                </div>
+                <div class="card-body No-Decoration ColourBlack">
+                    <p>Cooking time: 40 minutes </p>
+                    <p>Preperation time: 10 mintues</p>
+                    <p>Reviews: ⭐⭐⭐⭐⭐</p>
+                </div>
             </div>
         </div>
-    </div>
- </a>
+    </a>
+</div>
 
 
 @code {
