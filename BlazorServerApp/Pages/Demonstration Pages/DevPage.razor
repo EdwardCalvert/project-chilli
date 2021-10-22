@@ -1,0 +1,25 @@
+﻿@page "/dev"
+<h3>DevPage</h3>
+@for (int i = 0; i < effects.Length; i++)
+{
+    // see https://stackoverflow.com/a/56426146/323447
+    var iCopy = i;
+
+    <p>
+        <label for="@($"effect{i}")">@i</label>
+        <input id="@($"effect{i}")" value="@effects[i]"
+               @onchange="@(e => effects[iCopy] = e.Value.ToString())" />
+    </p>
+}
+
+@foreach(string item in effects)
+            {
+                <p>@item</p>
+            }
+
+@code {
+
+    private string[] effects = new string[3];
+
+    
+}

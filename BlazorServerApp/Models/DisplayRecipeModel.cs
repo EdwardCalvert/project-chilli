@@ -21,8 +21,8 @@ namespace BlazorServerApp.Models
         [Required]
         public string Description { get; set; }
 
-        [Required]
-        public string Ingredients { get; set; }
+        //[Required]
+        //public string Ingredients { get; set; }
 
         public int Servings { get; set; }
 

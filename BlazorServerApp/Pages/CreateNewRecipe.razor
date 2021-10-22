@@ -33,23 +33,24 @@
                                 
                             @for (int i = 0; i < ingredientsCounter && i < DisplayRecipeModel.INGREDIENTSCAPACITY; i++)
                             {
-                                int iCopy = i;
+                                int copyOfI = i;
                                 <div class="col" style="flex-basis: unset;">
                                     <div class="FieldData">
                                         <div class="InputFieldContainer">
-                                            <InputNumber id=" @("recipePreparationTimeInput" + i)" class="TimeInputField" @bind-Value="newRecipe.testField"  />
+                                            <input id="@("recipePreparationTimeInput" + i)" class="TimeInputField" value="@newRecipe.quantities[i]" @onchange="@(e => newRecipe.quantities[copyOfI] = int.Parse(e.Value.ToString()))" />
+
                                         </div>
                                         <div class="InputFieldContainer">
-                                            <InputSelect id="@("recipieIngredientsQuanity" + i)" @bind-Value="newRecipe.Units">
+                                            <select id="@("recipieIngredientsQuanity" + i)" @onchange="@(e => newRecipe.unitsList[copyOfI] = e.Value.ToString())">
                                                 @foreach (var value in DisplayRecipeModel.SUPPORTEDUNITS)
                                                     {
                                                     <option>@value</option>
                                                     }
-                                            </InputSelect>
+                                            </select>
                                         </div>
                                         <div class="InputFieldContainer" style="width:100%;">
 
-                                            <InputText class="TextBox" style=" max-width: 400px; width: 100%;" id="@("recipeIngredientsInput" + i)" value="@temporaryIngredientsList[i]" @onchange="@(e => temporaryIngredientsList[iCopy] = e.Value.ToString())" />
+                                            <input class="TextBox" style=" max-width: 400px; width: 100%;" id="@("recipeIngredientsInput" + i)" value="@newRecipe.ingredientsNames[i]" @onchange="@(e => newRecipe.ingredientsNames[copyOfI] = e.Value.ToString())" />
                                         </div>
                                         <div class="FieldLine"></div>
                                     </div>
@@ -93,15 +94,16 @@
     </tbody>
 </table>
 
-@*@foreach(var item in newRecipe.ingredientsNames)
+@foreach(var item in newRecipe.ingredientsNames)
             {
-                <p>@item</p>
-            }*@
+                <p>Thing: @item</p>
+            }
 
     @code {
         private DisplayRecipeModel newRecipe = new DisplayRecipeModel();
         private int ingredientsCounter = 2;
         string[] temporaryIngredientsList = new string[30];
+        string[] temporaryUnitsList = new string[30];
 
         private async Task InsertRecipe()
         {
