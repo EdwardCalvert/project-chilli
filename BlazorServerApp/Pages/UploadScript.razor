@@ -1,0 +1,48 @@
+﻿
+@page "/fileupload"
+@using System.IO
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
+<h3>UploadFilesToTheWebServer</h3>
+<form @onsubmit="OnSubmit">
+    <InputFile OnChange="OnInputFileChange" multiple />
+    <br /><br />
+    <button type="submit">Upload Selected File(s)</button>
+</form>
+@if (selectedFiles == null || selectedFiles.Count == 0)
+{
+    <p>No files selected</p>
+}
+else
+{
+    <p>Wow! They are loaded!</p>
+}
+
+
+@code {
+    string Message = "No file(s) selected";
+    IReadOnlyList<IBrowserFile> selectedFiles;
+
+    private void OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        selectedFiles = e.GetMultipleFiles();
+        Message = $"{selectedFiles.Count} file(s) selected";
+        this.StateHasChanged();
+    }
+
+    private async void OnSubmit()
+    {
+
+        foreach (var file in selectedFiles)
+        {
+            using (Stream stream = file.OpenReadStream(512000000))
+            {
+                var path = $"{env.WebRootPath}\\uploads\\{file.Name}";
+                FileStream fs = File.Create(path);
+                await stream.CopyToAsync(fs);
+                stream.Close();
+            }
+        }
+        Message = $"{selectedFiles.Count} file(s) uploaded on server";
+        this.StateHasChanged();
+    }
+}

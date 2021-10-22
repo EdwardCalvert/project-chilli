@@ -1,0 +1,117 @@
+﻿@page "/createRecipe"
+@using DataLibrary
+@using BlazorServerApp.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+
+
+<h3>CreateNewRecipe</h3>
+<table cellspacing="0" id="NewRecipeForm" style="width:100%;border-collapse:collapse;">
+    <tbody>
+        <tr>
+            <td colspan="2">
+                <EditForm Model="@newRecipe" OnValidSubmit="@InsertRecipe">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="FieldLine">
+                        <div class="FieldHeader">
+                            <label id="recipeNameLabel">Recipe Name*</label>
+                        </div>
+                        <div class="FieldData">
+                            <InputText style=" width:100%;" id="recipeNameInput" @bind-Value="newRecipe.RecipeName" />
+                        </div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipeDescriptionLabel">Recipe Description*</label></div>
+                        <div class="FieldData"><InputTextArea class="TextBox" id="recipeDescriptionInput" @bind-Value="newRecipe.Description"   /></div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipeIngredientsLabel">Ingredients* </label></div>
+                        <div class="container">
+                            <div class="row row-cols-1">
+                                
+                            @for (int i = 0; i < ingredientsCounter && i < DisplayRecipeModel.INGREDIENTSCAPACITY; i++)
+                            {
+                                int iCopy = i;
+                                <div class="col" style="flex-basis: unset;">
+                                    <div class="FieldData">
+                                        <div class="InputFieldContainer">
+                                            <InputNumber id=" @("recipePreparationTimeInput" + i)" class="TimeInputField" @bind-Value="newRecipe.testField"  />
+                                        </div>
+                                        <div class="InputFieldContainer">
+                                            <InputSelect id="@("recipieIngredientsQuanity" + i)" @bind-Value="newRecipe.Units">
+                                                @foreach (var value in DisplayRecipeModel.SUPPORTEDUNITS)
+                                                    {
+                                                    <option>@value</option>
+                                                    }
+                                            </InputSelect>
+                                        </div>
+                                        <div class="InputFieldContainer" style="width:100%;">
+
+                                            <InputText class="TextBox" style=" max-width: 400px; width: 100%;" id="@("recipeIngredientsInput" + i)" value="@temporaryIngredientsList[i]" @onchange="@(e => temporaryIngredientsList[iCopy] = e.Value.ToString())" />
+                                        </div>
+                                        <div class="FieldLine"></div>
+                                    </div>
+                                </div>
+                            }
+                                </div><button class="btn btn-primary" @onclick="IncrementCount">Add More Rows</button>
+                            
+                            </div>
+                        </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipeServingsLabel">Servings </label></div>
+                        <div class="FieldData"><InputNumber id="recipeServingsInput" class="QuantityInputField" @bind-Value="newRecipe.Servings" /></div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipeCookingTimeLabel">Cooking Time </label></div>
+                        <div class="FieldData">
+                        <div class="InputFieldContainer"><InputNumber id="recipeCookingTimeInput" class="TimeInputField" @bind-Value="newRecipe.CookingTime" /></div>
+                        <div class="InputLabelContainer"><p>Minutes</p></div></div>
+                        
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipePreparationTimeLabel">Preperation Time </label></div>
+                        <div class="FieldData"><div class="InputFieldContainer"><InputNumber id="recipePreparationTimeInput" class="TimeInputField" @bind-Value="newRecipe.PreperationTime" /></div><div class="InputLabelContainer"><p>Minutes</p></div></div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipeMealTypeLabel">Meal Type </label></div>
+                        <div class="FieldData"><InputSelect id="recipeMealTypeInput" @bind-Value="newRecipe.MealType">
+                            @foreach (var value in Enum.GetValues(typeof(DisplayRecipeModel.mealType)))
+                            {
+                                <option>@value</option>
+                            }
+                            </InputSelect>
+
+                        </div>
+                    </div>
+                    <div class="FormViewFieldLineSpacer"></div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </EditForm>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+@*@foreach(var item in newRecipe.ingredientsNames)
+            {
+                <p>@item</p>
+            }*@
+
+    @code {
+        private DisplayRecipeModel newRecipe = new DisplayRecipeModel();
+        private int ingredientsCounter = 2;
+        string[] temporaryIngredientsList = new string[30];
+
+        private async Task InsertRecipe()
+        {
+
+        }
+
+        private void IncrementCount()
+        {
+            ingredientsCounter++;
+        }
+
+
+    }

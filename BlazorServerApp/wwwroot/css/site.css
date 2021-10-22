@@ -8,6 +8,166 @@ a, .btn-link {
     color: #0366d6;
 }
 
+.TextBox{
+    width:100%;
+}
+
+.IngredientsTitle{
+
+}
+.IngredientsList{
+
+}
+.MethodList{
+
+}
+.No-Decoration, .No-Decoration:hover {
+    text-decoration: none;
+    border: none;
+}
+
+.ColourBlack{
+    color: black;
+}
+
+.TimeInputField, .QuantityInputField{
+    width: 50px;
+}
+.InputLableContainer {
+    padding-right: 5px;
+}
+.InputFieldContainer{
+    padding-right: 5px;
+    padding-bottom: 5px;
+}
+
+.RecipeCard {
+    background-color: #f1f1f1;
+    border: 1px solid #f1f1f1 !important;
+    margin-bottom: 30px;
+    height: calc(100% - 30px);
+}
+
+    .RecipeCard:hover {
+        animation-name: EventCardHover;
+        animation-duration: .5s;
+        animation-fill-mode: forwards;
+    }
+@keyframes EventCardHover {
+    from {
+    }
+
+    to {
+        background-color: white;
+        box-shadow: 0 0 20px 0 rgba(0,0,0,0.2);
+    }
+}
+.RecipeCard div {
+    padding-bottom: 10px;
+}
+
+/*Field form- borrowed from Winscouts.org*/
+.FieldHeader {
+    -ms-flex: 0 0 30%;
+    flex: 0 0 30%;
+    max-width: 30%;
+    text-align: left;
+    text-decoration: underline;
+    font-weight: 700;
+}
+.FormViewFieldLineSpacer {
+    width: 100%;
+    height: 10px;
+}
+.FieldLine {
+    
+    -ms-flex-wrap: wrap;
+    margin-right: -15px;
+    margin-bottom: 3px;
+    padding-right: 15px;
+}
+.FieldData {
+    position: relative;
+    min-height: 1px;
+    padding-right: 5px;
+    padding-left: 5px;
+    border-collapse: collapse;
+    text-indent: initial;
+    border-spacing: 2px;
+    display: flex;
+}
+    .FieldData ::after, ::before {
+        box-sizing: border-box;
+    }
+.FieldLine ::after ::before {
+    box-sizing: border-box;
+}
+
+/*Popup begin*/
+.wordblock__container {
+    display: inline-flex;
+    position: absolute;
+    top: 10%;
+    right: 0px;
+    z-index: 10000;
+    top: 0;
+    padding-top: 100px;
+    padding-right: 30px;
+    transform-origin: right;
+    animation: growing 0.4s ease-out forwards;
+}
+
+.wordblock__word {
+    flex: 1;
+    color: white;
+    background-color: red;
+    padding-left: 2px;
+    padding-right: 2px;
+    border-radius: 3px 0px 0px 3px;
+    
+}
+
+.wordblock__word-shrinked {
+    transform-origin: right;
+    animation: shrinking 0.1s ease-out forwards;
+}
+
+@keyframes shrinking {
+    0% {
+        transform: scaleX(1);
+    }
+
+    100% {
+        transform: scaleX(0.0);
+    }
+}
+@keyframes growing {
+    0% {
+        transform: scaleX(0.0);
+        
+    }
+
+    100% {
+        transform: scaleX(1);
+    }
+}
+
+
+.wordblock__x {
+    width: 1.2em;
+    background-color: red;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 0px 3px 3px 0px;
+    user-select: none;
+}
+
+    .wordblock__x:hover {
+        background-color: gray;
+    }
+/*Popup End*/
+
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;

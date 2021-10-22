@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorServerApp", "BlazorSe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataLibrary", "DataLibrary\DataLibrary.csproj", "{217A5853-0472-427F-AF3E-7CB6A2A043EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnderstandText", "UnderstandText\UnderstandText.csproj", "{49B7CEAA-9B8F-4B48-8016-AC9C2D2CDEC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnderstandText", "UnderstandText\UnderstandText.csproj", "{49B7CEAA-9B8F-4B48-8016-AC9C2D2CDEC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
