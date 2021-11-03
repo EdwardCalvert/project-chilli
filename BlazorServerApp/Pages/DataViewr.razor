@@ -1,0 +1,29 @@
+﻿
+
+@page "/dataViewer"
+
+@using DataLibrary
+@using BlazorServerApp.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+
+<h3>DataViewer</h3>
+
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Table Name</th>
+            <th>Button to intitalise process</th>
+            <th>Number of records on table</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+        </tr>
+    </tbody>
+</table>
+
+@code {
+    List<string> tables = new List<string> { "Recipe" };
+}

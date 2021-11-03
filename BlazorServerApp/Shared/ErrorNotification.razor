@@ -1,5 +1,4 @@
-﻿
-@if (isVisible)
+﻿@if (isVisible)
 {
     <div class="wordblock__container ">
         <span class="wordblock__word @wordClassModifier"> ⚠ @ErrorMessage </span>
@@ -9,29 +8,13 @@
               @onmouseout="(_=>OnMouseOut())">✕</span>
     </div>
 }
-
 @code {
-
     private bool isVisible = true;
-
     [Parameter]
     public string ErrorMessage { get; set; }
-
     private string wordClassModifier = "";
-
-
     private void OnMouseDown()
-    {
-        wordClassModifier = "wordblock__word-shrinked";
-    }
-
-    private void OnMouseUp()
-    {
-        isVisible = false;
-    }
-
-    private void OnMouseOut()
-    {
-        wordClassModifier = "";
-    }
+    {wordClassModifier = "wordblock__word-shrinked";}
+    private void OnMouseUp(){isVisible = false;}
+    private void OnMouseOut(){wordClassModifier = "";}
 }

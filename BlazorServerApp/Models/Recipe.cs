@@ -7,6 +7,7 @@ namespace BlazorServerApp.Models
 {
     public class Recipe
     {
+        private int RecipeID;
         enum MealType
         {
             Starter,
@@ -18,16 +19,20 @@ namespace BlazorServerApp.Models
             Biscuit,
             LightMeal,
         }
+        public uint Kcal;
+        public uint Saturates;
+        public uint Carbohydrates;
+        public uint Sugar;
+        public uint Fibre;
+        public uint Protein;
+        public uint Salt;
+
         private List<string> _ingredients;
         private int _cookingTime;
         private int _prepTime;
         private int _numberOfServings;
         private string _title;
         private MealType _mealType;
-        //private List<Equipment> equipment;
-
-        //private NutritionLabel _nutritionLabel;
-        //private Rating _rating;
 
         public Recipe()
         {

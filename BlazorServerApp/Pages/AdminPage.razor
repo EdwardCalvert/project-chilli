@@ -1,0 +1,113 @@
+﻿@page "/admin"
+@using DataLibrary
+@using BlazorServerApp.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+@try
+{
+<h3>AdminPage</h3>
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Table Name</th>
+            <th>Button to intitalise process</th>
+            <th>Number of records on table</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Recipe</td>
+
+            @if (DoTablesExist("Recipe").Result)
+            {
+                <td><button class="btn btn-danger">Recipe Table exists. Do you want to delete it? </button></td>
+
+                <td>@SumRecords("Recipe").Result</td>
+
+            }
+            else
+            {
+                <td><button class="btn btn-primary" @onclick="CreateRecipeTable">Create recipe table</button></td>
+                <td>0</td>
+            }
+
+        </tr>
+        </tbody>
+    </table>
+}
+            catch(Exception e)
+            {
+    <ErrorNotification ErrorMessage="e.Message"></ErrorNotification>
+            }
+@code {
+    private string accessModifier = "";
+    private List<string> recipeTableExists = new List<string>();
+
+    protected override Task OnInitializedAsync()
+    {
+        if (DoTablesExist("Reicpe").Result)
+        {
+
+        }
+
+
+        return base.OnInitializedAsync();
+    }
+
+    private async Task<bool> DoTablesExist(string tableName)
+    {
+        List<string> returnData = new List<string>();
+        returnData =  await _data.LoadData<string, dynamic>($"SHOW TABLES LIKE \"{tableName}\";", new { }, _config.GetConnectionString("recipeDatabase"));
+
+
+        return returnData.Count != 0 ;
+
+
+    }
+
+    private async Task<int> SumRecords(string tableName)
+    {
+        List<int> sum = await _data.LoadData<int, dynamic>($"SELECT count( * ) as  total_record FROM {tableName}", new { }, _config.GetConnectionString("recipeDatabase"));
+        if (sum.Count > 0)
+        {
+            return sum[0];
+        }
+        return 0;
+    }
+
+    private async Task OverrideRecipeTable()
+        {
+
+        }
+
+    private async Task CreateRecipeTable()
+    {
+        string sql = @"CREATE TABLE `Recipe` (
+	`RecipeID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`Servings` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+	`MealType` ENUM('Starter', 'Main', 'Dessert', 'Snack', 'Accompaniment', 'Cake', 'Biscuit', 'LightMeal') NOT NULL COLLATE 'latin1_swedish_ci',
+	`RecipeName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`Method` MEDIUMTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`Kcal` SMALLINT(5) NULL DEFAULT '0',
+	`Saturates` SMALLINT(5) NULL DEFAULT '0',
+	`Carbohydrates` SMALLINT(5) NULL DEFAULT '0',
+	`Sugar` SMALLINT(5) NULL DEFAULT '0',
+	`Fibre` SMALLINT(5) NULL DEFAULT '0',
+	`Protein` SMALLINT(5) NULL DEFAULT '0',
+	`Salt` SMALLINT(5) NULL DEFAULT '0',
+	`CookingTime` SMALLINT(5) NULL DEFAULT '0',
+	`PreperationTime` SMALLINT(5) NULL DEFAULT '0',
+	`DocxFilePath` MEDIUMTEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`Difficulty` ENUM('Easy', 'Medium', 'Hard') NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`PageVisits` INT(10) UNSIGNED NULL DEFAULT NULL,
+	`LastRequested` DATETIME NULL DEFAULT NULL,
+    PRIMARY KEY(`RecipeID`) USING BTREE
+)
+COLLATE = 'latin1_swedish_ci'
+ENGINE = InnoDB";
+        ;
+        await _data.SaveData(sql, new { }, _config.GetConnectionString("recipeDatabase"));
+
+    }
+}
