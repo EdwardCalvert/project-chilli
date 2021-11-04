@@ -1,35 +1,68 @@
 ﻿@page "/"
 @inherits Models.RecipeListBase
-<h3>Recipes</h3>
-<LoadingElement />
+<h3>Here are the top recipies- ordered by popularity!</h3>
+
 @if (Error != null)
 {
     <ErrorNotification ErrorMessage="This is a sample error message. Please visit the support page if you need further help. " />
 
 }
-<div style=" min-width: 18rem; max-width: 30.5%">
-    <a href="/Recipe" class="No-Decoration ">
+@if (_models == null)
+{
+    <BlazorServerApp.Shared.LoadingElement />
+}
+else
+{
+    //style=" min-width: 18rem; max-width: 30.5%"
+<div class="row" >
+    @foreach (DisplayRecipeModel model in _models) {
+    <div class="col-3">
+        
         <div class="RecipeCard">
-            <div class="card m-3">
-                <div class="card-header No-Decoration ColourBlack">
-                    <h1>Apple Amber </h1>
+            <a href="/Recipe" class="No-Decoration ">
+                <div class="card m-3">
+                    <div class="card-header No-Decoration ColourBlack">
+                        <h1>@model.RecipeName </h1>
 
+                    </div>
+                    <div class="card-body No-Decoration ColourBlack">
+                        @if (model.CookingTime != null)
+                        {
+                        <p>Cooking time: @model.CookingTime minutes </p>
+                        }
+                        @if (model.PreperationTime != null)
+                        {
+                        <p>Preperation time: @model.PreperationTime mintues</p>
+                        }
+                        <p>Reviews: ⭐⭐⭐⭐⭐</p>
+                        @if (model.Description != null)
+                        {
+                            <p>Descritption: @model.ShowShortDescription()</p>
+                        }
+                    </div>
                 </div>
-                <div class="card-body No-Decoration ColourBlack">
-                    <p>Cooking time: 40 minutes </p>
-                    <p>Preperation time: 10 mintues</p>
-                    <p>Reviews: ⭐⭐⭐⭐⭐</p>
-                </div>
-            </div>
+                </a>
         </div>
-    </a>
+        
+    </div>
+
+    }
 </div>
+}
 
 
 @code {
 
     private bool isVisible = true;
     private string wordClassModifier = "";
+    private List<DisplayRecipeModel> _models;
+
+    protected override Task OnInitializedAsync()
+
+    {
+        _models = LoadHomepageRecipies().Result;
+        return base.OnInitializedAsync();
+    }
 
 
     private void OnMouseDown()

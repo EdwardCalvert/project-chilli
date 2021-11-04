@@ -1,5 +1,6 @@
 ﻿@page "/admin"
 @using DataLibrary
+@using BlazorServerApp.Shared
 @using BlazorServerApp.Models
 @using Microsoft.Extensions.Configuration
 @inject IDataAccess _data
@@ -33,13 +34,30 @@
             }
 
         </tr>
-        </tbody>
+        <tr>
+            <td>Method</td>
+
+            @if (DoTablesExist("Method").Result)
+            {
+                <td><button class="btn btn-danger">Method Table exists. Do you want to delete it? </button></td>
+
+                <td>@SumRecords("Method").Result</td>
+
+            }
+            else
+            {
+                <td><button class="btn btn-primary" @onclick="CreateMethodTable">Create Method table</button></td>
+                <td>0</td>
+            }
+
+        </tr>
+    </tbody>
     </table>
 }
-            catch(Exception e)
-            {
-    <ErrorNotification ErrorMessage="e.Message"></ErrorNotification>
-            }
+catch(Exception e)
+{
+    <BlazorServerApp.Shared.ErrorNotification ErrorMessage="e.Message"/>
+}
 @code {
     private string accessModifier = "";
     private List<string> recipeTableExists = new List<string>();
@@ -77,18 +95,17 @@
     }
 
     private async Task OverrideRecipeTable()
-        {
+    {
 
-        }
+    }
 
     private async Task CreateRecipeTable()
     {
         string sql = @"CREATE TABLE `Recipe` (
 	`RecipeID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`Servings` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
-	`MealType` ENUM('Starter', 'Main', 'Dessert', 'Snack', 'Accompaniment', 'Cake', 'Biscuit', 'LightMeal') NOT NULL COLLATE 'latin1_swedish_ci',
+	`MealType` ENUM('Starter','Main','Dessert','Snack','Accompaniment','Cake','Biscuit','LightMeal') NOT NULL COLLATE 'latin1_swedish_ci',
 	`RecipeName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
-	`Method` MEDIUMTEXT NOT NULL COLLATE 'latin1_swedish_ci',
 	`Kcal` SMALLINT(5) NULL DEFAULT '0',
 	`Saturates` SMALLINT(5) NULL DEFAULT '0',
 	`Carbohydrates` SMALLINT(5) NULL DEFAULT '0',
@@ -99,15 +116,37 @@
 	`CookingTime` SMALLINT(5) NULL DEFAULT '0',
 	`PreperationTime` SMALLINT(5) NULL DEFAULT '0',
 	`DocxFilePath` MEDIUMTEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	`Difficulty` ENUM('Easy', 'Medium', 'Hard') NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`Difficulty` ENUM('Easy','Medium','Hard') NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
 	`PageVisits` INT(10) UNSIGNED NULL DEFAULT NULL,
 	`LastRequested` DATETIME NULL DEFAULT NULL,
-    PRIMARY KEY(`RecipeID`) USING BTREE
+	`Description` TEXT NULL,
+	PRIMARY KEY (`RecipeID`) USING BTREE
 )
-COLLATE = 'latin1_swedish_ci'
-ENGINE = InnoDB";
-        ;
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=6
+;"
+;
         await _data.SaveData(sql, new { }, _config.GetConnectionString("recipeDatabase"));
 
+    }
+
+    private async Task CreateMethodTable()
+    {
+        string sql = @"CREATE TABLE `Method` (
+	`StepNumber` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`RecipeID` INT(10) UNSIGNED NOT NULL,
+	`MethodText` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`StepNumber`, `RecipeID`) USING BTREE,
+	INDEX `RecipeID` (`RecipeID`) USING BTREE,
+	CONSTRAINT `RecipeID` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+";
+
+
+        await _data.SaveData(sql, new { }, _config.GetConnectionString("recipeDatabase"));
     }
 }

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 
 namespace BlazorServerApp.Models
 {
@@ -30,7 +31,7 @@ namespace BlazorServerApp.Models
         [Required]
         public List<DisplayEquipmentModel> Equipment { get; set; } = new List<DisplayEquipmentModel>();
 
-        [Range(1, 10)]
+        [Range(1, 100)]
         public int Servings { get; set; }
 
         [Range(1, 1000)]
@@ -57,9 +58,9 @@ namespace BlazorServerApp.Models
         }
 
         [ValidIngredient]
-        [MaxLength(2)]
         public List<DisplayIngredientModel> Ingredients = new List<DisplayIngredientModel>();
 
+        public string DocxFilePath;
 
         public static readonly List<string> SUPPORTEDUNITS = new List<string>{
             "Grams",
@@ -85,7 +86,34 @@ namespace BlazorServerApp.Models
             "Easy","Medium","Hard"
         };
 
-        public string Difficulty { get; set; } 
+        public string Difficulty { get; set; }
+
+        public List<DisplayReviewModel> Reviews = new List<DisplayReviewModel>();
+
+        public static DisplayRecipeModel PasrseBackendToFrontend(RecipeDataModel recipeDataModel)
+        {
+            DisplayRecipeModel displayRecipeModel= new DisplayRecipeModel();
+            displayRecipeModel.CookingTime = (int) recipeDataModel.CookingTime;
+            displayRecipeModel.Servings = (int)recipeDataModel.Servings;
+            displayRecipeModel.MealType = (mealType)recipeDataModel.MealType;
+            displayRecipeModel.RecipeName = recipeDataModel.RecipeName;
+            displayRecipeModel.CookingTime = (int) recipeDataModel.CookingTime;
+            displayRecipeModel.PreperationTime = (int) recipeDataModel.PreperationTime;
+            displayRecipeModel.DocxFilePath = recipeDataModel.DocxFilePath;
+            displayRecipeModel.Description = recipeDataModel.Description;
+
+            return displayRecipeModel;
+        }
+
+        public static List<DisplayRecipeModel> PasrseBackendToFrontend(List<RecipeDataModel> recipeDataModel)
+        {
+            List<DisplayRecipeModel> recipeModels = new();
+            foreach(RecipeDataModel model in recipeDataModel)
+            {
+                recipeModels.Add(PasrseBackendToFrontend(model));
+            }
+            return recipeModels;
+        }
 
         public void InsertEmptyIngredient(int quantity)
         {
@@ -123,6 +151,38 @@ namespace BlazorServerApp.Models
             for (int i = 0; i < quantity; i++)
             {
                 InsertEmptyMethod();
+            }
+        }
+
+        public string ShowShortDescription()
+        {
+            return ShowShortDescription(200);
+        }
+
+        public string ShowShortDescription(int length)
+        {
+            if (string.IsNullOrEmpty(Description))
+            {
+                return string.Empty;
+            }
+
+            // If text in shorter or equal to length, just return it
+            if (Description.Length <= length)
+            {
+                return Description;
+            }
+
+            // Text is longer, so try to find out where to cut
+            char[] delimiters = new char[] { ' ', '.', ',', ':', ';' };
+            int index = Description.LastIndexOfAny(delimiters, length - 3);
+
+            if (index > (length / 2))
+            {
+                return Description.Substring(0, index) + "...";
+            }
+            else
+            {
+                return Description.Substring(0, length - 3) + "...";
             }
         }
     }

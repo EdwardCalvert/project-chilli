@@ -172,7 +172,14 @@
                         </div>
                     </div>
                     <div class="FormViewFieldLineSpacer"></div>
+                    @try
+                    {
                     <button type="submit" class="btn btn-primary">Submit</button>
+                    }
+                catch(Exception e)
+                {
+                    <ErrorNotification ErrorMessage="@e.Message"/>
+                }
                 </EditForm>
             </td>
         </tr>
@@ -183,7 +190,11 @@
 
         private async Task InsertRecipe()
         {
+            RecipeDataModel readyForDatabase = RecipeDataModel.ParseFrontEndToBackend(newRecipe);
+            await _data.SaveData(readyForDatabase.SqlInsertStatement(), new { }, _config.GetConnectionString("recipeDatabase"));
 
+            newRecipe = new();
+            await OnInitializedAsync();
         }
 
         protected override Task OnInitializedAsync()
@@ -215,7 +226,7 @@
             if (newRecipe.Ingredients.Count != DisplayRecipeModel.INGREDIENTSCAPACITY)
             {
                 newRecipe.InsertEmptyIngredient(2);
-                
+
             }
         }
 

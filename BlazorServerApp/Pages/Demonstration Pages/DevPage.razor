@@ -1,55 +1,9 @@
-﻿@page "/dev"
+﻿@page "/dev/{RecipeIDRequest}"
 <h3>DevPage</h3>
+<p>@RecipeIDRequest</p>
 
-
-
-@for (int i = 0; i < formItems.Count; i++)
-{
-    FormItem currentItem = formItems[i];
-    <EditForm Model="currentItem">
-        <InputText @bind-Value="@currentItem.Name" />
-    </EditForm>
-
-
-}
-
-
-@foreach (FormItem form in formItems)
-{
-    <p>quantity: @form.Quantity</p>
-    <p>name: @form.Name</p>
-    <p>unit: @form.Unit</p>
-}
 @code{
-    private int ingredientsCounter = 2;
-
-    List<FormItem> formItems { get; set; }
-
-    protected override Task OnInitializedAsync()
-
-    {
-        formItems = new List<FormItem>();
-        formItems.Add(new FormItem(0, "cheese", "OZ"));
-        formItems.Add(new FormItem(400, "bread", "food"));
-        formItems.Add(new FormItem());
-        return base.OnInitializedAsync();
-    }
-
-    class FormItem
-    {
-        public int Quantity { get; set; }
-        public string Name { get; set; }
-        public string Unit { get; set; }
-
-        public FormItem(int quantity, string name, string unit)
-        {
-            Quantity = quantity;
-            Name = name;
-            Unit = unit;
-        }
-
-        public FormItem() { }
-    }
-
+[Parameter]
+    public string RecipeIDRequest { get; set; }
 
 }

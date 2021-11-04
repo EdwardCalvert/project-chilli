@@ -1,0 +1,9 @@
+﻿@page "/Recipe/{RecipeIDRequest:int}"
+<h3>Recipe</h3>
+<p>@RecipeIDRequest</p>
+
+@code{
+    [Parameter]
+    public int RecipeIDRequest { get; set; }
+
+}
