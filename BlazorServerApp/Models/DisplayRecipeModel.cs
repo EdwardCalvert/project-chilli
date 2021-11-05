@@ -45,6 +45,8 @@ namespace BlazorServerApp.Models
         [EnumDataType(typeof(mealType))]
         public mealType MealType;
 
+        public uint RecipeID { get; set; }
+
         public enum mealType
         {
             Starter,
@@ -80,6 +82,7 @@ namespace BlazorServerApp.Models
             "Ounce",
             };
 
+        public static RecomendedIntake RecomendedIntake = new RecomendedIntake(2000,70,20,260,90,50,6);
 
         public static readonly List<string> DIFICULTY = new List<string>
         {
@@ -90,6 +93,8 @@ namespace BlazorServerApp.Models
 
         public List<DisplayReviewModel> Reviews = new List<DisplayReviewModel>();
 
+        public DisplayNutritionModel DisplayNutritionModel { get; set; }
+
         public static DisplayRecipeModel PasrseBackendToFrontend(RecipeDataModel recipeDataModel)
         {
             DisplayRecipeModel displayRecipeModel= new DisplayRecipeModel();
@@ -99,8 +104,14 @@ namespace BlazorServerApp.Models
             displayRecipeModel.RecipeName = recipeDataModel.RecipeName;
             displayRecipeModel.CookingTime = (int) recipeDataModel.CookingTime;
             displayRecipeModel.PreperationTime = (int) recipeDataModel.PreperationTime;
-            displayRecipeModel.DocxFilePath = recipeDataModel.DocxFilePath;
+            if (!string.IsNullOrEmpty(recipeDataModel.DocxFilePath))
+            {
+                displayRecipeModel.DocxFilePath = recipeDataModel.DocxFilePath;
+            }
+            
             displayRecipeModel.Description = recipeDataModel.Description;
+            displayRecipeModel.RecipeID = recipeDataModel.RecipeID;
+            displayRecipeModel.DisplayNutritionModel = new DisplayNutritionModel(recipeDataModel.Kcal, recipeDataModel.Fat, recipeDataModel.Saturates, recipeDataModel.Sugar, recipeDataModel.Fibre, recipeDataModel.Carbohydrates, recipeDataModel.Salt, DisplayRecipeModel.RecomendedIntake);
 
             return displayRecipeModel;
         }

@@ -1,9 +1,63 @@
-﻿@page "/Recipe/{RecipeIDRequest:int}"
-<h3>Recipe</h3>
-<p>@RecipeIDRequest</p>
+﻿@using BlazorServerApp.ExtensionMethods
+@page "/Recipe/{RecipeIDRequest:int}"
+@if (model == null)
+{
+    <LoadingElement />
+}
+else
+{
+    <h3>@model.RecipeName</h3>
+    if (model.DocxFilePath != null)
+    {
+        <div><a href="@model.DocxFilePath" class="btn btn-primary">Download</a></div>
+    }
+
+    <FoodLabel nutritionLabel="@model.DisplayNutritionModel" StyleParameters="font-size: 12px; overflow-wrap: anywhere;
+    width: 100px;" ShowTitle="false"/>
+    <h5>Serves @model.Servings</h5>
+    <div class="container-fluid">
+        <p>@model.Description</p>
+        <div class="IngredientsTitle">
+            Ingredients
+        </div>
+
+        <div class="IngredientsList">
+            <ul>
+                @foreach (DisplayIngredientModel ingredient in model.Ingredients) {
+                <li><em>@ingredient.Quantity @ingredient.Unit</em> @ingredient.Name</li>
+                }
+            </ul>
+        </div>
+        <div class="MethodList">
+            <ol>
+                @foreach (DisplayMethodList step in model.Method) {
+                <li>@step</li>
+                }
+            </ol>
+        </div>
+    </div>
+    if (model.DocxFilePath != null)
+    {
+        <div><a href="@model.DocxFilePath" class="btn btn-primary">Download</a></div>
+    }
+
+}
 
 @code{
     [Parameter]
     public int RecipeIDRequest { get; set; }
+
+    ISqlRunner sqlRunner = new SqlRunner();
+
+    DisplayRecipeModel model = new DisplayRecipeModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        List<RecipeDataModel> result = await _data.LoadData<RecipeDataModel, dynamic>($"SELECT * FROM Recipe WHERE RecipeID={RecipeIDRequest}", new { }, _config.GetConnectionString("recipeDatabase"));
+        model = DisplayRecipeModel.PasrseBackendToFrontend(result[0]);
+    }
+
+
 
 }

@@ -23,13 +23,14 @@ namespace BlazorServerApp.Models
         }
         public MEALTYPE MealType;
         public string RecipeName;
-        public uint Kcal;
-        public uint Saturates;
-        public uint Carbohydrates;
-        public uint Sugar;
-        public uint Fibre;
-        public uint Protein;
-        public uint Salt;
+        public float Kcal;
+        public float Saturates;
+        public float Carbohydrates;
+        public float Sugar;
+        public float Fibre;
+        public float Protein;
+        public float Salt;
+        public float Fat;
         public uint CookingTime;
         public uint PreperationTime;
         public string DocxFilePath;
@@ -80,7 +81,7 @@ namespace BlazorServerApp.Models
 
         public string SqlInsertStatement()
         {
-            return $"insert into Recipe values({RecipeID},{Servings},'{MealType}','{RecipeName}',{Kcal},{Saturates},{Carbohydrates},{Sugar},{Fibre},{Protein},{Salt},{CookingTime},{PreperationTime},'{DocxFilePath}','{Difficulty}',{PageVisits},'{LastRequested.ToString("yyyy-MM-dd HH:mm:ss")}','{Description}')";
+            return $"insert into Recipe values({RecipeID},{Servings},'{MealType}','{RecipeName}',{Kcal},{Saturates},{Carbohydrates},{Sugar},{Fibre},{Protein},{Salt},{Fat},{CookingTime},{PreperationTime},'{DocxFilePath}','{Difficulty}',{PageVisits},'{LastRequested.ToString("yyyy-MM-dd HH:mm:ss")}','{Description}')";
         }
     }
 }

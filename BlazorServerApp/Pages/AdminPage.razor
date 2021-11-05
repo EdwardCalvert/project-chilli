@@ -106,26 +106,28 @@ catch(Exception e)
 	`Servings` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
 	`MealType` ENUM('Starter','Main','Dessert','Snack','Accompaniment','Cake','Biscuit','LightMeal') NOT NULL COLLATE 'latin1_swedish_ci',
 	`RecipeName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
-	`Kcal` SMALLINT(5) NULL DEFAULT '0',
-	`Saturates` SMALLINT(5) NULL DEFAULT '0',
-	`Carbohydrates` SMALLINT(5) NULL DEFAULT '0',
-	`Sugar` SMALLINT(5) NULL DEFAULT '0',
-	`Fibre` SMALLINT(5) NULL DEFAULT '0',
-	`Protein` SMALLINT(5) NULL DEFAULT '0',
-	`Salt` SMALLINT(5) NULL DEFAULT '0',
+	`Kcal` DECIMAL(20,2) NULL DEFAULT NULL,
+	`Saturates` DECIMAL(20,2) NULL DEFAULT NULL,
+	`Carbohydrates` DECIMAL(20,2) NULL DEFAULT NULL,
+	`Sugar` DECIMAL(20,2) NULL DEFAULT NULL,
+	`Fibre` DECIMAL(20,2) NULL DEFAULT NULL,
+	`Protein` DECIMAL(20,2) NULL DEFAULT NULL,
+	`Salt` DECIMAL(20,2) NULL DEFAULT NULL,
+	`Fat` DECIMAL(20,2) NULL DEFAULT NULL,
 	`CookingTime` SMALLINT(5) NULL DEFAULT '0',
 	`PreperationTime` SMALLINT(5) NULL DEFAULT '0',
 	`DocxFilePath` MEDIUMTEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
 	`Difficulty` ENUM('Easy','Medium','Hard') NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
 	`PageVisits` INT(10) UNSIGNED NULL DEFAULT NULL,
 	`LastRequested` DATETIME NULL DEFAULT NULL,
-	`Description` TEXT NULL,
+	`Description` TEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
 	PRIMARY KEY (`RecipeID`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=6
-;"
+AUTO_INCREMENT=11
+;
+"
 ;
         await _data.SaveData(sql, new { }, _config.GetConnectionString("recipeDatabase"));
 

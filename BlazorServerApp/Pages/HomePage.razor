@@ -16,25 +16,23 @@ else
     //style=" min-width: 18rem; max-width: 30.5%"
 <div class="row" >
     @foreach (DisplayRecipeModel model in _models) {
-    <div class="col-3">
+    <div class="col-12 col-lg-6">
         
         <div class="RecipeCard">
-            <a href="/Recipe" class="No-Decoration ">
+            <a href="/Recipe/@model.RecipeID" class="No-Decoration ">
                 <div class="card m-3">
                     <div class="card-header No-Decoration ColourBlack">
                         <h1>@model.RecipeName </h1>
 
                     </div>
                     <div class="card-body No-Decoration ColourBlack">
-                        @if (model.CookingTime != null)
-                        {
                         <p>Cooking time: @model.CookingTime minutes </p>
-                        }
-                        @if (model.PreperationTime != null)
-                        {
+
                         <p>Preperation time: @model.PreperationTime mintues</p>
-                        }
+
                         <p>Reviews: ⭐⭐⭐⭐⭐</p>
+
+                        <FoodLabel nutritionLabel="model.DisplayNutritionModel" StyleParameters="font-size: 9px; overflow-wrap: anywhere;" ShowTitle="false" />
                         @if (model.Description != null)
                         {
                             <p>Descritption: @model.ShowShortDescription()</p>
