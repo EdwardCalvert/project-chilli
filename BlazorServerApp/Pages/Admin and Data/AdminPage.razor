@@ -3,8 +3,6 @@
 @using BlazorServerApp.Shared
 @using BlazorServerApp.Models
 @using Microsoft.Extensions.Configuration
-@inject IDataAccess _data
-@inject IConfiguration _config
 @try
 {
 <h3>AdminPage</h3>
@@ -17,40 +15,26 @@
         </tr>
     </thead>
     <tbody>
+        @foreach (string tableName in tables) {
         <tr>
-            <td>Recipe</td>
+            <td>@tableName</td>
 
-            @if (DoTablesExist("Recipe").Result)
+            @if (DoTablesExist(tableName).Result)
             {
-                <td><button class="btn btn-danger">Recipe Table exists. Do you want to delete it? </button></td>
+                <td><button class="btn btn-danger">@tableName Table exists. I would give you the option of deleting it,<br />but I haven't made that script yet! </button></td>
 
-                <td>@SumRecords("Recipe").Result</td>
+                <td>@SumRecords(tableName).Result</td>
 
             }
             else
             {
-                <td><button class="btn btn-primary" @onclick="CreateRecipeTable">Create recipe table</button></td>
+                <td><button class="btn btn-primary" @onclick="e=> RunSql(tableCreationCodes[tableName])">Create recipe table</button></td>
                 <td>0</td>
             }
 
         </tr>
-        <tr>
-            <td>Method</td>
-
-            @if (DoTablesExist("Method").Result)
-            {
-                <td><button class="btn btn-danger">Method Table exists. Do you want to delete it? </button></td>
-
-                <td>@SumRecords("Method").Result</td>
-
-            }
-            else
-            {
-                <td><button class="btn btn-primary" @onclick="CreateMethodTable">Create Method table</button></td>
-                <td>0</td>
-            }
-
-        </tr>
+        }
+        
     </tbody>
     </table>
 }
@@ -59,49 +43,33 @@ catch(Exception e)
     <BlazorServerApp.Shared.ErrorNotification ErrorMessage="e.Message"/>
 }
 @code {
-    private string accessModifier = "";
-    private List<string> recipeTableExists = new List<string>();
-
-    protected override Task OnInitializedAsync()
-    {
-        if (DoTablesExist("Reicpe").Result)
+        private List<string> tables = new List<string>() { "Recipe", "Method", "Review" };
+        protected override Task OnInitializedAsync()
         {
+            return base.OnInitializedAsync();
+        }
 
+        private async Task<bool> DoTablesExist(string tableName)
+        {
+            List<string> returnData = new List<string>();
+            returnData =  await _data.LoadData<string>($"SHOW TABLES LIKE \"{tableName}\";", _config.GetConnectionString("recipeDatabase"));
+            return returnData.Count != 0 ;
+        }
+
+        private async Task<int> SumRecords(string tableName)
+        {
+            List<int> sum = await _data.LoadData<int>($"SELECT count( * ) as  total_record FROM {tableName}", _config.GetConnectionString("recipeDatabase"));
+            if (sum.Count > 0)
+            {
+                return sum[0];
+            }
+            return 0;
         }
 
 
-        return base.OnInitializedAsync();
-    }
-
-    private async Task<bool> DoTablesExist(string tableName)
+        private Dictionary<string, string> tableCreationCodes = new Dictionary<string, string>()
     {
-        List<string> returnData = new List<string>();
-        returnData =  await _data.LoadData<string, dynamic>($"SHOW TABLES LIKE \"{tableName}\";", new { }, _config.GetConnectionString("recipeDatabase"));
-
-
-        return returnData.Count != 0 ;
-
-
-    }
-
-    private async Task<int> SumRecords(string tableName)
-    {
-        List<int> sum = await _data.LoadData<int, dynamic>($"SELECT count( * ) as  total_record FROM {tableName}", new { }, _config.GetConnectionString("recipeDatabase"));
-        if (sum.Count > 0)
-        {
-            return sum[0];
-        }
-        return 0;
-    }
-
-    private async Task OverrideRecipeTable()
-    {
-
-    }
-
-    private async Task CreateRecipeTable()
-    {
-        string sql = @"CREATE TABLE `Recipe` (
+        { "Recipe",@"CREATE TABLE `Recipe` (
 	`RecipeID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`Servings` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
 	`MealType` ENUM('Starter','Main','Dessert','Snack','Accompaniment','Cake','Biscuit','LightMeal') NOT NULL COLLATE 'latin1_swedish_ci',
@@ -126,16 +94,7 @@ catch(Exception e)
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=11
-;
-"
-;
-        await _data.SaveData(sql, new { }, _config.GetConnectionString("recipeDatabase"));
-
-    }
-
-    private async Task CreateMethodTable()
-    {
-        string sql = @"CREATE TABLE `Method` (
+;" },{"Method",@"CREATE TABLE `Method` (
 	`StepNumber` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`RecipeID` INT(10) UNSIGNED NOT NULL,
 	`MethodText` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
@@ -145,10 +104,25 @@ AUTO_INCREMENT=11
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
-;
-";
+;"},{"Review",@"CREATE TABLE `Review` (
+	`ReviewID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`RecipeID` INT(10) UNSIGNED NOT NULL DEFAULT '1',
+	`ReviewersName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`ReviewTitle` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`ReviewText` MEDIUMTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`StarCount` INT(10) UNSIGNED NOT NULL DEFAULT '1',
+	PRIMARY KEY (`ReviewID`) USING BTREE,
+	INDEX `ReviewFK` (`RecipeID`) USING BTREE,
+	CONSTRAINT `ReviewFK` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;"}
+    };
 
 
-        await _data.SaveData(sql, new { }, _config.GetConnectionString("recipeDatabase"));
+    private async Task RunSql(string sql)
+    {
+        await _data.SaveData(sql, _config.GetConnectionString("recipeDatabase"));
     }
 }

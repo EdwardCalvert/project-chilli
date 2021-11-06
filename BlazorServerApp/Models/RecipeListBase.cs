@@ -10,30 +10,36 @@ using Microsoft.Extensions.Configuration;
 
 namespace BlazorServerApp.Models
 {
-    public class RecipeListBase : ComponentBase
+    public class RecipeListBase : DataComponent
     {
-        public IEnumerable<RecipeDataModel> Recipes { get; set; }
-        [Inject]
-        public IDataAccess _data { get; set; }
-        [Inject]
-        public IConfiguration _config { get; set; }
         public string Error;
 
         protected override Task OnInitializedAsync()
         {
-            LoadHomepageRecipies();
+            LoadRecipies("ORDER BY PageVisits DESC LIMIT 20");
             return base.OnInitializedAsync();
         }
 
-        public async Task<List<DisplayRecipeModel>> LoadHomepageRecipies()
+        //ORDER BY PageVisits DESC LIMIT 20
+        public async Task<List<DisplayRecipeModel>> LoadRecipies(string extraSql)
         {
-            //go to database, and get a list of the 'top' 100 recipes
             List<RecipeDataModel> recipes;
-            List<DisplayRecipeModel> UIRecipies;
-            
-                string sql = "SELECT  * FROM Recipe ORDER BY PageVisits DESC LIMIT 20";
-                recipes = await _data.LoadData<RecipeDataModel, dynamic>(sql, new { }, _config.GetConnectionString("recipeDatabase"));
-                UIRecipies = DisplayRecipeModel.PasrseBackendToFrontend(recipes);
+            List<DisplayRecipeModel> UIRecipies = new List<DisplayRecipeModel>();
+            recipes = await _data.LoadData<RecipeDataModel>($"SELECT  * FROM Recipe {extraSql}", _config.GetConnectionString("recipeDatabase"));
+            foreach (RecipeDataModel recipe in recipes)
+            {
+                DisplayRecipeModel displayRecipeModel = DisplayRecipeModel.PasrseBackendToFrontend(recipe);
+                List<MethodDataModel>  methods = await _data.LoadData<MethodDataModel>($"SELECT * FROM Method WHERE RecipeID={recipe.RecipeID}", _config.GetConnectionString("recipeDatabase"));
+                if (methods.Count > 0)
+                {
+                    //Loop Parse the data model into the front end model. Should we do this here?
+                    //displayRecipeModel.Method 
+                }
+                List<ReviewDataModel> reviews = await _data.LoadData<ReviewDataModel>($"SELECT * FROM Review WHERE RecipeID={recipe.RecipeID}",_config.GetConnectionString("recipeDatabase"));
+                UIRecipies.Add(displayRecipeModel);
+            }
+
+            //UIRecipies = DisplayRecipeModel.PasrseBackendToFrontend(recipes);
 
             return UIRecipies;
 

@@ -26,7 +26,7 @@ namespace BlazorServerApp.Models
         public string Description { get; set; }
 
         [Required]
-        public List<DisplayMethodList> Method { get; set; } = new List<DisplayMethodList>();
+        public List<DisplayMethodModel> Method { get; set; } = new List<DisplayMethodModel>();
 
         [Required]
         public List<DisplayEquipmentModel> Equipment { get; set; } = new List<DisplayEquipmentModel>();
@@ -154,7 +154,7 @@ namespace BlazorServerApp.Models
 
         public void InsertEmptyMethod()
         {
-            Method.Add(new DisplayMethodList());
+            Method.Add(new DisplayMethodModel());
         }
 
         public void InsertEmptyMethod(int quantity)

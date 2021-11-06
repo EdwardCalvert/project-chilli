@@ -5,13 +5,18 @@ using System.Threading.Tasks;
 
 namespace BlazorServerApp.Models
 {
-    public class DisplayMethodList
+    public class DisplayMethodModel
     {
         public string Step { get; set; }
 
-        public DisplayMethodList()
+        public DisplayMethodModel()
         {
 
         }
+
+        //public static DisplayRecipeModel Parse(MethodDataModel dataModel)
+        //{
+
+        //}
     }
 }

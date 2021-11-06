@@ -89,6 +89,11 @@ a, .btn-link {
     color: black;
 }
 
+.InputField40Percent{
+    width: 40vw;
+    max-width: 400px;
+}
+
 .TimeInputField, .QuantityInputField{
     width: 50px;
 }
@@ -99,6 +104,13 @@ a, .btn-link {
     padding-right: 5px;
     padding-bottom: 5px;
 }
+.ReviewCard {
+    background-color: #f1f1f1;
+    border: 20px solid #f1f1f1 !important;
+    margin-bottom: 30px;
+}
+
+
 
 .RecipeCard {
     background-color: #f1f1f1;

@@ -1,5 +1,4 @@
-﻿@using BlazorServerApp.ExtensionMethods
-@page "/Recipe/{RecipeIDRequest:int}"
+﻿@page "/Recipe/{RecipeIDRequest:int}"
 @if (model == null)
 {
     <LoadingElement />
@@ -30,11 +29,12 @@ else
         </div>
         <div class="MethodList">
             <ol>
-                @foreach (DisplayMethodList step in model.Method) {
+                @foreach (DisplayMethodModel step in model.Method) {
                 <li>@step</li>
                 }
             </ol>
         </div>
+        <ReviewSection/>
     </div>
     if (model.DocxFilePath != null)
     {
@@ -47,14 +47,13 @@ else
     [Parameter]
     public int RecipeIDRequest { get; set; }
 
-    ISqlRunner sqlRunner = new SqlRunner();
 
     DisplayRecipeModel model = new DisplayRecipeModel();
 
     protected override async Task OnInitializedAsync()
     {
 
-        List<RecipeDataModel> result = await _data.LoadData<RecipeDataModel, dynamic>($"SELECT * FROM Recipe WHERE RecipeID={RecipeIDRequest}", new { }, _config.GetConnectionString("recipeDatabase"));
+        List<RecipeDataModel> result = await _data.LoadData<RecipeDataModel>($"SELECT * FROM Recipe WHERE RecipeID={RecipeIDRequest}", _config.GetConnectionString("recipeDatabase"));
         model = DisplayRecipeModel.PasrseBackendToFrontend(result[0]);
     }
 

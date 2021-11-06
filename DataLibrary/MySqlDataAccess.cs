@@ -11,22 +11,22 @@ namespace DataLibrary
 {
     public class MySqlDataAccess : IDataAccess
     {
-        public async Task<List<U>> LoadData<U, T>(string sql, T Parameters, string connectionString)
+        public async Task<List<U>> LoadData<U>(string sql, string connectionString)
         {
             using (IDbConnection connection = new MySqlConnection(connectionString))
             {
-                var rows = await connection.QueryAsync<U>(sql, Parameters);
+                var rows = await connection.QueryAsync<U>(sql);
 
                 return rows.ToList();
             }
 
         }
 
-        public Task SaveData<T>(string sql, T Parameters, string connectionString)
+        public Task SaveData(string sql, string connectionString)
         {
             using (IDbConnection connection = new MySqlConnection(connectionString))
             {
-                return connection.ExecuteAsync(sql, Parameters);
+                return connection.ExecuteAsync(sql);
 
             }
 

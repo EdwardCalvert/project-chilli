@@ -1,13 +1,4 @@
-﻿
-
-@page "/dataViewer"
-
-@using DataLibrary
-@using BlazorServerApp.Models
-@using Microsoft.Extensions.Configuration
-@inject IDataAccess _data
-@inject IConfiguration _config
-
+﻿@page "/dataViewer"
 <h3>DataViewer</h3>
 
 @if (recipeDatas == null)
@@ -79,7 +70,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         string sql = "select * from Recipe";
-        recipeDatas = await _data.LoadData<RecipeDataModel, dynamic>(sql, new { }, _config.GetConnectionString("recipeDatabase"));
+        recipeDatas = await _data.LoadData<RecipeDataModel>(sql, _config.GetConnectionString("recipeDatabase"));
 
         RecipeDataModel recipeDataModel = new RecipeDataModel();
     }
