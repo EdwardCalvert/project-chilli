@@ -9,6 +9,8 @@ namespace BlazorServerApp.Models
     {
         public string Step { get; set; }
 
+        public uint StepNumber { get; set; }
+
         public DisplayMethodModel()
         {
 

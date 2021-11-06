@@ -22,9 +22,26 @@ namespace BlazorServerApp.Models
         [Required]
         public int StarCount { get; set; }
 
-        public readonly Dictionary<int,string> Stars = new Dictionary<int, string>() { { 5, "⭐⭐⭐⭐⭐" } , { 4, "⭐⭐⭐⭐" } , { 3, "⭐⭐⭐" } , { 2, "⭐⭐" } , { 1, "⭐" }, { 0, "" } };
+        public static readonly Dictionary<int,string> Stars = new Dictionary<int, string>() { { 5, "⭐⭐⭐⭐⭐" } , { 4, "⭐⭐⭐⭐" } , { 3, "⭐⭐⭐" } , { 2, "⭐⭐" } , { 1, "⭐" }, { 0, "" } };
 
+        public static int ReturnAverageRating(List<DisplayReviewModel> reviewModels)
+        {
+            if (reviewModels != null && reviewModels.Count > 0)
+            {
+                float sum = 0;
+                foreach(DisplayReviewModel model in reviewModels)
+                {
+                    sum += model.StarCount;
+                }
+                return (int)(sum / reviewModels.Count);
+            }
+            return 0;
+        }
 
+        public static string ReturnStars(List<DisplayReviewModel> reviewModels)
+        {
+            return Stars[ReturnAverageRating(reviewModels)];
+        }
     }
 
 }

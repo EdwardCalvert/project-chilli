@@ -34,7 +34,7 @@ else
                 }
             </ol>
         </div>
-        <ReviewSection/>
+        <ReviewSection Reviews="@model.Reviews"/>
     </div>
     if (model.DocxFilePath != null)
     {
@@ -46,17 +46,14 @@ else
 @code{
     [Parameter]
     public int RecipeIDRequest { get; set; }
+    RecipeDataLoader recipeDataLoader = new RecipeDataLoader();
 
 
     DisplayRecipeModel model = new DisplayRecipeModel();
 
     protected override async Task OnInitializedAsync()
     {
-
-        List<RecipeDataModel> result = await _data.LoadData<RecipeDataModel>($"SELECT * FROM Recipe WHERE RecipeID={RecipeIDRequest}", _config.GetConnectionString("recipeDatabase"));
-        model = DisplayRecipeModel.PasrseBackendToFrontend(result[0]);
+        List<DisplayRecipeModel> result = await recipeDataLoader.LoadRecipies($"WHERE RecipeID={RecipeIDRequest}");
+        model = result[0];
     }
-
-
-
 }

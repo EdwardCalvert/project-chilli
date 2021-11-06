@@ -1,74 +1,87 @@
-﻿@if (Reviews.Count > 0) { 
-
-}
+﻿
 <div class="ReviewCard">
-    <EditForm Model="@newReview" OnValidSubmit="@InsertNewRecipe">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <div class="FieldLine">
-            <div class="FieldHeader">
-                <label id="reviewTitleLabel">ReviewTitle</label>
-            </div>
-            <div class="col-12 col-xs-8 col-md-6 col-lg-4 FieldData">
-                <InputText style="width: 100%" id="reviewTitleInput" @bind-Value="newReview.ReviewTitle" />
-            </div>
 
+    @if (Reviews.Count > 0)
+    {
+        @foreach (DisplayReviewModel displayReviewModel in Reviews)
+        {
+    <div class="card m-3">
+        <div class="card-header No-Decoration ColourBlack">
+            @displayReviewModel.ReviewTitle
         </div>
-        <div class="FieldLine">
-            <div class="FieldHeader">
-                <label id="reviewRatingTitle">Your Rating</label>
-            </div>
-            <div class="FieldData">
-                <div class="InputFieldContainer">
-                    <InputSelect id="reviewRatingSelector" @bind-Value="newReview.StarCount">
-                        @foreach (var value in newReview.Stars)
+        <div class="card-body No-Decoration ColourBlack">
+            @displayReviewModel.ReviewText
+        </div>
+    </div>
+        }
+                }
+<EditForm Model="@newReview" OnValidSubmit="@InsertNewRecipe">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="FieldLine">
+        <div class="FieldHeader">
+            <label id="reviewTitleLabel">ReviewTitle</label>
+        </div>
+        <div class="col-12 col-xs-8 col-md-6 col-lg-4 FieldData">
+            <InputText style="width: 100%" id="reviewTitleInput" @bind-Value="newReview.ReviewTitle" />
+        </div>
+
+    </div>
+    <div class="FieldLine">
+        <div class="FieldHeader">
+            <label id="reviewRatingTitle">Your Rating</label>
+        </div>
+        <div class="FieldData">
+            <div class="InputFieldContainer">
+                <InputSelect id="reviewRatingSelector" @bind-Value="newReview.StarCount">
+                    @foreach (var value in DisplayReviewModel.Stars)
                         {
-                            <option value="@value.Key">@value.Value</option>
+                        <option value="@value.Key">@value.Value</option>
                         }
-                    </InputSelect>
-                </div>
+                </InputSelect>
             </div>
         </div>
-        <div class="FieldLine">
-            <div class="FieldHeader">
-                <label id="recipeNameLabel">Your name</label>
-            </div>
-            <div class="col-12 col-xs-8 col-md-6 col-lg-4 FieldData">
-                <InputText style="width:100%"  id="reviewerNameInput" @bind-Value="newReview.ReviewersName" />
-            </div>
+    </div>
+    <div class="FieldLine">
+        <div class="FieldHeader">
+            <label id="recipeNameLabel">Your name</label>
+        </div>
+        <div class="col-12 col-xs-8 col-md-6 col-lg-4 FieldData">
+            <InputText style="width:100%" id="reviewerNameInput" @bind-Value="newReview.ReviewersName" />
+        </div>
 
+    </div>
+    <div class="FieldLine">
+        <div class="FieldHeader">
+            <label id="recipeNameLabel">ReviewText</label>
         </div>
-        <div class="FieldLine">
-            <div class="FieldHeader">
-                <label id="recipeNameLabel">ReviewText</label>
-            </div>
-            <div class="FieldData">
-                <InputTextArea rows="6" style=" width:100%;" id="reviewText" @bind-Value="newReview.ReviewText" />
-            </div>
+        <div class="FieldData">
+            <InputTextArea rows="6" style=" width:100%;" id="reviewText" @bind-Value="newReview.ReviewText" />
+        </div>
 
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </EditForm>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
 </div>
 @code {
-    [Parameter]
-    public List<DisplayReviewModel> Reviews { get; set; }
+[Parameter]
+public List<DisplayReviewModel> Reviews { get; set; }
 
-    private DisplayReviewModel newReview;
+private DisplayReviewModel newReview;
 
 
-    protected override Task OnInitializedAsync()
-    {
-        newReview = new();
-        Reviews = new();
-        return base.OnInitializedAsync();
-    }
+protected override Task OnInitializedAsync()
+{
+newReview = new();
+Reviews = new();
+return base.OnInitializedAsync();
+}
 
-    private void InsertNewRecipe()
-    {
+private void InsertNewRecipe()
+{
 
-    }
+}
 
-  
+
 
 }

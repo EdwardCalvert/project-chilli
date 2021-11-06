@@ -11,9 +11,14 @@ namespace BlazorServerApp.Models
 {
     public class DataComponent : ComponentBase
     {
-        [Inject]
-        public IDataAccess _data { get; set; }
-        [Inject]
-        public IConfiguration _config { get; set; }
+        //[Inject]
+        //public IDataAccess _data { get; set; }
+        //[Inject]
+        //public IConfiguration _config { get; set; }
+
+        public DataComponent() : base()
+        {
+        
+        }
     }
 }

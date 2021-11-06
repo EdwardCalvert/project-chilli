@@ -1,0 +1,12 @@
+﻿@if (Models.DisplayReviewModel.ReturnStars(DisplayReviewModel) == "")
+{
+    <p>No ratings yet.</p>
+}
+else
+{
+    <p>Reviews: @Models.DisplayReviewModel.ReturnStars(DisplayReviewModel)</p>}
+
+@code {
+    [Parameter]
+    public List<DisplayReviewModel> DisplayReviewModel { get; set; }
+}

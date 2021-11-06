@@ -1,5 +1,5 @@
 ﻿@page "/"
-@inherits Models.RecipeListBase
+@inherits Models.RecipeDataLoader
 <h3>Here are the top recipies- ordered by popularity!</h3>
 <!--Potentially create an input select box here to allow it to be sorted by different criteria. -->
 
@@ -31,7 +31,7 @@ else
 
                         <p>Preperation time: @model.PreperationTime mintues</p>
 
-                        <p>Reviews: ⭐⭐⭐⭐⭐</p>
+                        <ReviewSummary DisplayReviewModel="@model.Reviews"/>
 
                         <FoodLabel nutritionLabel="model.DisplayNutritionModel" StyleParameters="font-size: 9px; overflow-wrap: anywhere;" ShowTitle="false" />
                         @if (model.Description != null)

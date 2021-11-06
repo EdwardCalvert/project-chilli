@@ -10,7 +10,7 @@ namespace BlazorServerApp.Models
         public uint ReviewID { get; set; }
         public uint RecipeID { get; set; }
         public string ReviewersName { get; set; }
-        public string ReviewersTitle { get; set; }
+        public string ReviewerTitle { get; set; }
         public string ReviewText { get; set; }
         public int StarCount { get; set; }
     }
