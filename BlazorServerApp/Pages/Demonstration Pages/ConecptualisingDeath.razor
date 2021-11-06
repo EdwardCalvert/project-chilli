@@ -1,6 +1,6 @@
 ﻿@page "/death"
-
-
+@using System.Timers
+@implements IDisposable
 <div class="container col-12" style="max-width: 1218px">
     <h3>A kind reminder you are <em>WASTING YOUR TIME</em></h3>
     <div class="row">
@@ -9,11 +9,11 @@
         </div>
         <div class="col-10">
             <div class="progress">
+
                 <div class="progress-bar" role="progressbar" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100" style="width:@percent">
                     <span class="sr-only">@percent</span>
                     @percent
                 </div>
-
             </div>
         </div>
         <div class="col-1">
@@ -74,22 +74,43 @@
     </div>
 </div>
 
-@code { 
+@code {
     public double percent;
+    System.Threading.Timer timer;
+
 
     protected override void OnInitialized()
     {
-        base.OnInitialized();
+
+        timer = new System.Threading.Timer((_) =>
+        {
+            percent = UpdatePercent();
+            StateHasChanged();
+        }, null, 0, 1000);
+
+    }
+
+    private double UpdatePercent()
+    {
+        double percent;
         DateTime birthDate = new DateTime(2004, 4, 25);
 
         DateTime TodayDate = DateTime.Now;
-        var numberOfDays = (TodayDate- birthDate).TotalDays;
+        var numberOfDays = (TodayDate - birthDate).TotalDays;
 
         var lifespanOfHuman = 82 * 365;
-         percent = (numberOfDays / lifespanOfHuman) * 100;
+        return percent = (numberOfDays / lifespanOfHuman) * 100;
+
+
+
     }
 
-
-
-
+    private void elapsed(object sender, System.EventArgs e)
+    {
+        UpdatePercent();
+    }
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
 }

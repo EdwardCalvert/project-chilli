@@ -69,6 +69,8 @@ namespace BlazorServerApp.Models
             return dataModel;
         }
 
+        
+
         public static List<RecipeDataModel> ParseFrontEndToBackend(List<DisplayRecipeModel> frontEndModel)
         {
             List<RecipeDataModel> recipeDataModels = new List<RecipeDataModel>(frontEndModel.Count);

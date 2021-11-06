@@ -33,11 +33,11 @@ else
             <ol>
                 @foreach (DisplayMethodModel step in model.Method)
                 {
-                    <li>@step</li>
+                    <li>@step.Step</li>
                 }
             </ol>
         </div>
-        <ReviewSection Reviews="@model.Reviews" />
+        <ReviewSection RecipeID="@RecipeIDRequest" />
     </div>
     if (model.DocxFilePath != null)
     {
@@ -50,12 +50,20 @@ else
     [Parameter]
     public int RecipeIDRequest { get; set; }
 
+    private bool pageRequested = false;
+
 
     DisplayRecipeModel model = new DisplayRecipeModel();
 
     protected override async Task OnInitializedAsync()
     {
         List<DisplayRecipeModel> result = await LoadRecipies($"WHERE RecipeID={RecipeIDRequest}");
+        if (!pageRequested)
+        {
+            await IncrementViews(RecipeIDRequest);
+            pageRequested = true;
+        }
+
         model = result[0];
     }
 }

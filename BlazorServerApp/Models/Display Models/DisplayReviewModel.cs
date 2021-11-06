@@ -19,10 +19,11 @@ namespace BlazorServerApp.Models
         [MinLength(2, ErrorMessage = "Name is too short")]
         public string ReviewersName { get; set; }
 
-        [Required]
-        public int StarCount { get; set; }
+        public Star Star { get; set; }
 
-        public static readonly Dictionary<int,string> Stars = new Dictionary<int, string>() { { 5, "⭐⭐⭐⭐⭐" } , { 4, "⭐⭐⭐⭐" } , { 3, "⭐⭐⭐" } , { 2, "⭐⭐" } , { 1, "⭐" }, { 0, "" } };
+        public int RecipeID { get; set; }
+
+        public DateTime DateCreated { get; set; }
 
         public static int ReturnAverageRating(List<DisplayReviewModel> reviewModels)
         {
@@ -31,7 +32,7 @@ namespace BlazorServerApp.Models
                 float sum = 0;
                 foreach(DisplayReviewModel model in reviewModels)
                 {
-                    sum += model.StarCount;
+                    sum += model.Star.GetNumberOfStars();
                 }
                 return (int)(sum / reviewModels.Count);
             }
@@ -40,7 +41,7 @@ namespace BlazorServerApp.Models
 
         public static string ReturnStars(List<DisplayReviewModel> reviewModels)
         {
-            return Stars[ReturnAverageRating(reviewModels)];
+            return Star.Stars[ReturnAverageRating(reviewModels)];
         }
     }
 

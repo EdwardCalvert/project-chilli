@@ -111,13 +111,16 @@ ENGINE=InnoDB
 	`ReviewTitle` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
 	`ReviewText` MEDIUMTEXT NOT NULL COLLATE 'latin1_swedish_ci',
 	`StarCount` INT(10) UNSIGNED NOT NULL DEFAULT '1',
+	`DateSubmitted` DATETIME NOT NULL,
 	PRIMARY KEY (`ReviewID`) USING BTREE,
 	INDEX `ReviewFK` (`RecipeID`) USING BTREE,
 	CONSTRAINT `ReviewFK` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
-;"}
+AUTO_INCREMENT=112
+;
+"}
     };
 
 

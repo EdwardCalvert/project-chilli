@@ -1,5 +1,6 @@
 ﻿@if (nutritionLabel != null)
 {
+<div style="border: 10px;">
     <table class="FoodLabelTable">
         @if (ShowTitle)
         {
@@ -35,8 +36,9 @@
 
             <td class="FoodLabelTd" style="@StyleParameters">@($"{nutritionLabel.SaltPercentage()}%")</td>
         </tr>
-       
+
     </table>
+</div>
 }
     @code{
         //Data from https://www.nhs.uk/live-well/eat-well/what-are-reference-intakes-on-food-labels/

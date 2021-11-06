@@ -53,6 +53,27 @@ namespace BlazorServerApp.Models
         {
             return await _data.LoadData<ReviewDataModel>($"SELECT * FROM Review WHERE RecipeID={RecipeID}",_config.GetConnectionString("recipeDatabase"));
         }
+
+        public static string MySQLTimeFormat(DateTime date)
+        {
+            return date.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
+        public async Task IncrementViews(int RecipeID)
+        {
+            int pageVisits = 0;
+            List<int> results = await _data.LoadData<int>($"SELECT PageVisits FROM Recipe WHERE RecipeID={RecipeID}", _config.GetConnectionString("recipeDatabase"));
+            pageVisits = results[0];
+            pageVisits++;
+            await _data.SaveData($"UPDATE RecipeDatabase.Recipe SET PageVisits={pageVisits} WHERE RecipeID={RecipeID}; ", _config.GetConnectionString("recipeDatabase"));
+            await _data.SaveData($"UPDATE RecipeDatabase.Recipe SET LastRequested='{RecipeDataLoader.MySQLTimeFormat(DateTime.Now)}' WHERE RecipeID={RecipeID}; ", _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task SaveNewReview(DisplayReviewModel displayReviewModel)
+        {
+            await _data.SaveData(ModelParser.ParseDisplayReviewModelToDisplayDataModel(displayReviewModel).SQLInsertStatement(),_config.GetConnectionString("recipeDatabase"));
+        }
+
     }
 
 }
