@@ -1,4 +1,5 @@
 ﻿@page "/Recipe/{RecipeIDRequest:int}"
+@inherits Models.RecipeDataLoader
 @if (model == null)
 {
     <LoadingElement />
@@ -12,7 +13,7 @@ else
     }
 
     <FoodLabel nutritionLabel="@model.DisplayNutritionModel" StyleParameters="font-size: 12px; overflow-wrap: anywhere;
-    width: 100px;" ShowTitle="false"/>
+    width: 100px;" ShowTitle="false" />
     <h5>Serves @model.Servings</h5>
     <div class="container-fluid">
         <p>@model.Description</p>
@@ -22,19 +23,21 @@ else
 
         <div class="IngredientsList">
             <ul>
-                @foreach (DisplayIngredientModel ingredient in model.Ingredients) {
-                <li><em>@ingredient.Quantity @ingredient.Unit</em> @ingredient.Name</li>
+                @foreach (DisplayIngredientModel ingredient in model.Ingredients)
+                {
+                    <li><em>@ingredient.Quantity @ingredient.Unit</em> @ingredient.Name</li>
                 }
             </ul>
         </div>
         <div class="MethodList">
             <ol>
-                @foreach (DisplayMethodModel step in model.Method) {
-                <li>@step</li>
+                @foreach (DisplayMethodModel step in model.Method)
+                {
+                    <li>@step</li>
                 }
             </ol>
         </div>
-        <ReviewSection Reviews="@model.Reviews"/>
+        <ReviewSection Reviews="@model.Reviews" />
     </div>
     if (model.DocxFilePath != null)
     {
@@ -46,14 +49,13 @@ else
 @code{
     [Parameter]
     public int RecipeIDRequest { get; set; }
-    RecipeDataLoader recipeDataLoader = new RecipeDataLoader();
 
 
     DisplayRecipeModel model = new DisplayRecipeModel();
 
     protected override async Task OnInitializedAsync()
     {
-        List<DisplayRecipeModel> result = await recipeDataLoader.LoadRecipies($"WHERE RecipeID={RecipeIDRequest}");
+        List<DisplayRecipeModel> result = await LoadRecipies($"WHERE RecipeID={RecipeIDRequest}");
         model = result[0];
     }
 }
