@@ -3,64 +3,104 @@
 @using BlazorServerApp.Shared
 @using BlazorServerApp.Models
 @using Microsoft.Extensions.Configuration
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
 @inherits RecipeDataLoader
-@try
-{
-<h3>Welcome to the admin page!</h3>
-<h4>Please use this page with caution, as you have the facility to delete tables from the database, which doesn't seem like a great idea!</h4>
-<h3>Create and delete tables</h3>
-<table class="table table-striped">
-    <thead class="thead-dark">
-        <tr>
-            <th>Table Name</th>
-            <th>Button to intitalise process</th>
-            <th>Number of records on table</th>
-			<th>Create sample data</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (string tableName in tables) {
-        <tr>
-            <td>@tableName</td>
 
-            @if (DoTablesExist(tableName).Result)
+    <h3>Welcome to the admin page!</h3>
+    <h4>Please use this page with caution, as you have the facility to delete tables from the database, which doesn't seem like a great idea!</h4>
+    <h3>Create and delete tables</h3>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Table Name</th>
+                <th>Button to intitalise process</th>
+                <th>Number of records on table</th>
+                <th>Create sample data</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (string tableName in tables)
             {
-                <td><button class="btn btn-danger">@tableName Table exists. I would give you the option of deleting it,<br />but I haven't made that script yet! </button></td>
+                <tr>
+                    <td>@tableName</td>
 
-                <td>@SumRecords(tableName).Result</td>
-				<td><button class="btn btn-primary">Add Data @Result</button></td>
+                    @if (DoTablesExist(tableName).Result)
+                    {
+                        <td><button class="btn btn-danger">@tableName Table exists. I would give you the option of deleting it,<br />but I haven't made that script yet! </button></td>
+
+                        <td>@SumRecords(tableName).Result</td>
+                        <td><button class="btn btn-primary">Add Data @Result</button></td>
+                    }
+                    else
+                    {
+                        <td><button class="btn btn-primary" @onclick="e=> RunSql(tableCreationCodes[tableName])">Create recipe table</button></td>
+                        <td>0</td>
+                        <td><button class="btn btn-danger">Can't add sample data! Table doesn't exist!</button></td>
+                    }
+
+                </tr>
             }
-            else
-            {
-                <td><button class="btn btn-primary" @onclick="e=> RunSql(tableCreationCodes[tableName])">Create recipe table</button></td>
-                <td>0</td>
-				<td><button class="btn btn-danger">Can't add sample data! Table doesn't exist!</button></td>
-            }
 
-        </tr>
-        }
-        
-    </tbody>
-</table>
+        </tbody>
+    </table>
 
-<h3>DataLoader</h3>
-<p>The equipment and ingredients table require data to operate correctly. Upload a csv/ or work manually to add for the first time.</p>
-    //using (Stream stream = file.OpenReadStream(512000000))
-    //{
-    //    var path = $"{env.WebRootPath}\\uploads\\{file.Name}";
-    //    FileStream fs = File.Create(path);
-    //    await stream.CopyToAsync(fs);
-    //    stream.Close();
-    //}
+    <h3>DataLoader- For the Table Equipment</h3>
+    <p>The equipment and ingredients table require data to operate correctly. Upload a csv/ or work manually to add for the first time.</p>
 
-}
-catch(Exception e)
-{
-    <BlazorServerApp.Shared.ErrorNotification ErrorMessage="e.Message"/>
-}
+
+    <form @onsubmit="OnSubmit">
+        <InputFile OnChange="OnInputFileChange" multiple />
+        <br /><br />
+        <button type="submit" class="btn btn-primary">Upload Selected File(s) to the Equipment Table</button>
+        <p>@Message</p>
+    </form>      
+    @if (error) { 
+        <ErrorNotification ErrorMessage="@Message"/>
+    }
+
+
 @code {
-    private List<string> tables = new List<string>() { "Recipe", "Method", "Review" ,"Equipment","EquipmentInRecipe"};
+    private List<string> tables = new List<string>() { "Recipe", "Method", "Review", "Equipment", "EquipmentInRecipe" };
     private string Result { get; set; }
+    bool error = false;
+
+    string Message = "No file(s) selected";
+    IReadOnlyList<IBrowserFile> selectedFiles;
+    const int largestFileSize = 512000000;
+
+    private void OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        selectedFiles = e.GetMultipleFiles();
+        Message = $"{selectedFiles.Count} file(s) selected";
+        this.StateHasChanged();
+    }
+
+    private async void OnSubmit()
+    {
+        try
+        {
+
+            foreach (var file in selectedFiles)
+            {
+                var reader = await new StreamReader(file.OpenReadStream()).ReadToEndAsync();
+                await ProcessCSVSaveToDB(reader);
+
+            }
+            Message = $"{selectedFiles.Count} file(s) uploaded on server";
+            this.StateHasChanged();
+            error = false;
+        }
+        catch (NullReferenceException)
+        {
+            Message = "Sorry, please attach some files!";
+            error = true;
+        }
+        catch (Exception e)
+        {
+            Message = "Error encoundtered:" + e.Message;
+            error = true;
+        }
+    }
     protected override Task OnInitializedAsync()
     {
         return base.OnInitializedAsync();
@@ -68,80 +108,80 @@ catch(Exception e)
 
 
     private readonly Dictionary<string, List<string>> sampleData = new Dictionary<string, List<string>>()
-    {
+{
         {"Recipe",new List<string>(){}}
 
     };
 
 
     private readonly Dictionary<string, string> tableCreationCodes = new Dictionary<string, string>()
-    {
+{
         { "Recipe",@"CREATE TABLE `Recipe` (
-	`RecipeID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`Servings` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
-	`MealType` ENUM('Starter','Main','Dessert','Snack','Accompaniment','Cake','Biscuit','LightMeal') NOT NULL COLLATE 'latin1_swedish_ci',
-	`RecipeName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
-	`Kcal` DECIMAL(20,2) NULL DEFAULT NULL,
-	`Saturates` DECIMAL(20,2) NULL DEFAULT NULL,
-	`Carbohydrates` DECIMAL(20,2) NULL DEFAULT NULL,
-	`Sugar` DECIMAL(20,2) NULL DEFAULT NULL,
-	`Fibre` DECIMAL(20,2) NULL DEFAULT NULL,
-	`Protein` DECIMAL(20,2) NULL DEFAULT NULL,
-	`Salt` DECIMAL(20,2) NULL DEFAULT NULL,
-	`Fat` DECIMAL(20,2) NULL DEFAULT NULL,
-	`CookingTime` SMALLINT(5) NULL DEFAULT '0',
-	`PreperationTime` SMALLINT(5) NULL DEFAULT '0',
-	`DocxFilePath` MEDIUMTEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	`Difficulty` ENUM('Easy','Medium','Hard') NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	`PageVisits` INT(10) UNSIGNED NULL DEFAULT NULL,
-	`LastRequested` DATETIME NULL DEFAULT NULL,
-	`Description` TEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	PRIMARY KEY (`RecipeID`) USING BTREE
+    `RecipeID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `Servings` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+    `MealType` ENUM('Starter','Main','Dessert','Snack','Accompaniment','Cake','Biscuit','LightMeal') NOT NULL COLLATE 'latin1_swedish_ci',
+    `RecipeName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+    `Kcal` DECIMAL(20,2) NULL DEFAULT NULL,
+    `Saturates` DECIMAL(20,2) NULL DEFAULT NULL,
+    `Carbohydrates` DECIMAL(20,2) NULL DEFAULT NULL,
+    `Sugar` DECIMAL(20,2) NULL DEFAULT NULL,
+    `Fibre` DECIMAL(20,2) NULL DEFAULT NULL,
+    `Protein` DECIMAL(20,2) NULL DEFAULT NULL,
+    `Salt` DECIMAL(20,2) NULL DEFAULT NULL,
+    `Fat` DECIMAL(20,2) NULL DEFAULT NULL,
+    `CookingTime` SMALLINT(5) NULL DEFAULT '0',
+    `PreperationTime` SMALLINT(5) NULL DEFAULT '0',
+    `DocxFilePath` MEDIUMTEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+    `Difficulty` ENUM('Easy','Medium','Hard') NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+    `PageVisits` INT(10) UNSIGNED NULL DEFAULT NULL,
+    `LastRequested` DATETIME NULL DEFAULT NULL,
+    `Description` TEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+    PRIMARY KEY (`RecipeID`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=11
 ;" },{"Method",@"CREATE TABLE `Method` (
-	`StepNumber` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`RecipeID` INT(10) UNSIGNED NOT NULL,
-	`MethodText` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
-	PRIMARY KEY (`StepNumber`, `RecipeID`) USING BTREE,
-	INDEX `RecipeID` (`RecipeID`) USING BTREE,
-	CONSTRAINT `RecipeID` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
+    `StepNumber` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `RecipeID` INT(10) UNSIGNED NOT NULL,
+    `MethodText` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
+    PRIMARY KEY (`StepNumber`, `RecipeID`) USING BTREE,
+    INDEX `RecipeID` (`RecipeID`) USING BTREE,
+    CONSTRAINT `RecipeID` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;"},{"Review",@"CREATE TABLE `Review` (
-	`ReviewID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`RecipeID` INT(10) UNSIGNED NOT NULL DEFAULT '1',
-	`ReviewersName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
-	`ReviewTitle` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
-	`ReviewText` MEDIUMTEXT NOT NULL COLLATE 'latin1_swedish_ci',
-	`StarCount` INT(10) UNSIGNED NOT NULL DEFAULT '1',
-	`DateSubmitted` DATETIME NOT NULL,
-	PRIMARY KEY (`ReviewID`) USING BTREE,
-	INDEX `ReviewFK` (`RecipeID`) USING BTREE,
-	CONSTRAINT `ReviewFK` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
+    `ReviewID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `RecipeID` INT(10) UNSIGNED NOT NULL DEFAULT '1',
+    `ReviewersName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+    `ReviewTitle` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
+    `ReviewText` MEDIUMTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+    `StarCount` INT(10) UNSIGNED NOT NULL DEFAULT '1',
+    `DateSubmitted` DATETIME NOT NULL,
+    PRIMARY KEY (`ReviewID`) USING BTREE,
+    INDEX `ReviewFK` (`RecipeID`) USING BTREE,
+    CONSTRAINT `ReviewFK` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=112
 ;
 " },{"EquipmentInRecipe",@"CREATE TABLE `EquipmentInRecipe` (
-	`EquipmentID` INT(10) UNSIGNED NOT NULL,
-	`RecipeID` INT(10) UNSIGNED NOT NULL,
-	PRIMARY KEY (`EquipmentID`, `RecipeID`) USING BTREE,
-	INDEX `FK_RecipeID_on_EquipmentInRecipe` (`RecipeID`) USING BTREE,
-	CONSTRAINT `FK_EquipmentID_on_EquipmentInRecipe` FOREIGN KEY (`EquipmentID`) REFERENCES `RecipeDatabase`.`Equipment` (`EquipmentID`) ON UPDATE NO ACTION ON DELETE CASCADE,
-	CONSTRAINT `FK_RecipeID_on_EquipmentInRecipe` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
+    `EquipmentID` INT(10) UNSIGNED NOT NULL,
+    `RecipeID` INT(10) UNSIGNED NOT NULL,
+    PRIMARY KEY (`EquipmentID`, `RecipeID`) USING BTREE,
+    INDEX `FK_RecipeID_on_EquipmentInRecipe` (`RecipeID`) USING BTREE,
+    CONSTRAINT `FK_EquipmentID_on_EquipmentInRecipe` FOREIGN KEY (`EquipmentID`) REFERENCES `RecipeDatabase`.`Equipment` (`EquipmentID`) ON UPDATE NO ACTION ON DELETE CASCADE,
+    CONSTRAINT `FK_RecipeID_on_EquipmentInRecipe` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 "},{"Equipment",@"CREATE TABLE `Equipment` (
-	`EquipmentID` INT(10) UNSIGNED NOT NULL,
-	`EquipmentName` TEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	`TypeOf` ENUM('Food Preparation Equipment','Serving Equipment','Cooking Equipment','Storage Equipment','Miscellaneous Equipment') NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+    `EquipmentID` INT(10) UNSIGNED NOT NULL,
+    `EquipmentName` TEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+    `TypeOf` ENUM('Food Preparation Equipment','Serving Equipment','Cooking Equipment','Storage Equipment','Miscellaneous Equipment') NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
     PRIMARY KEY (`EquipmentID`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
@@ -153,6 +193,6 @@ ENGINE=InnoDB
 
     private async Task RunSql(string sql)
     {
-        await _data.SaveData(sql, _config.GetConnectionString("recipeDatabase"));
+        await _data.SaveData(sql,new { }, _config.GetConnectionString("recipeDatabase"));
     }
 }

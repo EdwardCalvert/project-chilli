@@ -25,23 +25,15 @@ namespace BlazorServerApp.Models
 
         public DateTime DateCreated { get; set; }
 
-        public static int ReturnAverageRating(List<DisplayReviewModel> reviewModels)
-        {
-            if (reviewModels != null && reviewModels.Count > 0)
-            {
-                float sum = 0;
-                foreach(DisplayReviewModel model in reviewModels)
-                {
-                    sum += model.Star.GetNumberOfStars();
-                }
-                return (int)(sum / reviewModels.Count);
-            }
-            return 0;
-        }
 
         public static string ReturnStars(List<DisplayReviewModel> reviewModels)
         {
-            return Star.Stars[ReturnAverageRating(reviewModels)];
+            List<Star> stars = new(reviewModels.Count);
+            foreach(DisplayReviewModel model in reviewModels)
+            {
+                stars.Add(model.Star);
+            }
+            return Star.ReturnAverageStarRating(stars);
         }
     }
 

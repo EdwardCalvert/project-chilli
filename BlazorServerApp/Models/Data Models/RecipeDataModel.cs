@@ -57,7 +57,14 @@ namespace BlazorServerApp.Models
 
         public string SqlInsertStatement()
         {
-            return $"insert into Recipe values({RecipeID},{Servings},'{MealType}','{RecipeName}',{Kcal},{Saturates},{Carbohydrates},{Sugar},{Fibre},{Protein},{Salt},{Fat},{CookingTime},{PreperationTime},'{DocxFilePath}','{Difficulty}',{PageVisits},'{LastRequested.ToString("yyyy-MM-dd HH:mm:ss")}','{Description}')";
+            return $"INSERT INTO Recipe(Servings, MealType, RecipeName, Kcal, Saturates, Carbohydrates, Sugar, Fibre, Protein, Salt, Fat, CookingTime, PreperationTime, Difficulty, PageVisits,LastRequested, Description)" +
+                $"VALUES( @servings, @mealType, @recipeName, @kcal, @saturates, @carbohydrates, @sugar, @fibre, @protein, @salt, @fat, @cookingTime, @preperationTime, @difficulty, @pageVisits, @lastRequested, @description)";
+                
+        }
+
+        public dynamic SqlAnonymousType()
+        {
+            return new { servings = Servings, mealType = MealType, recipeName = RecipeName, kcal = Kcal, saturates = Saturates, carbohydrates = Carbohydrates, sugar = Sugar, fibre= Fibre, protein = Protein, salt=Salt, fat=Fat, cookingTime = CookingTime, preperationTime = PreperationTime, difficulty = Difficulty, pageVisits = PageVisits, lastRequested = LastRequested, description = Description };
         }
     }
 }

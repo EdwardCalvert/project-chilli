@@ -52,30 +52,13 @@ else
 
 @code {
 
-    private bool isVisible = true;
-    private string wordClassModifier = "";
     private List<DisplayRecipeModel> _models;
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
 
     {
-        _models = LoadRecipies("ORDER BY PageVisits DESC LIMIT 20").Result;
-        return base.OnInitializedAsync();
+        List<RecipeDataModel> datas =  await _data.LoadData<RecipeDataModel, dynamic>("SELECT * FROM Recipe ORDER BY PageVisits DESC LIMIT 20", new {  }, _config.GetConnectionString("recipeDatabase"));
+        _models = await BuildRecipeTreeFromDataModel(datas);
     }
 
-
-    private void OnMouseDown()
-    {
-        wordClassModifier = "wordblock__word-shrinked";
-    }
-
-    private void OnMouseUp()
-    {
-        isVisible = false;
-    }
-
-    private void OnMouseOut()
-    {
-        wordClassModifier = "";
-    }
 }

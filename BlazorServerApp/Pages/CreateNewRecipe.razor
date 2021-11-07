@@ -74,6 +74,7 @@
                                         <div class="FieldData">
                                             <div class="InputFieldContainer">
                                                 <InputText id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfEquipment.Name" />
+                                                
                                             </div>
                                             <div class="FieldLine">
                                                 <button class="btn btn-danger" @onclick="@(e=>DeleteEquipment(i-1))">✕</button>
@@ -183,9 +184,10 @@
         private DisplayRecipeModel newRecipe = new DisplayRecipeModel();
 
         private async Task InsertRecipe()
+
         {
-            RecipeDataModel readyForDatabase = RecipeDataModel.ParseFrontEndToBackend(newRecipe);
-            await _data.SaveData(readyForDatabase.SqlInsertStatement(), _config.GetConnectionString("recipeDatabase"));
+            await InsertRecipeAndRelatedFields(newRecipe);
+           
 
             newRecipe = new();
             await OnInitializedAsync();

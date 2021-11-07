@@ -9,7 +9,8 @@ namespace BlazorServerApp.Models
     {
         public string Name { get; set; }
         public uint EquipmentID { get; set; }
-        public readonly List<string> Types = new List<string> { "Food Preparation Equipment", "Serving Equipment", "Cooking Equipment", "Storage Equipment", "Miscellaneous Equipment" };
+        public string TypeOf { get; set; }
+        public static readonly List<string> Types = new List<string> { "Food Preparation Equipment", "Serving Equipment", "Cooking Equipment", "Storage Equipment", "Miscellaneous Equipment" };
 
         public DisplayEquipmentModel()
         {

@@ -18,7 +18,13 @@ namespace BlazorServerApp.Models
         
         public string SQLInsertStatement()
         {
-            return $"INSERT INTO Review(RecipeID,ReviewersName,ReviewTitle,ReviewText,StarCount,DateSubmitted)  VALUES({RecipeID},'{ReviewersName.MakeSQLSafe()}','{ReviewTitle.MakeSQLSafe()}','{ReviewText.MakeSQLSafe()}',{StarCount},'{RecipeDataLoader.MySQLTimeFormat(DateSubmitted)}');";
+            return $"INSERT INTO Review(RecipeID,ReviewersName,ReviewTitle,ReviewText,StarCount,DateSubmitted)  VALUES(@recipeID,@reviewersName,@reviewTitle,@reviewText,@starCount,@dateSubmitted);";
+        }
+
+        public dynamic SQLAnonymousType()
+        {
+            return new { recipeID = RecipeID, reviewersName = ReviewersName, reviewTitle = ReviewTitle, reviewText = ReviewText,starCount = StarCount, dateSubmitted = RecipeDataLoader.MySQLTimeFormat(DateSubmitted) };
+
         }
     }
 }

@@ -64,13 +64,13 @@ else
 
 
 @code {
-        List<string> tables = new List<string> { "Recipe" };
-        List<RecipeDataModel> recipeDatas;
+    List<string> tables = new List<string> { "Recipe" };
+    List<RecipeDataModel> recipeDatas;
 
     protected override async Task OnInitializedAsync()
     {
         string sql = "select * from Recipe";
-        recipeDatas = await _data.LoadData<RecipeDataModel>(sql, _config.GetConnectionString("recipeDatabase"));
+        recipeDatas = await _data.LoadData<RecipeDataModel,dynamic>(sql,new { }, _config.GetConnectionString("recipeDatabase"));
 
         RecipeDataModel recipeDataModel = new RecipeDataModel();
     }

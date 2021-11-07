@@ -57,7 +57,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        List<DisplayRecipeModel> result = await LoadRecipies($"WHERE RecipeID={RecipeIDRequest}");
+        List<RecipeDataModel> datas = await _data.LoadData<RecipeDataModel, dynamic>("SELECT * FROM Recipe WHERE RecipeID = @recipeID",new {recipeID = RecipeIDRequest },_config.GetConnectionString("recipeDatabase"));
+        List<DisplayRecipeModel> result = await BuildRecipeTreeFromDataModel(datas);
+
         if (!pageRequested)
         {
             await IncrementViews(RecipeIDRequest);

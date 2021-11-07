@@ -40,6 +40,31 @@ namespace BlazorServerApp.Models
 
         }
 
+
+        private static int ReturnAverageRating(List<Star> stars)
+        {
+            if (stars != null && stars.Count > 0)
+            {
+                float sum = 0;
+                foreach (Star star in stars)
+                {
+                    sum += star.GetNumberOfStars();
+                }
+                return (int)(sum / stars.Count);
+            }
+            return 0;
+        }
+
+        public static string ReturnAverageStarRating(List<Star> reviewModels)
+        {
+            return Star.GetStarsForUI(ReturnAverageRating(reviewModels));
+        }
+
+        public static string GetStarsForUI(int starCount)
+        {
+            return Stars[starCount];
+        }
+
         private static bool Validate(int starCount)
         {
             if (starCount < _miniimumStars || starCount > _maximumStars)

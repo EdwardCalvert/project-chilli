@@ -12,9 +12,9 @@ namespace BlazorServerApp.Data
         public static DisplayReviewModel ParseReviewDataModelToDisplayReviewModel(ReviewDataModel reviewDataModel)
         {
             DisplayReviewModel displayReviewModel = new DisplayReviewModel();
-            displayReviewModel.ReviewTitle = reviewDataModel.ReviewTitle.UnSQLize();
-            displayReviewModel.ReviewText = reviewDataModel.ReviewText.UnSQLize();
-            displayReviewModel.ReviewersName = reviewDataModel.ReviewersName.UnSQLize();
+            displayReviewModel.ReviewTitle = reviewDataModel.ReviewTitle;
+            displayReviewModel.ReviewText = reviewDataModel.ReviewText;
+            displayReviewModel.ReviewersName = reviewDataModel.ReviewersName;
             displayReviewModel.Star = Star.CreateStar(reviewDataModel.StarCount);
             displayReviewModel.RecipeID = (int) reviewDataModel.RecipeID;
             displayReviewModel.DateCreated = reviewDataModel.DateSubmitted;
@@ -34,7 +34,7 @@ namespace BlazorServerApp.Data
         public static DisplayMethodModel ParseMethodDataModelToDisplayMethodModel(MethodDataModel methodDataModel)
         {
             DisplayMethodModel displayMethodModel = new DisplayMethodModel();
-            displayMethodModel.Step = methodDataModel.MethodText.UnSQLize();
+            displayMethodModel.Step = methodDataModel.MethodText;
             displayMethodModel.StepNumber = methodDataModel.StepNumber;
             return displayMethodModel;
         }
@@ -54,10 +54,10 @@ namespace BlazorServerApp.Data
                 throw new Exception("The RecipeID MUST be provided");
             }
             ReviewDataModel reviewDataModel = new ReviewDataModel();
-            reviewDataModel.ReviewersName = displayReviewModel.ReviewersName.MakeSQLSafe();
-            reviewDataModel.ReviewText = displayReviewModel.ReviewText.MakeSQLSafe();
+            reviewDataModel.ReviewersName = displayReviewModel.ReviewersName;
+            reviewDataModel.ReviewText = displayReviewModel.ReviewText;
             reviewDataModel.StarCount = displayReviewModel.Star.GetNumberOfStars();
-            reviewDataModel.ReviewTitle = displayReviewModel.ReviewTitle.MakeSQLSafe();
+            reviewDataModel.ReviewTitle = displayReviewModel.ReviewTitle;
             reviewDataModel.RecipeID = (uint) displayReviewModel.RecipeID;
             reviewDataModel.DateSubmitted = displayReviewModel.DateCreated;
             return reviewDataModel;
@@ -94,12 +94,12 @@ namespace BlazorServerApp.Data
             return recipeModels;
         }
 
-        public static RecipeDataModel ParseFrontEndToBackend(DisplayRecipeModel model)
+        public static RecipeDataModel ParseOnlyDisplayRecipeModelIntoRecipeDataModel(DisplayRecipeModel model)
         {
             RecipeDataModel dataModel = new RecipeDataModel();
             dataModel.CookingTime = (uint)model.CookingTime;
             dataModel.Servings = (uint)model.Servings;
-            dataModel.MealType = (MEALTYPE)model.MealType;
+            dataModel.MealType = (RecipeDataModel.MEALTYPE)model.MealType;
             dataModel.RecipeName = model.RecipeName;
             dataModel.CookingTime = (uint)model.CookingTime;
             dataModel.PreperationTime = (uint)model.CookingTime;
@@ -112,14 +112,48 @@ namespace BlazorServerApp.Data
 
 
 
-        public static List<RecipeDataModel> ParseFrontEndToBackend(List<DisplayRecipeModel> frontEndModel)
+        public static List<RecipeDataModel> ParseOnlyDisplayRecipeModelIntoRecipeDataModel(List<DisplayRecipeModel> frontEndModel)
         {
             List<RecipeDataModel> recipeDataModels = new List<RecipeDataModel>(frontEndModel.Count);
             foreach (DisplayRecipeModel model in frontEndModel)
             {
-                recipeDataModels.Add(ParseFrontEndToBackend(model));
+                recipeDataModels.Add(ParseOnlyDisplayRecipeModelIntoRecipeDataModel(model));
             }
             return recipeDataModels;
         }
-    }
+        public static MethodDataModel ParseDisplayMethodModelToMethodDataModel(DisplayMethodModel displayMethodModels, uint RecipeID)
+        {
+            MethodDataModel methodDataModel = new MethodDataModel();
+            methodDataModel.StepNumber = displayMethodModels.StepNumber;
+            methodDataModel.MethodText = displayMethodModels.Step;
+            methodDataModel.RecipeID = RecipeID;
+            return methodDataModel;
+        }
+
+        public static List<MethodDataModel> ParseDisplayMethodModelToMethodDataModel(List<DisplayMethodModel> displayMethodModels, uint RecipeIDForAllDataModels)
+        {
+            List<MethodDataModel> methodDataModels = new List<MethodDataModel>();
+            foreach(DisplayMethodModel displayMethodModel in displayMethodModels)
+            {
+                methodDataModels.Add(ParseDisplayMethodModelToMethodDataModel(displayMethodModel, RecipeIDForAllDataModels));
+            }
+            return methodDataModels;
+        }
+
+        public static List<EquipmentDataModel>  ParseDisplayEquipmentModelToEquipmentDataModel(List<DisplayEquipmentModel >displayEquipmentModels)
+        {
+            List<EquipmentDataModel> dataModels = new List<EquipmentDataModel>(displayEquipmentModels.Count);
+            foreach (DisplayEquipmentModel displayEquipmentModel in displayEquipmentModels)
+            {
+                EquipmentDataModel equipmentDataModel = new EquipmentDataModel();
+                equipmentDataModel.EquipmentName = displayEquipmentModel.Name;
+                equipmentDataModel.EquipmentID = displayEquipmentModel.EquipmentID;
+                equipmentDataModel.TypeOf = displayEquipmentModel.TypeOf;
+                dataModels.Add(equipmentDataModel);
+            }
+            return dataModels;
+        }
+
+
+}
 }
