@@ -53,33 +53,7 @@ namespace BlazorServerApp.Models
         {
 
         }
-        public static RecipeDataModel ParseFrontEndToBackend(DisplayRecipeModel model)
-        {
-            RecipeDataModel dataModel = new RecipeDataModel();
-            dataModel.CookingTime = (uint)model.CookingTime;
-            dataModel.Servings = (uint)model.Servings;
-            dataModel.MealType = (MEALTYPE)model.MealType;
-            dataModel.RecipeName = model.RecipeName;
-            dataModel.CookingTime = (uint)model.CookingTime;
-            dataModel.PreperationTime = (uint)model.CookingTime;
-            dataModel.DocxFilePath = model.DocxFilePath;
-            dataModel.PageVisits = 1;
-            dataModel.LastRequested = DateTime.Now;
-            dataModel.Description = model.Description;
-            return dataModel;
-        }
-
         
-
-        public static List<RecipeDataModel> ParseFrontEndToBackend(List<DisplayRecipeModel> frontEndModel)
-        {
-            List<RecipeDataModel> recipeDataModels = new List<RecipeDataModel>(frontEndModel.Count);
-            foreach (DisplayRecipeModel model in frontEndModel)
-            {
-                recipeDataModels.Add(ParseFrontEndToBackend(model));
-            }
-            return recipeDataModels;
-        }
 
         public string SqlInsertStatement()
         {

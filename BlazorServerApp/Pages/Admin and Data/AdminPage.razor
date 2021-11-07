@@ -3,15 +3,19 @@
 @using BlazorServerApp.Shared
 @using BlazorServerApp.Models
 @using Microsoft.Extensions.Configuration
+@inherits RecipeDataLoader
 @try
 {
-<h3>AdminPage</h3>
+<h3>Welcome to the admin page!</h3>
+<h4>Please use this page with caution, as you have the facility to delete tables from the database, which doesn't seem like a great idea!</h4>
+<h3>Create and delete tables</h3>
 <table class="table table-striped">
     <thead class="thead-dark">
         <tr>
             <th>Table Name</th>
             <th>Button to intitalise process</th>
             <th>Number of records on table</th>
+			<th>Create sample data</th>
         </tr>
     </thead>
     <tbody>
@@ -24,50 +28,53 @@
                 <td><button class="btn btn-danger">@tableName Table exists. I would give you the option of deleting it,<br />but I haven't made that script yet! </button></td>
 
                 <td>@SumRecords(tableName).Result</td>
-
+				<td><button class="btn btn-primary">Add Data @Result</button></td>
             }
             else
             {
                 <td><button class="btn btn-primary" @onclick="e=> RunSql(tableCreationCodes[tableName])">Create recipe table</button></td>
                 <td>0</td>
+				<td><button class="btn btn-danger">Can't add sample data! Table doesn't exist!</button></td>
             }
 
         </tr>
         }
         
     </tbody>
-    </table>
+</table>
+
+<h3>DataLoader</h3>
+<p>The equipment and ingredients table require data to operate correctly. Upload a csv/ or work manually to add for the first time.</p>
+    //using (Stream stream = file.OpenReadStream(512000000))
+    //{
+    //    var path = $"{env.WebRootPath}\\uploads\\{file.Name}";
+    //    FileStream fs = File.Create(path);
+    //    await stream.CopyToAsync(fs);
+    //    stream.Close();
+    //}
+
 }
 catch(Exception e)
 {
     <BlazorServerApp.Shared.ErrorNotification ErrorMessage="e.Message"/>
 }
 @code {
-        private List<string> tables = new List<string>() { "Recipe", "Method", "Review" };
-        protected override Task OnInitializedAsync()
-        {
-            return base.OnInitializedAsync();
-        }
-
-        private async Task<bool> DoTablesExist(string tableName)
-        {
-            List<string> returnData = new List<string>();
-            returnData =  await _data.LoadData<string>($"SHOW TABLES LIKE \"{tableName}\";", _config.GetConnectionString("recipeDatabase"));
-            return returnData.Count != 0 ;
-        }
-
-        private async Task<int> SumRecords(string tableName)
-        {
-            List<int> sum = await _data.LoadData<int>($"SELECT count( * ) as  total_record FROM {tableName}", _config.GetConnectionString("recipeDatabase"));
-            if (sum.Count > 0)
-            {
-                return sum[0];
-            }
-            return 0;
-        }
+    private List<string> tables = new List<string>() { "Recipe", "Method", "Review" ,"Equipment","EquipmentInRecipe"};
+    private string Result { get; set; }
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
 
 
-        private Dictionary<string, string> tableCreationCodes = new Dictionary<string, string>()
+    private readonly Dictionary<string, List<string>> sampleData = new Dictionary<string, List<string>>()
+    {
+        {"Recipe",new List<string>(){}}
+
+    };
+
+
+    private readonly Dictionary<string, string> tableCreationCodes = new Dictionary<string, string>()
     {
         { "Recipe",@"CREATE TABLE `Recipe` (
 	`RecipeID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -119,6 +126,26 @@ ENGINE=InnoDB
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=112
+;
+" },{"EquipmentInRecipe",@"CREATE TABLE `EquipmentInRecipe` (
+	`EquipmentID` INT(10) UNSIGNED NOT NULL,
+	`RecipeID` INT(10) UNSIGNED NOT NULL,
+	PRIMARY KEY (`EquipmentID`, `RecipeID`) USING BTREE,
+	INDEX `FK_RecipeID_on_EquipmentInRecipe` (`RecipeID`) USING BTREE,
+	CONSTRAINT `FK_EquipmentID_on_EquipmentInRecipe` FOREIGN KEY (`EquipmentID`) REFERENCES `RecipeDatabase`.`Equipment` (`EquipmentID`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `FK_RecipeID_on_EquipmentInRecipe` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+"},{"Equipment",@"CREATE TABLE `Equipment` (
+	`EquipmentID` INT(10) UNSIGNED NOT NULL,
+	`EquipmentName` TEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`TypeOf` ENUM('Food Preparation Equipment','Serving Equipment','Cooking Equipment','Storage Equipment','Miscellaneous Equipment') NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+    PRIMARY KEY (`EquipmentID`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
 ;
 "}
     };

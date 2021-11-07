@@ -13,9 +13,9 @@ namespace BlazorServerApp.Models
     public class RecipeDataLoader : ComponentBase
     {
         [Inject]
-        public IDataAccess _data { get; set; }
+        private IDataAccess _data { get; set; }
         [Inject]
-        public IConfiguration _config { get; set; }
+        private IConfiguration _config { get; set; }
 
 
         protected override Task OnInitializedAsync()
@@ -72,6 +72,54 @@ namespace BlazorServerApp.Models
         public async Task SaveNewReview(DisplayReviewModel displayReviewModel)
         {
             await _data.SaveData(ModelParser.ParseDisplayReviewModelToDisplayDataModel(displayReviewModel).SQLInsertStatement(),_config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<bool> DoTablesExist(string tableName)
+        {
+            List<string> returnData = new List<string>();
+            returnData = await _data.LoadData<string>($"SHOW TABLES LIKE \"{tableName}\";", _config.GetConnectionString("recipeDatabase"));
+            return returnData.Count != 0;
+        }
+
+        public async Task<int> SumRecords(string tableName)
+        {
+            List<int> sum = await _data.LoadData<int>($"SELECT count( * ) as  total_record FROM {tableName}", _config.GetConnectionString("recipeDatabase"));
+            if (sum.Count > 0)
+            {
+                return sum[0];
+            }
+            return 0;
+        }
+
+        public async Task InsertRecipe(DisplayRecipeModel displayRecipeModel )
+        {
+            ModelParser.
+
+            List<RecipeDataModel> recipes = new List<RecipeDataModel>();
+            List<DisplayRecipeModel> UIRecipies = new List<DisplayRecipeModel>();
+            recipes = await _data.LoadData<RecipeDataModel>($"SELECT * FROM Recipe {extraSql}", _config.GetConnectionString("recipeDatabase"));
+            foreach (RecipeDataModel recipe in recipes)
+            {
+                DisplayRecipeModel displayRecipeModel = DisplayRecipeModel.PasrseBackendToFrontend(recipe);
+                List<MethodDataModel> methods = await _data.LoadData<MethodDataModel>($"SELECT * FROM Method WHERE RecipeID={recipe.RecipeID}", _config.GetConnectionString("recipeDatabase"));
+                if (methods != null && methods.Count > 0)
+                {
+                    displayRecipeModel.Method = ModelParser.ParseMethodDataModelToDisplayMethodModel(methods);
+                }
+                List<ReviewDataModel> reviews = await _data.LoadData<ReviewDataModel>($"SELECT * FROM Review WHERE RecipeID={recipe.RecipeID}", _config.GetConnectionString("recipeDatabase"));
+                if (reviews != null && reviews.Count > 0)
+                {
+                    displayRecipeModel.Reviews = ModelParser.ParseReviewDataModelToDisplayReviewModel(reviews);
+
+                }
+                UIRecipies.Add(displayRecipeModel);
+            }
+            return UIRecipies;
+        }
+
+        public async Task ProcessCSV()
+        {
+            //Give it a csv and a model? how will it enumerate through the model?
         }
 
     }

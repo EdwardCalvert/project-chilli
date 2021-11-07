@@ -95,37 +95,6 @@ namespace BlazorServerApp.Models
 
         public DisplayNutritionModel DisplayNutritionModel { get; set; }
 
-        public static DisplayRecipeModel PasrseBackendToFrontend(RecipeDataModel recipeDataModel)
-        {
-            DisplayRecipeModel displayRecipeModel= new DisplayRecipeModel();
-            displayRecipeModel.CookingTime = (int) recipeDataModel.CookingTime;
-            displayRecipeModel.Servings = (int)recipeDataModel.Servings;
-            displayRecipeModel.MealType = (mealType)recipeDataModel.MealType;
-            displayRecipeModel.RecipeName = recipeDataModel.RecipeName;
-            displayRecipeModel.CookingTime = (int) recipeDataModel.CookingTime;
-            displayRecipeModel.PreperationTime = (int) recipeDataModel.PreperationTime;
-            if (!string.IsNullOrEmpty(recipeDataModel.DocxFilePath))
-            {
-                displayRecipeModel.DocxFilePath = recipeDataModel.DocxFilePath;
-            }
-            
-            displayRecipeModel.Description = recipeDataModel.Description;
-            displayRecipeModel.RecipeID = recipeDataModel.RecipeID;
-            displayRecipeModel.DisplayNutritionModel = new DisplayNutritionModel(recipeDataModel.Kcal, recipeDataModel.Fat, recipeDataModel.Saturates, recipeDataModel.Sugar, recipeDataModel.Fibre, recipeDataModel.Carbohydrates, recipeDataModel.Salt, DisplayRecipeModel.RecomendedIntake);
-
-            return displayRecipeModel;
-        }
-
-        public static List<DisplayRecipeModel> PasrseBackendToFrontend(List<RecipeDataModel> recipeDataModel)
-        {
-            List<DisplayRecipeModel> recipeModels = new();
-            foreach(RecipeDataModel model in recipeDataModel)
-            {
-                recipeModels.Add(PasrseBackendToFrontend(model));
-            }
-            return recipeModels;
-        }
-
         public void InsertEmptyIngredient(int quantity)
         {
             for(int i =0; i<quantity; i++)

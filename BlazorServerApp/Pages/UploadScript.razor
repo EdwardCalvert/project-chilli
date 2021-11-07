@@ -7,20 +7,15 @@
     <InputFile OnChange="OnInputFileChange" multiple />
     <br /><br />
     <button type="submit">Upload Selected File(s)</button>
+    <p>@Message</p>
 </form>
-@if (selectedFiles == null || selectedFiles.Count == 0)
-{
-    <p>No files selected</p>
-}
-else
-{
-    <p>Wow! They are loaded!</p>
-}
+
 
 
 @code {
     string Message = "No file(s) selected";
     IReadOnlyList<IBrowserFile> selectedFiles;
+    const int largestFileSize = 512000000;
 
     private void OnInputFileChange(InputFileChangeEventArgs e)
     {
@@ -33,14 +28,12 @@ else
     {
 
         foreach (var file in selectedFiles)
+
         {
-            using (Stream stream = file.OpenReadStream(512000000))
-            {
-                var path = $"{env.WebRootPath}\\uploads\\{file.Name}";
-                FileStream fs = File.Create(path);
-                await stream.CopyToAsync(fs);
-                stream.Close();
-            }
+
+            await using FileStream fs = new($"{env.WebRootPath}\\uploads\\{file.Name}", FileMode.Create);
+            await file.OpenReadStream().CopyToAsync(fs);
+
         }
         Message = $"{selectedFiles.Count} file(s) uploaded on server";
         this.StateHasChanged();
