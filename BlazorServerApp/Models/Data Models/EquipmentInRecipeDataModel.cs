@@ -12,7 +12,7 @@ namespace BlazorServerApp.Models
 
         public string SqlInsertStatement()
         {
-            return $"INSERT INTO EquipmentInRecipe(EquipmentID,Recipe) VALUES(@equipmentID, @recipeID);";
+            return $"INSERT INTO EquipmentInRecipe(EquipmentID,RecipeID) VALUES(@equipmentID, @recipeID);";
         }
 
         public dynamic SqlAnonymousType()

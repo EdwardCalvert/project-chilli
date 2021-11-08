@@ -107,6 +107,8 @@ namespace BlazorServerApp.Models
 
         public async Task InsertRecipeAndRelatedFields(DisplayRecipeModel displayModel )
         {
+            Console.WriteLine(displayModel.SqlInsertStatement() + "SELECT LAST_INSERT_ID();");
+            Console.WriteLine($"'{displayModel.MealType}'");
             List<uint> autoIncrementResult = await _data.LoadData<uint,dynamic>(displayModel.SqlInsertStatement() + "SELECT LAST_INSERT_ID();", displayModel.SqlAnonymousType() ,_config.GetConnectionString("recipeDatabase"));
 
             uint RecipeId = autoIncrementResult[0];
@@ -114,16 +116,20 @@ namespace BlazorServerApp.Models
             {
                 if (model.MethodText != null)
                 {
+                    model.RecipeID = RecipeId;
                     await _data.SaveData(model.SqlInsertStatement(), model.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
                 }
             }
 
-            foreach (DisplayEquipmentModel model in displayModel.Equipment)
+            if (displayModel.Equipment!=null )
             {
-                EquipmentInRecipeDataModel model1 = new();
-                model1.EquipmentID = model.EquipmentID;
-                model1.RecipeID = RecipeId;
-                await _data.SaveData(model1.SqlInsertStatement(), model1.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+                foreach (DisplayEquipmentModel model in displayModel.Equipment)
+                {
+                    EquipmentInRecipeDataModel model1 = new();
+                    model1.EquipmentID = model.EquipmentID;
+                    model1.RecipeID = RecipeId;
+                    await _data.SaveData(model1.SqlInsertStatement(), model1.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+                }
             }
         }
 
