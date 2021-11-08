@@ -146,7 +146,7 @@ namespace BlazorServerApp.Data
             foreach (DisplayEquipmentModel displayEquipmentModel in displayEquipmentModels)
             {
                 EquipmentDataModel equipmentDataModel = new EquipmentDataModel();
-                equipmentDataModel.EquipmentName = displayEquipmentModel.Name;
+                equipmentDataModel.EquipmentName = displayEquipmentModel.EquipmentName;
                 equipmentDataModel.EquipmentID = displayEquipmentModel.EquipmentID;
                 equipmentDataModel.TypeOf = displayEquipmentModel.TypeOf;
                 dataModels.Add(equipmentDataModel);
@@ -154,6 +154,6 @@ namespace BlazorServerApp.Data
             return dataModels;
         }
 
-
-}
+ 
+    }
 }

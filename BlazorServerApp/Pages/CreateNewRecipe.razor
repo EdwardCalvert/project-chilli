@@ -73,8 +73,9 @@
                                     <div class="col" style="flex-basis: unset;">
                                         <div class="FieldData">
                                             <div class="InputFieldContainer">
-                                                <InputText id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfEquipment.Name" />
-                                                
+                                                @*<InputText id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfEquipment.EquipmentName" />*@
+                                                <BlazorServerApp.Shared.AddEquipmentTypeAhead @bind-EquipmentName="@copyOfEquipment.EquipmentName" />
+                                                <p>@copyOfEquipment.EquipmentName</p>
                                             </div>
                                             <div class="FieldLine">
                                                 <button class="btn btn-danger" @onclick="@(e=>DeleteEquipment(i-1))">✕</button>
@@ -82,7 +83,7 @@
                                         </div>
                                     </div>
                                 }
-
+                                <p>Can't find the Equipment you are looking for? You'll need to add it here'</p>
 
                                 @if (newRecipe.Equipment.Count >= DisplayRecipeModel.EQUIPMENTCAPACITY)
                                 {

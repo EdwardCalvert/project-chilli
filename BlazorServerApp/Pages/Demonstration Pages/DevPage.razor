@@ -1,9 +1,16 @@
-﻿@page "/dev/{RecipeIDRequest}"
-<h3>DevPage</h3>
-<p>@RecipeIDRequest</p>
-
-@code{
-[Parameter]
-    public string RecipeIDRequest { get; set; }
-
+﻿@page "/dev"
+<div>
+    CurrentCounterValue in MyFirstComponent is @CurrentCounterValue
+</div>
+<button @onclick=@UpdateCurrentCounterValue>Update</button>
+@code {
+    [Parameter]
+    public int CurrentCounterValue { get; set; }
+    [Parameter]
+    public EventCallback<int> CurrentCounterValueChanged { get; set; }
+    async Task UpdateCurrentCounterValue()
+    {
+        CurrentCounterValue++;
+        await CurrentCounterValueChanged.InvokeAsync(CurrentCounterValue);
+    }
 }
