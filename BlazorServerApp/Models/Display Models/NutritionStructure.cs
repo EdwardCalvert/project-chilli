@@ -7,16 +7,16 @@ namespace BlazorServerApp.Models
 {
     public class NutritionStructure 
     {
-        public float Kcal { get; set; }
-        public float Fat { get; set; }
-        public float Saturates { get; set; }
-        public float Sugar { get; set; }
-        public float Fibre { get; set; }
-        public float Carbohydrates { get; set; }
-        public float Salt { get; set; }
+        public double Kcal { get; set; }
+        public double Fat { get; set; }
+        public double Saturates { get; set; }
+        public double Sugar { get; set; }
+        public double Fibre { get; set; }
+        public double Carbohydrates { get; set; }
+        public double Salt { get; set; }
 
 
-        public NutritionStructure(float kcal, float fat, float saturates, float sugar, float fibre, float carbohydrates, float salt)
+        public NutritionStructure(double kcal, double fat, double saturates, double sugar, double fibre, double carbohydrates, double salt)
         {
             Kcal = kcal;
             Fat = fat;
@@ -26,21 +26,28 @@ namespace BlazorServerApp.Models
             Carbohydrates = carbohydrates;
             Salt = salt;
         }
+
+        public bool IsEmpty()
+        {
+            return Kcal == 0 && Fat == 0 && Saturates ==0 && Sugar == 0 && Fibre ==0 && Carbohydrates == 0 && Salt ==0;
+        }
     }
 
     public class RecomendedIntake : NutritionStructure
     {
-        public RecomendedIntake(float kcal, float fat, float saturates, float sugar, float fibre, float carbohydrates, float salt) : base(kcal, fat, saturates, sugar, fibre, carbohydrates, salt)
+        public RecomendedIntake(double kcal, double fat, double saturates, double sugar, double fibre, double carbohydrates, double salt) : base(kcal, fat, saturates, sugar, fibre, carbohydrates, salt)
         {
 
         }
+
+
     }
 
     public class DisplayNutritionModel : NutritionStructure
     {
         private RecomendedIntake RecomendedIntake;
 
-        public DisplayNutritionModel(float kcal, float fat, float saturates, float sugar, float fibre, float carbohydrates, float salt, RecomendedIntake recomendedIntake) : base(kcal, fat, saturates, sugar, fibre, carbohydrates, salt)
+        public DisplayNutritionModel(double kcal, double fat, double saturates, double sugar, double fibre, double carbohydrates, double salt, RecomendedIntake recomendedIntake) : base(kcal, fat, saturates, sugar, fibre, carbohydrates, salt)
         {
             RecomendedIntake = recomendedIntake;
         }

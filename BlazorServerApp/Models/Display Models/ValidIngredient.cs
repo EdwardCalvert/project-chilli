@@ -25,4 +25,19 @@ AttributeTargets.Field, AllowMultiple = true)]
 
         }
     }
+    [AttributeUsage(AttributeTargets.Property |
+AttributeTargets.Field, AllowMultiple = true)]
+    public sealed class ValidMealType : ValidationAttribute
+    {
+        public bool IsValid(DisplayRecipeModel value)
+        {
+            return ValidMealType.ValidIngredient(value);
+
+        }
+
+        public static bool ValidIngredient(DisplayRecipeModel value)
+        {
+            return DisplayRecipeModel.mealType.Contains(value.MealType);
+        }
+    }
 }

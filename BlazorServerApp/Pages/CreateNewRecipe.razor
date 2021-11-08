@@ -135,7 +135,7 @@
                         <div class="FieldHeader"><label id="recipeMealTypeLabel">Meal Type </label></div>
                         <div class="FieldData">
                             <InputSelect id="recipeMealTypeInput" @bind-Value="newRecipe.MealType">
-                                @foreach (var value in Enum.GetValues(typeof(DisplayRecipeModel.mealType)))
+                                @foreach (var value in DisplayRecipeModel.mealType)
                                 {
                                     <option>@value</option>
                                 }
@@ -178,9 +178,10 @@
         {
             newRecipe.Equipment = SelectedEquipment;
             await InsertRecipeAndRelatedFields(newRecipe);
-
+            if( ValidMealType.ValidIngredient(newRecipe))
             
             newRecipe = new();
+            SelectedEquipment = null;
             await OnInitializedAsync();
         }
 

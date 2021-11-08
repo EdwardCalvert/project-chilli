@@ -23,14 +23,14 @@ namespace BlazorServerApp.Models
         }
         public MEALTYPE MealType;
         public string RecipeName;
-        public float Kcal;
-        public float Saturates;
-        public float Carbohydrates;
-        public float Sugar;
-        public float Fibre;
-        public float Protein;
-        public float Salt;
-        public float Fat;
+        public double Kcal;
+        public double Saturates;
+        public double Carbohydrates;
+        public double Sugar;
+        public double Fibre;
+        public double Protein;
+        public double Salt;
+        public double Fat;
         public uint CookingTime;
         public uint PreperationTime;
         public string DocxFilePath;

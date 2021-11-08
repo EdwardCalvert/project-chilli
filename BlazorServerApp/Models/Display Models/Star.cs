@@ -45,7 +45,7 @@ namespace BlazorServerApp.Models
         {
             if (stars != null && stars.Count > 0)
             {
-                float sum = 0;
+                double sum = 0;
                 foreach (Star star in stars)
                 {
                     sum += star.GetNumberOfStars();

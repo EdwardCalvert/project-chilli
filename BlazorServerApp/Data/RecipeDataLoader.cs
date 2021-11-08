@@ -25,7 +25,7 @@ namespace BlazorServerApp.Models
 
         public string Error;
 
-        private async Task<List<DisplayRecipeModel>> BuildRecipeTreeFromDataModel(List<DisplayRecipeModel> recipes)
+        public async Task<List<DisplayRecipeModel>> BuildRecipeTreeFromDataModel(List<DisplayRecipeModel> recipes)
         {
             foreach (DisplayRecipeModel recipe in recipes)
             {
@@ -174,12 +174,21 @@ namespace BlazorServerApp.Models
         public async Task<List<DisplayRecipeModel>> GetHomepageRecipes()
         {
             List<DisplayRecipeModel> datas = await _data.LoadData<DisplayRecipeModel, dynamic>("SELECT * FROM Recipe ORDER BY PageVisits DESC LIMIT 20", new { }, _config.GetConnectionString("recipeDatabase"));
+            foreach (DisplayRecipeModel model in datas)
+            {
+                model.DisplayNutritionModel = new DisplayNutritionModel(model.Kcal, model.Fat, model.Saturates, model.Sugar, model.Fibre, model.Carbohydrates, model.Salt, DisplayRecipeModel.RecomendedIntake);
+            }
             return await BuildRecipeTreeFromDataModel(datas);
         }
 
         public async Task<List<DisplayRecipeModel>> GetRecipe(uint RecipeID)
         {
             List<DisplayRecipeModel> result = await _data.LoadData<DisplayRecipeModel, dynamic>("SELECT * FROM Recipe WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+            foreach(DisplayRecipeModel model in result)
+            {
+                model.DisplayNutritionModel = new DisplayNutritionModel(model.Kcal, model.Fat, model.Saturates, model.Sugar, model.Fibre, model.Carbohydrates, model.Salt, DisplayRecipeModel.RecomendedIntake);
+            }
+
             return await BuildRecipeTreeFromDataModel(result);
         }
 

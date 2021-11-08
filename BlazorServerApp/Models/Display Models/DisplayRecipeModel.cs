@@ -42,22 +42,22 @@ namespace BlazorServerApp.Models
         public int PreperationTime { get; set; }
 
         [Required]
-        [EnumDataType(typeof(mealType))]
-        public mealType MealType;
+        [ValidMealType]
+        public string MealType;
 
         public uint RecipeID { get; set; }
 
-        public enum mealType
+        public static readonly List<string> mealType = new List<string>
         {
-            Starter,
-            Main,
-            Dessert,
-            Snack,
-            Accompaniment,
-            Cake,
-            Biscuit,
-            LightMeal,
-        }
+            "Starter",
+            "Main",
+            "Dessert",
+            "Snack",
+            "Accompaniment",
+            "Cake",
+            "Biscuit",
+            "LightMeal",
+        };
 
         [ValidIngredient]
         public List<DisplayIngredientModel> Ingredients = new List<DisplayIngredientModel>();
@@ -99,6 +99,7 @@ namespace BlazorServerApp.Models
             "Easy","Medium","Hard"
         };
 
+        public static RecomendedIntake RecomendedIntake = new RecomendedIntake(2000, 70, 20, 260, 90, 50, 6);
         public string Difficulty { get; set; }
 
         public List<DisplayReviewModel> Reviews = new List<DisplayReviewModel>();

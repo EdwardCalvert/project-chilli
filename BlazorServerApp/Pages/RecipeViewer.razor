@@ -10,7 +10,8 @@ else if (!validIdentifier )
 }
 else
 {
-    <h3>@model.RecipeName</h3>
+    <h2>@model.RecipeName</h2>
+    <h5>@model.MealType</h5>
     if (model.DocxFilePath != null)
     {
         <div><a href="@model.DocxFilePath" class="btn btn-primary">Download</a></div>
@@ -18,13 +19,21 @@ else
 
     <FoodLabel nutritionLabel="@model.DisplayNutritionModel" StyleParameters="font-size: 12px; overflow-wrap: anywhere;
     width: 100px;" ShowTitle="false" />
-    <h5>Serves @model.Servings</h5>
-    <div class="container-fluid">
-        <p>@model.Description</p>
-        <div class="IngredientsTitle">
-            Ingredients
-        </div>
+    <p>Serves: @model.Servings people <br />
+    Cooking time: @model.CookingTime mins <br />
+    Preperation time: @model.PreperationTime mins <br />
+    Total time: @(model.PreperationTime + model.CookingTime) mins</p>
 
+<div class="container-fluid">
+    @if (model.Description != null)
+    {
+        <hr />
+        <h3>Description</h3>
+        <p>@model.Description</p>}
+    @if (model.Ingredients != null && model.Ingredients.Count>0)
+    {
+        <h3>Ingredients</h3>
+        <hr />
         <div class="IngredientsList">
             <ul>
                 @foreach (DisplayIngredientModel ingredient in model.Ingredients)
@@ -33,6 +42,11 @@ else
                 }
             </ul>
         </div>
+    }
+    @if (model.Method != null &&model.Method.Count>0)
+    {
+        <hr />
+        <h3>Method</h3>
         <div class="MethodList">
             <ol>
                 @foreach (DisplayMethodModel step in model.Method)
@@ -41,9 +55,21 @@ else
                 }
             </ol>
         </div>
-        <div class=""></div>
-        <ReviewSection RecipeID="@RecipeID" />
-    </div>
+    }
+    @if (model.Equipment != null && model.Equipment.Count() >0)
+    {
+        <hr />
+        <h3>Equipment</h3>
+        <div class="EquipmentList">
+            <ul>
+                @foreach (DisplayEquipmentModel equipmentModel in model.Equipment)
+                {
+                    <li>@equipmentModel.EquipmentName (@equipmentModel.TypeOf)</li>
+                }
+            </ul>
+        </div>}
+    <ReviewSection RecipeID="@RecipeID" />
+</div>
     if (model.DocxFilePath != null)
     {
         <div><a href="@model.DocxFilePath" class="btn btn-primary">Download</a></div>
@@ -74,7 +100,7 @@ else
 
             if (!pageRequested)
             {
-
+                
                 await IncrementViews(RecipeID);
                 pageRequested = true;
             }
