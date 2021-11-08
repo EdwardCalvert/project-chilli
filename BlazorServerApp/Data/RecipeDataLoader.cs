@@ -158,9 +158,9 @@ namespace BlazorServerApp.Models
 
         }
 
-        public async Task<List<DisplayEquipmentModel>> FindEquipmentLike(string text)
+        public async Task<IEnumerable<DisplayEquipmentModel>> FindEquipmentLike(string text)
         {
-           return await _data.LoadData<DisplayEquipmentModel, dynamic>("SELECT *  FROM Equipment WHERE EquipmentName LIKE Concat('%',@Text,'%');", new { Text = text }, _config.GetConnectionString("recipeDatabase"));
+           return await _data.LoadData<DisplayEquipmentModel, dynamic>("SELECT *  FROM Equipment WHERE EquipmentName LIKE Concat('%',@Text,'%') LIMIT 20;", new { Text = text }, _config.GetConnectionString("recipeDatabase"));
         }
 
     }

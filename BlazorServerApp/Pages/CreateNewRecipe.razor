@@ -67,34 +67,23 @@
                         <div class="FieldHeader"><label id="EquipmentLable">Equipment* </label></div>
                         <div class="container">
                             <div class="row row-cols-1">
-                                @for (int i = 0; i < newRecipe.Equipment.Count; i++)
-                                {
-                                    DisplayEquipmentModel copyOfEquipment = newRecipe.Equipment[i];
-                                    <div class="col" style="flex-basis: unset;">
-                                        <div class="FieldData">
-                                            <div class="InputFieldContainer">
-                                                @*<InputText id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfEquipment.EquipmentName" />*@
-                                                <BlazorServerApp.Shared.AddEquipmentTypeAhead @bind-EquipmentName="@copyOfEquipment.EquipmentName" />
-                                                <p>@copyOfEquipment.EquipmentName</p>
-                                            </div>
-                                            <div class="FieldLine">
-                                                <button class="btn btn-danger" @onclick="@(e=>DeleteEquipment(i-1))">✕</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                                <p>Can't find the Equipment you are looking for? You'll need to add it here'</p>
 
-                                @if (newRecipe.Equipment.Count >= DisplayRecipeModel.EQUIPMENTCAPACITY)
-                                {
-                                    <p class="alert-danger">Sorry, you can't add any more rows</p>
-                                    <ErrorNotification ErrorMessage="@($"You can't add any more rows. Only a car would need more than {DisplayRecipeModel.EQUIPMENTCAPACITY} pieces of equipment!  ")" />
-
-                                }
-                                else
-                                {
-                                    <button class="btn btn-primary" @onclick="AddEquipment">Add Equipment</button>
-                                }
+                                <BlazoredTypeahead SearchMethod="FindEquipmentLike"
+                                                   @bind-Values="SelectedEquipment"
+                                                   EnableDropDown="true"
+                                                   MinimumLength="2"
+                                                   
+                                                   placeholder="Search by first name...">
+                                    <SelectedTemplate Context="equipment">
+                                        @equipment.EquipmentName
+                                    </SelectedTemplate>
+                                    <HelpTemplate>
+                                        Please enter a minimum of 2 characters to perform a search. <a href="/admin">Add Equipment from the Admin pannel.</a>
+                                    </HelpTemplate>
+                                    <ResultTemplate Context="equipment">
+                                        @equipment.EquipmentName  (@equipment.TypeOf)
+                                    </ResultTemplate>
+                                </BlazoredTypeahead>
                             </div>
                         </div>
                     </div>
@@ -182,13 +171,19 @@
     </tbody>
 </table>
     @code {
+
         private DisplayRecipeModel newRecipe = new DisplayRecipeModel();
+
+        @* USED FOR TESTING THE TYPEHEAD FORM*@
+        @*Begin*@
+        private IList<DisplayEquipmentModel> SelectedEquipment;
+        @*END*@
 
         private async Task InsertRecipe()
 
         {
             await InsertRecipeAndRelatedFields(newRecipe);
-           
+
 
             newRecipe = new();
             await OnInitializedAsync();
