@@ -190,9 +190,4 @@ ENGINE=InnoDB
 "}
     };
 
-
-    private async Task RunSql(string sql)
-    {
-        await _data.SaveData(sql,new { }, _config.GetConnectionString("recipeDatabase"));
-    }
 }

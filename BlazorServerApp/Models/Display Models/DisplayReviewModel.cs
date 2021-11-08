@@ -21,9 +21,24 @@ namespace BlazorServerApp.Models
 
         public Star Star { get; set; }
 
-        public int RecipeID { get; set; }
+        public uint RecipeID { get; set; }
 
-        public DateTime DateCreated { get; set; }
+        public uint ReviewID { get; set; }
+
+        public int StarCount { get; set; }
+
+        public DateTime DateSubmitted { get; set; }
+
+        public string SQLInsertStatement()
+        {
+            return $"INSERT INTO Review(RecipeID,ReviewersName,ReviewTitle,ReviewText,StarCount,DateSubmitted)  VALUES(@recipeID,@reviewersName,@reviewTitle,@reviewText,@starCount,@dateSubmitted);";
+        }
+
+        public dynamic SQLAnonymousType()
+        {
+            return new { recipeID = RecipeID, reviewersName = ReviewersName, reviewTitle = ReviewTitle, reviewText = ReviewText, starCount = Star.GetNumberOfStars(), dateSubmitted = RecipeDataLoader.MySQLTimeFormat(DateSubmitted) };
+
+        }
 
 
         public static string ReturnStars(List<DisplayReviewModel> reviewModels)

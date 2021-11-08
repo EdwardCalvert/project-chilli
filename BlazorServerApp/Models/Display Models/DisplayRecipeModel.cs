@@ -29,7 +29,7 @@ namespace BlazorServerApp.Models
         public List<DisplayMethodModel> Method { get; set; } = new List<DisplayMethodModel>();
 
         [Required]
-        public List<DisplayEquipmentModel> Equipment { get; set; } = new List<DisplayEquipmentModel>();
+        public IEnumerable<DisplayEquipmentModel> Equipment { get; set; } = new List<DisplayEquipmentModel>();
 
         [Range(1, 100)]
         public int Servings { get; set; }
@@ -64,6 +64,9 @@ namespace BlazorServerApp.Models
 
         public string DocxFilePath;
 
+
+        public DateTime LastRequested { get; set; }
+
         public static readonly List<string> SUPPORTEDUNITS = new List<string>{
             "Grams",
             "Cup",
@@ -82,7 +85,14 @@ namespace BlazorServerApp.Models
             "Ounce",
             };
 
-        public static RecomendedIntake RecomendedIntake = new RecomendedIntake(2000,70,20,260,90,50,6);
+        public double Kcal { get; set; }
+        public double Fat { get; set; }
+        public double Saturates { get; set; }
+        public double Sugar { get; set; }
+        public double Fibre { get; set; }
+        public double Carbohydrates { get; set; }
+        public double Salt { get; set; }
+        public double Protein { get; set; }
 
         public static readonly List<string> DIFICULTY = new List<string>
         {
@@ -94,6 +104,21 @@ namespace BlazorServerApp.Models
         public List<DisplayReviewModel> Reviews = new List<DisplayReviewModel>();
 
         public DisplayNutritionModel DisplayNutritionModel { get; set; }
+
+        public uint PageVisits { get; set; }
+
+
+        public string SqlInsertStatement()
+        {
+            return $"INSERT INTO Recipe(Servings, MealType, RecipeName, Kcal, Saturates, Carbohydrates, Sugar, Fibre, Protein, Salt, Fat, CookingTime, PreperationTime, Difficulty, PageVisits,LastRequested, Description)" +
+                $"VALUES( @servings, @mealType, @recipeName, @kcal, @saturates, @carbohydrates, @sugar, @fibre, @protein, @salt, @fat, @cookingTime, @preperationTime, @difficulty, @pageVisits, @lastRequested, @description)";
+
+        }
+
+        public dynamic SqlAnonymousType()
+        {
+            return new { servings = Servings, mealType = MealType, recipeName = RecipeName, kcal = Kcal, saturates = Saturates, carbohydrates = Carbohydrates, sugar = Sugar, fibre = Fibre, protein = Protein, salt = Salt, fat = Fat, cookingTime = CookingTime, preperationTime = PreperationTime, difficulty = Difficulty, pageVisits = PageVisits, lastRequested = LastRequested, description = Description };
+        }
 
         public void InsertEmptyIngredient(int quantity)
         {
@@ -108,18 +133,6 @@ namespace BlazorServerApp.Models
             Ingredients.Add(new DisplayIngredientModel());
         }
 
-        public void InsertEmptyEquipment(int quantity)
-        {
-            for(int i =0; i <quantity; i++)
-            {
-                InsertEmptyEquipment();
-            }
-        }
-
-        public void InsertEmptyEquipment()
-        {
-            Equipment.Add(new DisplayEquipmentModel());        
-        }
 
         public void InsertEmptyMethod()
         {

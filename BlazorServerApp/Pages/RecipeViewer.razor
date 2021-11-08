@@ -1,8 +1,12 @@
-﻿@page "/Recipe/{RecipeIDRequest:int}"
+﻿@page "/Recipe/{RecipeIDRequest:long}"
 @inherits Models.RecipeDataLoader
-@if (model == null)
+@if (model == null )
 {
     <LoadingElement />
+}
+else if (!validIdentifier )
+{
+    <ErrorNotification ErrorMessage="Sorry, the ID you provided was not recognised as valid!"/>
 }
 else
 {
@@ -33,11 +37,11 @@ else
             <ol>
                 @foreach (DisplayMethodModel step in model.Method)
                 {
-                    <li>@step.Step</li>
+                    <li>@step.MethodText</li>
                 }
             </ol>
         </div>
-        <ReviewSection RecipeID="@RecipeIDRequest" />
+        <ReviewSection RecipeID="@RecipeID" />
     </div>
     if (model.DocxFilePath != null)
     {
@@ -47,25 +51,37 @@ else
 }
 
 @code{
-    [Parameter]
-    public int RecipeIDRequest { get; set; }
+        [Parameter]
+        public long RecipeIDRequest { get; set; }
 
     private bool pageRequested = false;
+    private bool validIdentifier;
+
+    private uint RecipeID;
 
 
     DisplayRecipeModel model = new DisplayRecipeModel();
 
     protected override async Task OnInitializedAsync()
     {
-        List<RecipeDataModel> datas = await _data.LoadData<RecipeDataModel, dynamic>("SELECT * FROM Recipe WHERE RecipeID = @recipeID",new {recipeID = RecipeIDRequest },_config.GetConnectionString("recipeDatabase"));
-        List<DisplayRecipeModel> result = await BuildRecipeTreeFromDataModel(datas);
-
-        if (!pageRequested)
+        uint Result;
+        validIdentifier = uint.TryParse(RecipeIDRequest.ToString(), out Result);
+        if (validIdentifier)
         {
-            await IncrementViews(RecipeIDRequest);
-            pageRequested = true;
-        }
+            RecipeID = Result;
+            List<DisplayRecipeModel> result = await GetRecipe(RecipeID);
 
-        model = result[0];
+            if (!pageRequested)
+            {
+
+                await IncrementViews(RecipeID);
+                pageRequested = true;
+            }
+
+            if (result.Count>0)
+            {
+                model = result[0];
+            }
+        }
     }
 }

@@ -57,8 +57,7 @@ else
     protected override async Task OnInitializedAsync()
 
     {
-        List<RecipeDataModel> datas =  await _data.LoadData<RecipeDataModel, dynamic>("SELECT * FROM Recipe ORDER BY PageVisits DESC LIMIT 20", new {  }, _config.GetConnectionString("recipeDatabase"));
-        _models = await BuildRecipeTreeFromDataModel(datas);
+        _models = await GetHomepageRecipes();
     }
 
 }

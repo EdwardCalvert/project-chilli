@@ -25,8 +25,7 @@
                         <div class="container">
                             <div class="row row-cols-1">
 
-                                @for (int i = 0; i < newRecipe.Ingredients.Count; i++)
-                                {
+                                @for (int i = 0; i < newRecipe.Ingredients.Count; i++) {
                                     DisplayIngredientModel copyOfIngredient = newRecipe.Ingredients[i];
                                     <div class="col" style="flex-basis: unset;">
                                         <div class="FieldData">
@@ -67,7 +66,6 @@
                         <div class="FieldHeader"><label id="EquipmentLable">Equipment* </label></div>
                         <div class="container">
                             <div class="row row-cols-1">
-
                                 <BlazoredTypeahead SearchMethod="FindEquipmentLike"
                                                    @bind-Values="SelectedEquipment"
                                                    EnableDropDown="true"
@@ -97,7 +95,7 @@
 
                                     <div class="FieldData">
                                         <div class="InputFieldContainer">
-                                            <InputText class="" style="width: 400px; max-width: unset;" id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfMethod.Step" />
+                                            <InputText class="" style="width: 400px; max-width: unset;" id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfMethod.MethodText" />
                                         </div>
                                         <div class="FieldLine">
                                             <button class="btn btn-danger" @onclick="@(e=>DeleteStep(i-1))">✕</button>
@@ -174,17 +172,13 @@
 
         private DisplayRecipeModel newRecipe = new DisplayRecipeModel();
 
-        @* USED FOR TESTING THE TYPEHEAD FORM*@
-        @*Begin*@
         private IList<DisplayEquipmentModel> SelectedEquipment;
-        @*END*@
-
         private async Task InsertRecipe()
 
         {
             await InsertRecipeAndRelatedFields(newRecipe);
 
-
+            
             newRecipe = new();
             await OnInitializedAsync();
         }
@@ -192,7 +186,6 @@
         protected override Task OnInitializedAsync()
         {
             newRecipe.InsertEmptyIngredient(3);
-            newRecipe.InsertEmptyEquipment(2);
             newRecipe.InsertEmptyMethod(5);
 
             return base.OnInitializedAsync();
@@ -201,11 +194,6 @@
         private void DeleteIngredient(int index)
         {
             newRecipe.Ingredients.RemoveAt(index);
-        }
-
-        private void DeleteEquipment(int index)
-        {
-            newRecipe.Equipment.RemoveAt(index);
         }
 
         private void DeleteStep(int index)
@@ -220,11 +208,6 @@
                 newRecipe.InsertEmptyIngredient(2);
 
             }
-        }
-
-        private void AddEquipment()
-        {
-            newRecipe.InsertEmptyEquipment();
         }
 
         private void AddMethod()
