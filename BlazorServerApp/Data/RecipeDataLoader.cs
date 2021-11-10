@@ -7,6 +7,7 @@ using DataLibrary;
 using BlazorServerApp.Models;
 using Microsoft.Extensions.Configuration;
 using BlazorServerApp.Data;
+using System.Text.RegularExpressions;
 
 namespace BlazorServerApp.Models
 {
@@ -133,7 +134,7 @@ namespace BlazorServerApp.Models
             }
         }
 
-        public async Task ProcessCSVSaveToDB(string csvData)
+        public async Task ProcessEquipmentCsvAndSaveToDB(string csvData)
         {
              string[] lines = csvData.Split(Environment.NewLine);
             foreach(string line in lines)
@@ -163,6 +164,11 @@ namespace BlazorServerApp.Models
 
             }
 
+        }
+
+       public async Task InsertIngredient(IngredientDataModel model)
+        {
+            await _data.SaveData(model.SqlInsertStatement(), model.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task<IEnumerable<DisplayEquipmentModel>> FindEquipmentLike(string text)

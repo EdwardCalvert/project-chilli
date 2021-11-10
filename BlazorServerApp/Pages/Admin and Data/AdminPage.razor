@@ -44,16 +44,31 @@
         </tbody>
     </table>
 
-    <h3>DataLoader- For the Table Equipment</h3>
+    <h3>DataLoaders</h3>
     <p>The equipment and ingredients table require data to operate correctly. Upload a csv/ or work manually to add for the first time.</p>
 
-
+    <h5>Equipment Table</h5>
     <form @onsubmit="OnSubmit">
         <InputFile OnChange="OnInputFileChange" multiple />
         <br /><br />
         <button type="submit" class="btn btn-primary">Upload Selected File(s) to the Equipment Table</button>
         <p>@Message</p>
-    </form>      
+    </form>     
+    <h5>IngredientsTable</h5>
+    <form @onsubmit="AsyncSubmitEquipment">
+        <InputFile OnChange="OnInputFileChange" multiple />
+        <br /><br />
+        @if (!spinning) { 
+        <button type="submit" class="btn btn-primary">Upload Selected File(s) to the Ingredients Table</button>
+        }
+            else
+            {
+            
+                <LoadingElement></LoadingElement>
+                <p>Please be patient. Ingredients are being loaded to the database.</p>
+            }
+        <p>@Message</p>
+    </form>    
     @if (error) { 
         <ErrorNotification ErrorMessage="@Message"/>
     }
@@ -63,6 +78,7 @@
     private List<string> tables = new List<string>() { "Recipe", "Method", "Review", "Equipment", "EquipmentInRecipe" };
     private string Result { get; set; }
     bool error = false;
+    bool spinning = false;
 
     string Message = "No file(s) selected";
     IReadOnlyList<IBrowserFile> selectedFiles;
@@ -83,11 +99,11 @@
             foreach (var file in selectedFiles)
             {
                 var reader = await new StreamReader(file.OpenReadStream()).ReadToEndAsync();
-                await ProcessCSVSaveToDB(reader);
+                await ProcessEquipmentCsvAndSaveToDB(reader);
 
             }
             Message = $"{selectedFiles.Count} file(s) uploaded on server";
-            this.StateHasChanged();
+            //this.StateHasChanged();
             error = false;
         }
         catch (NullReferenceException)
@@ -101,6 +117,43 @@
             error = true;
         }
     }
+
+    private async Task SubmitEquipment()
+    {
+        try
+        {
+
+            foreach (var file in selectedFiles)
+            {
+                var reader = await new StreamReader(file.OpenReadStream()).ReadToEndAsync();
+                await ProcessIngredientCsvAndSaveToDB(reader);
+
+            }
+            Message = $"{selectedFiles.Count} file(s) uploaded on server";
+            //this.StateHasChanged();
+            error = false;
+        }
+        catch (NullReferenceException)
+        {
+            Message = "Sorry, please attach some files!";
+            error = true;
+        }
+        catch (Exception e)
+        {
+            Message = "Error encoundtered:" + e.Message;
+            error = true;
+        }
+    }
+
+    private async Task AsyncSubmitEquipment()    // this is an async task
+    {
+        spinning = true;
+        await Task.Delay(1);      // flushing changes. The trick!!
+        await SubmitEquipment();               // non-async code
+        spinning = false;
+        await Task.Delay(1);      // changes are flushed again    
+    }
+
     protected override Task OnInitializedAsync()
     {
         return base.OnInitializedAsync();
