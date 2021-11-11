@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace BlazorServerApp.Models
 {
-    public class NutritionStructure 
+    public class NutritionStructure : IEnumerable
     {
         public double Kcal { get; set; }
         public double Fat { get; set; }
@@ -27,9 +28,23 @@ namespace BlazorServerApp.Models
             Salt = salt;
         }
 
+        private List<string> properties = new() { "Fat", "Saturates", "Sugar", "Carbohydrates", "Salt" };
+
         public bool IsEmpty()
         {
             return Kcal == 0 && Fat == 0 && Saturates ==0 && Sugar == 0 && Fibre ==0 && Carbohydrates == 0 && Salt ==0;
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            foreach (string PropertyName in properties)
+            {
+                yield return PropertyName;
+            }
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 
@@ -52,33 +67,19 @@ namespace BlazorServerApp.Models
             RecomendedIntake = recomendedIntake;
         }
 
-        public int SaltPercentage()
+        public double GetProperty(string propertyName)
         {
-            return (int)((Salt / RecomendedIntake.Salt) * 100); 
+            return (double)this.GetType().GetProperty(propertyName).GetValue(this, null);
         }
-        public int FatPercentage()
+
+        public double GetRecomendedIntake(string propertyName)
         {
-            return (int)((Fat / RecomendedIntake.Fat) * 100);
+            return (double)RecomendedIntake.GetType().GetProperty(propertyName).GetValue(RecomendedIntake, null);
         }
-        public int SaturatePercentage()
+
+        public int GetPercentage(string propertyName)
         {
-            return (int)((Saturates / RecomendedIntake.Saturates) * 100);
-        }
-        public int FibrePercentage()
-        {
-            return (int)((Fibre / RecomendedIntake.Fibre)*100);
-        }
-        public int SugarPercentage()
-        {
-            return (int)((Sugar / RecomendedIntake.Sugar)*100);
-        }
-        public int CarbohydratePercentage()
-        {
-            return (int)((Carbohydrates / RecomendedIntake.Carbohydrates)*100);
-        }
-        public int EnergyPercentage()
-        {
-            return (int)((Kcal / RecomendedIntake.Kcal)*100);
+            return (int)((GetProperty(propertyName)/GetRecomendedIntake(propertyName) )*100);
         }
 
         public string Colour(int percent)

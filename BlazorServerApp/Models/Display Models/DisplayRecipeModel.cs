@@ -29,7 +29,7 @@ namespace BlazorServerApp.Models
         public List<DisplayMethodModel> Method { get; set; } = new List<DisplayMethodModel>();
 
         [Required]
-        public IEnumerable<DisplayEquipmentModel> Equipment { get; set; } = new List<DisplayEquipmentModel>();
+        public IList<DisplayEquipmentModel> Equipment { get; set; }
 
         [Range(1, 100)]
         public int Servings { get; set; }
@@ -37,13 +37,11 @@ namespace BlazorServerApp.Models
         [Range(1, 1000)]
         public int CookingTime { get; set; }
 
-        [Required]
-        [Range(1, 1000)]
+        [Required, Range(1, 1000)]
         public int PreperationTime { get; set; }
 
-        [Required]
-        [ValidMealType]
-        public string MealType;
+        [Required, ValidMealType]
+        public string MealType { get; set; }
 
         public uint RecipeID { get; set; }
 
@@ -56,11 +54,10 @@ namespace BlazorServerApp.Models
             "Accompaniment",
             "Cake",
             "Biscuit",
-            "LightMeal",
+            "Light Meal",
         };
-
-        [ValidIngredient]
-        public List<DisplayIngredientModel> Ingredients = new List<DisplayIngredientModel>();
+        [Required, ValidIngredientsInRecipe]
+        public List<DisplayIngredientInRecipeModel> Ingredients { get; set; } = new List<DisplayIngredientInRecipeModel>();
 
         public string DocxFilePath;
 
@@ -100,6 +97,8 @@ namespace BlazorServerApp.Models
         };
 
         public static RecomendedIntake RecomendedIntake = new RecomendedIntake(2000, 70, 20, 260, 90, 50, 6);
+
+        [Required]
         public string Difficulty { get; set; }
 
         public List<DisplayReviewModel> Reviews = new List<DisplayReviewModel>();
@@ -131,7 +130,7 @@ namespace BlazorServerApp.Models
 
         public void InsertEmptyIngredient()
         {
-            Ingredients.Add(new DisplayIngredientModel());
+            Ingredients.Add(new DisplayIngredientInRecipeModel());
         }
 
 

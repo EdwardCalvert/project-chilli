@@ -24,7 +24,7 @@ else
     Preperation time: @model.PreperationTime mins <br />
     Total time: @(model.PreperationTime + model.CookingTime) mins</p>
 
-<div class="container-fluid">
+<div>
     @if (model.Description != null)
     {
         <hr />
@@ -36,9 +36,9 @@ else
         <hr />
         <div class="IngredientsList">
             <ul>
-                @foreach (DisplayIngredientModel ingredient in model.Ingredients)
+                @foreach (DisplayIngredientInRecipeModel ingredient in model.Ingredients)
                 {
-                    <li><em>@ingredient.Quantity @ingredient.Unit</em> @ingredient.Name</li>
+                    <li><em>@ingredient.Quantity @ingredient.Unit</em> @ingredient.IngredientID</li>
                 }
             </ul>
         </div>

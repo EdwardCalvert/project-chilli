@@ -1,6 +1,6 @@
 ﻿@if (nutritionLabel != null  && !nutritionLabel.IsEmpty())
 {
-<div style="border: 10px;">
+<div style="margin-top: 10px; margin-bottom:10px">
     <table class="FoodLabelTable">
         @if (ShowTitle)
         {
@@ -11,33 +11,31 @@
 
         <tr>
             <td rowspan="2" class="FoodLabelTd" style="@StyleParameters"> Energy- @($"{nutritionLabel.Kcal}kcal")</td>
-            <td class="FoodLabelTd" style="@StyleParameters">Fat<br />@(nutritionLabel.Fat)g</td>
-            <td class="FoodLabelTd" style="@StyleParameters">Saturates <br />@(nutritionLabel.Saturates)g</td>
-            <td class="FoodLabelTd" style="@StyleParameters">Carbohydrates<br /> @(nutritionLabel.Carbohydrates)g</td>
-            <td class="FoodLabelTd" style="@StyleParameters">Sugars <br />@(nutritionLabel.Sugar)g</td>
-            <td class="FoodLabelTd" style="@StyleParameters">Salt<br /> @(nutritionLabel.Salt)g</td>
+            @foreach (string methodName in nutritionLabel)
+            {
+                <td class="FoodLabelTd" style="@StyleParameters">@methodName<br />@(nutritionLabel.GetProperty(methodName))g</td>
+            }
         </tr>
         <tr>
-
-            <td class="FoodLabelTableIcon @($"FoodLabelContainer{nutritionLabel.Colour(nutritionLabel.FatPercentage())}")" style="@StyleParameters"></td>
-            <td class="FoodLabelTableIcon @($"FoodLabelContainer{nutritionLabel.Colour(nutritionLabel.SaturatePercentage())}")" style="@StyleParameters"></td>
-            <td class="FoodLabelTableIcon @($"FoodLabelContainer{nutritionLabel.Colour(nutritionLabel.CarbohydratePercentage())}")" style="@StyleParameters"></td>
-            <td class="FoodLabelTableIcon @($"FoodLabelContainer{nutritionLabel.Colour(nutritionLabel.SugarPercentage())}")" style="@StyleParameters"></td>
-            <td class="FoodLabelTableIcon @($"FoodLabelContainer{nutritionLabel.Colour(nutritionLabel.SaltPercentage())}")" style="@StyleParameters"></td>
+            @foreach (string methodName in nutritionLabel)
+            {
+                <td class="FoodLabelTableIcon @($"FoodLabelContainer{nutritionLabel.Colour(nutritionLabel.GetPercentage(methodName))}")" style="@StyleParameters"></td>
+            }
         </tr>
         <tr>
-            <td class="FoodLabelTd" style="@StyleParameters">@($"{nutritionLabel.EnergyPercentage()}%")</td>
-            <td class="FoodLabelTd" style="@StyleParameters">@($"{nutritionLabel.FatPercentage()}%")</td>
-            <td class="FoodLabelTd" style="@StyleParameters">@($"{nutritionLabel.SaturatePercentage()}%")</td>
-            <td class="FoodLabelTd" style="@StyleParameters">@($"{nutritionLabel.CarbohydratePercentage()}%")</td>
-            <td class="FoodLabelTd" style="@StyleParameters">@($"{nutritionLabel.SugarPercentage()}%")</td>
-
-
-
-            <td class="FoodLabelTd" style="@StyleParameters">@($"{nutritionLabel.SaltPercentage()}%")</td>
+            <td class="FoodLabelTd" style="@StyleParameters">@($"{nutritionLabel.GetPercentage("Kcal")}%")</td>
+            @foreach (string methodName in nutritionLabel)
+            {
+                <td class="FoodLabelTd" style="@StyleParameters">@($"{nutritionLabel.GetPercentage(methodName)}%")</td>
+            }
         </tr>
 
     </table>
+    @if (ShowTitle)
+    {
+        <h6>Micro Nutrients</h6>
+        <p>@nutritionLabel.Fibre</p>
+    }
 </div>
 }
     @code{

@@ -155,8 +155,6 @@ a, .btn-link {
     height: 10px;
 }
 .FieldLine {
-    
-    -ms-flex-wrap: wrap;
     margin-right: -15px;
     margin-bottom: 3px;
     padding-right: 15px;
@@ -170,6 +168,8 @@ a, .btn-link {
     text-indent: initial;
     border-spacing: 2px;
     display: flex;
+    padding-top: 5px;
+
 }
     .FieldData ::after, ::before {
         box-sizing: border-box;
