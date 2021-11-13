@@ -9,13 +9,24 @@ using BlazorServerApp.Extensions;
 
 namespace BlazorServerApp.Models
 {
-    public class RecipeDataLoader : ComponentBase
+    public interface IRecipeDataLoader
     {
-        [Inject]
+        public  Task<List<Recipe>> GetHomepageRecipes();
+    }
+
+    public class RecipeDataLoader : ComponentBase, IRecipeDataLoader
+    {
+        //[Inject]
         private IDataAccess _data { get; set; }
-        [Inject]
+        //[Inject]
         private IConfiguration _config { get; set; }
 
+
+       public RecipeDataLoader(IDataAccess data, IConfiguration config)
+        {
+            _data = data;
+            _config = config;
+        }
 
         protected override Task OnInitializedAsync()
         {
@@ -267,7 +278,7 @@ namespace BlazorServerApp.Models
             string[] cols = line.Split(',');
             if (cols.Length == 20)
             {
-                if (Regex.IsMatch(cols[0], "[0-9]{2}-[0-9]{3,4}"))
+                if (Regex.IsMatch(cols[0], "[0-9]{2}-[0-9]{3,4}") ||uint.TryParse(cols[0],out _))
                 {
                     Ingredient model = new Ingredient();
                     model.FoodCode = cols[0];

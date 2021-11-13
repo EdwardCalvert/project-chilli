@@ -1,5 +1,5 @@
 ﻿@page "/"
-@inherits Models.RecipeDataLoader
+@inject RecipeDataLoader _recipeLoader
 <h3>Here are the top recipies- ordered by popularity!</h3>
 <!--Potentially create an input select box here to allow it to be sorted by different criteria. -->
 
@@ -15,38 +15,39 @@
 else
 {
     //style=" min-width: 18rem; max-width: 30.5%"
-<div class="row" >
-    @foreach (Recipe model in _models) {
-    <div class="col-12 col-lg-6">
-        
-        <div class="RecipeCard">
-            <a href="/Recipe/@model.RecipeID" class="No-Decoration ">
-                <div class="card m-3">
-                    <div class="card-header No-Decoration ColourBlack">
-                        <h1>@model.RecipeName </h1>
+    <div class="row">
+        @foreach (Recipe model in _models)
+        {
+            <div class="col-12 col-lg-6">
 
-                    </div>
-                    <div class="card-body No-Decoration ColourBlack">
-                        <p>Cooking time: @model.CookingTime minutes </p>
+                <div class="RecipeCard">
+                    <a href="/Recipe/@model.RecipeID" class="No-Decoration ">
+                        <div class="card m-3">
+                            <div class="card-header No-Decoration ColourBlack">
+                                <h1>@model.RecipeName </h1>
 
-                        <p>Preperation time: @model.PreperationTime mintues</p>
+                            </div>
+                            <div class="card-body No-Decoration ColourBlack">
+                                <p>Cooking time: @model.CookingTime minutes </p>
 
-                        <ReviewSummary DisplayReviewModel="@model.Reviews"/>
+                                <p>Preperation time: @model.PreperationTime mintues</p>
 
-                        <FoodLabel nutritionLabel="model.DisplayNutritionModel" StyleParameters="font-size: 9px; overflow-wrap: anywhere;" ShowTitle="false" />
-                        @if (model.Description != null)
-                        {
-                            <p>Descritption: @model.ShowShortDescription()</p>
-                        }
-                    </div>
+                                <ReviewSummary DisplayReviewModel="@model.Reviews" />
+
+                                <FoodLabel nutritionLabel="model.DisplayNutritionModel" StyleParameters="font-size: 9px; overflow-wrap: anywhere;" ShowTitle="false" />
+                                @if (model.Description != null)
+                                {
+                                    <p>Descritption: @model.ShowShortDescription()</p>
+                                }
+                            </div>
+                        </div>
+                    </a>
                 </div>
-                </a>
-        </div>
-        
-    </div>
 
-    }
-</div>
+            </div>
+
+        }
+    </div>
 }
 
 
@@ -58,7 +59,7 @@ else
     protected override async Task OnInitializedAsync()
 
     {
-        _models = await GetHomepageRecipes();
+        _models = await _recipeLoader.GetHomepageRecipes();
     }
 
 }

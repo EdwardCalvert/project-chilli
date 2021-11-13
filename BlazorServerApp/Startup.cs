@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataLibrary;
+using BlazorServerApp.Models;
 
 namespace BlazorServerApp
 {
@@ -31,6 +32,8 @@ namespace BlazorServerApp
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
             services.AddSingleton<IDataAccess,MySqlDataAccess>(); //Inject the mysql data access- could be changed to any data layer implementing IDataAcess. This launches it in memory- the overhead is worth it as data layer is vital. 
+            services.AddSingleton<RecipeDataLoader, RecipeDataLoader>();
+
             services.AddHttpClient();
             services.AddStackExchangeRedisCache(options =>
             {

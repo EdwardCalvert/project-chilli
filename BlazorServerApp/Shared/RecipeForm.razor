@@ -1,4 +1,4 @@
-﻿@inherits RecipeDataLoader
+﻿@inject RecipeDataLoader dataLoader
 @inject NavigationManager NavManager
 
 <ErrorNotification ErrorMessage="@ErrorMessage" Show="@error" />
@@ -39,7 +39,7 @@
                                         </InputSelect>
 
 
-                                        <BlazoredTypeahead SearchMethod="FindIngredients"
+                                        <BlazoredTypeahead SearchMethod="dataLoader.FindIngredients"
                                                            @bind-Value="copyOfIngredient.IngredientID"
                                                            EnableDropDown="true"
                                                            MinimumLength="3"
@@ -47,7 +47,7 @@
                                                            placeholder="Search by ingredientName..."
                                                            style="padding-right: 5px; margin-right: 5px;">
                                             <SelectedTemplate Context="ingredient">
-                                                @(GetIngredient(ingredient).Result.IngredientName)
+                                                @(dataLoader.GetIngredient(ingredient).Result.IngredientName)
                                             </SelectedTemplate>
                                             <HelpTemplate>
                                                 Please enter at least 3 character to perform a search.<hr />
@@ -91,7 +91,7 @@
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="EquipmentLable">Equipment* </label></div>
                         <div class="row row-cols-1">
-                            <BlazoredTypeahead SearchMethod="FindEquipmentLike"
+                            <BlazoredTypeahead SearchMethod="dataLoader.FindEquipmentLike"
                                                @bind-Values="RecipeModel.Equipment"
                                                EnableDropDown="true"
                                                MinimumLength="2"
@@ -221,12 +221,12 @@
         {
             if (mode == MODES.Create)
             {
-                await InsertRecipeAndRelatedFields(RecipeModel);
+                await dataLoader.InsertRecipeAndRelatedFields(RecipeModel);
                 await OnInitializedAsync();
             }
             else if (mode == MODES.Edit)
             {
-                await UpdateRecipe(RecipeModel);
+                await dataLoader.UpdateRecipe(RecipeModel);
                 NavManager.NavigateTo($"/Recipe/{RecipeModel.RecipeID}");
             }
         }

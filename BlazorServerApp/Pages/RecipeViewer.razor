@@ -1,5 +1,6 @@
 ﻿@page "/Recipe/{RecipeIDRequest:long}"
-@inherits Models.RecipeDataLoader
+@inject RecipeDataLoader dataLoader
+
 @if (model == null )
 {
     <LoadingElement />
@@ -101,12 +102,12 @@ else
         if (validIdentifier)
         {
             RecipeID = Result;
-            List<Recipe> result = await GetRecipe(RecipeID);
+            List<Recipe> result = await dataLoader.GetRecipe(RecipeID);
 
             if (!pageRequested)
             {
                 
-                await IncrementViews(RecipeID);
+                await dataLoader.IncrementViews(RecipeID);
                 pageRequested = true;
             }
 

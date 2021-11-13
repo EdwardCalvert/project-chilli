@@ -1,4 +1,4 @@
-﻿@inherits Models.RecipeDataLoader
+﻿@inject RecipeDataLoader dataLoader
 <div class="ReviewCard">
 
 
@@ -88,7 +88,7 @@
         newReview.Star = Star.CreateStar(StarCount);
         newReview.DateSubmitted = DateTime.Now;
         newReview.RecipeID = RecipeID;
-        await SaveNewReview(newReview);
+        await dataLoader.SaveNewReview(newReview);
 
         newReview = new Review();
 
@@ -97,7 +97,7 @@
 
     private async Task UpdateReviews()
     {
-        Reviews = await GetReviews(RecipeID);
+        Reviews = await dataLoader.GetReviews(RecipeID);
     }
 
 
