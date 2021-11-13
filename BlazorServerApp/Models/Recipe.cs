@@ -11,7 +11,7 @@ namespace BlazorServerApp.Models
     /// <summary>
     /// This class is intended as a front-end model, to allow data validation.
     /// </summary>
-    public class DisplayRecipeModel
+    public class Recipe
     {
         public const int INGREDIENTSCAPACITY= 30;
         public const int EQUIPMENTCAPACITY = 30;
@@ -26,10 +26,10 @@ namespace BlazorServerApp.Models
         public string Description { get; set; }
 
         [Required]
-        public List<DisplayMethodModel> Method { get; set; } = new List<DisplayMethodModel>();
+        public List<Method> Method { get; set; } = new List<Method>();
 
         [Required]
-        public IList<DisplayEquipmentModel> Equipment { get; set; }
+        public IList<Equipment> Equipment { get; set; }
 
         [Range(1, 100)]
         public int Servings { get; set; }
@@ -57,7 +57,7 @@ namespace BlazorServerApp.Models
             "Light Meal",
         };
         [Required, ValidIngredientsInRecipe]
-        public List<DisplayIngredientInRecipeModel> Ingredients { get; set; } = new List<DisplayIngredientInRecipeModel>();
+        public List<IngredientInRecipe> Ingredients { get; set; } = new List<IngredientInRecipe>();
 
         public string DocxFilePath;
 
@@ -101,7 +101,7 @@ namespace BlazorServerApp.Models
         [Required]
         public string Difficulty { get; set; }
 
-        public List<DisplayReviewModel> Reviews = new List<DisplayReviewModel>();
+        public List<Review> Reviews = new List<Review>();
 
         public DisplayNutritionModel DisplayNutritionModel { get; set; }
 
@@ -120,6 +120,17 @@ namespace BlazorServerApp.Models
             return new { servings = Servings, mealType = MealType, recipeName = RecipeName, kcal = Kcal, saturates = Saturates, carbohydrates = Carbohydrates, sugar = Sugar, fibre = Fibre, protein = Protein, salt = Salt, fat = Fat, cookingTime = CookingTime, preperationTime = PreperationTime, difficulty = Difficulty, pageVisits = PageVisits, lastRequested = DateTime.Now, description = Description };
         }
 
+        public dynamic SqlAnonymousType(uint RecipeID)
+        {
+            return new { servings = Servings, mealType = MealType, recipeName = RecipeName, kcal = Kcal, saturates = Saturates, carbohydrates = Carbohydrates, sugar = Sugar, fibre = Fibre, protein = Protein, salt = Salt, fat = Fat, cookingTime = CookingTime, preperationTime = PreperationTime, difficulty = Difficulty, pageVisits = PageVisits, lastRequested = DateTime.Now, description = Description, recipeID = RecipeID };
+        }
+
+        public string SqlUpdateStatement()
+        {
+            return $"UPDATE Recipe SET Servings = @servings, MealType =  @mealType, RecipeName = @recipeName, Kcal = @kcal, Saturates = @saturates, Carbohydrates = @carbohydrates, Sugar = @sugar, Fibre = @fibre, Protein = @protein, Salt = @salt, Fat = @fat, CookingTime = @cookingTime, PreperationTime = @preperationTime, Difficulty = @difficulty, PageVisits = @pageVisits,LastRequested = @lastRequested, Description = @description WHERE RecipeID = @recipeID; ";
+
+        }
+
         public void InsertEmptyIngredient(int quantity)
         {
             for(int i =0; i<quantity; i++)
@@ -130,13 +141,13 @@ namespace BlazorServerApp.Models
 
         public void InsertEmptyIngredient()
         {
-            Ingredients.Add(new DisplayIngredientInRecipeModel());
+            Ingredients.Add(new IngredientInRecipe());
         }
 
 
         public void InsertEmptyMethod()
         {
-            Method.Add(new DisplayMethodModel());
+            Method.Add(new Method());
         }
 
         public void InsertEmptyMethod(int quantity)

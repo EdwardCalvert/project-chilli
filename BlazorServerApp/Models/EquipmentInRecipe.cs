@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace BlazorServerApp.Models
 {
-    public class EquipmentInRecipeDataModel
+    public class EquipmentInRecipe
     {
         public uint EquipmentID { get; set; }
         public uint RecipeID { get; set; }
@@ -19,5 +19,15 @@ namespace BlazorServerApp.Models
         {
             return new { equipmentID = EquipmentID, recipeID = RecipeID};
         }
+
+        //public string SqlDeleteStatement()
+        //{
+        //    return "DELETE FROM `RecipeDatabase`.`EquipmentInRecipe` WHERE  `EquipmentID`=@equipmentID AND `RecipeID`=@recipeID;";
+        //}
+
+        //public dynamic SqlDeleteAnonymousType()
+        //{
+        //    return new {equipmentID = EquipmentID, recipeID = RecipeID };
+        //}
     }
 }

@@ -14,8 +14,13 @@ else
     <h5>@model.MealType</h5>
     if (model.DocxFilePath != null)
     {
-        <div><a href="@model.DocxFilePath" class="btn btn-primary">Download</a></div>
+<div>
+    <a href="@model.DocxFilePath" class="btn btn-primary">Download</a>
+    <a href="/Recipe/@RecipeID/Edit" class="btn btn-primary">Edit Recipe</a>
+    <a class="btn btn-danger">⚠ Delete Recipe</a>
+</div>
     }
+    
 
     <FoodLabel nutritionLabel="@model.DisplayNutritionModel" StyleParameters="font-size: 12px; overflow-wrap: anywhere;
     width: 100px;" ShowTitle="false" />
@@ -36,7 +41,7 @@ else
         <hr />
         <div class="IngredientsList">
             <ul>
-                @foreach (DisplayIngredientInRecipeModel ingredient in model.Ingredients)
+                @foreach (IngredientInRecipe ingredient in model.Ingredients)
                 {
                     <li><em>@ingredient.Quantity @ingredient.Unit</em> @ingredient.IngredientID</li>
                 }
@@ -49,7 +54,7 @@ else
         <h3>Method</h3>
         <div class="MethodList">
             <ol>
-                @foreach (DisplayMethodModel step in model.Method)
+                @foreach (Method step in model.Method)
                 {
                     <li>@step.MethodText</li>
                 }
@@ -62,7 +67,7 @@ else
         <h3>Equipment</h3>
         <div class="EquipmentList">
             <ul>
-                @foreach (DisplayEquipmentModel equipmentModel in model.Equipment)
+                @foreach (Equipment equipmentModel in model.Equipment)
                 {
                     <li>@equipmentModel.EquipmentName (@equipmentModel.TypeOf)</li>
                 }
@@ -87,7 +92,7 @@ else
     private uint RecipeID;
 
 
-    DisplayRecipeModel model = new DisplayRecipeModel();
+    Recipe model = new Recipe();
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,7 +101,7 @@ else
         if (validIdentifier)
         {
             RecipeID = Result;
-            List<DisplayRecipeModel> result = await GetRecipe(RecipeID);
+            List<Recipe> result = await GetRecipe(RecipeID);
 
             if (!pageRequested)
             {

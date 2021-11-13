@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BlazorServerApp.Models
 {
-    public class DisplayReviewModel
+    public class Review
     {
         [Required]
         [StringLength(50, ErrorMessage = "Review title is too long.")]
@@ -41,10 +41,10 @@ namespace BlazorServerApp.Models
         }
 
 
-        public static string ReturnStars(List<DisplayReviewModel> reviewModels)
+        public static string ReturnStars(List<Review> reviewModels)
         {
             List<Star> stars = new(reviewModels.Count);
-            foreach(DisplayReviewModel model in reviewModels)
+            foreach(Review model in reviewModels)
             {
                 stars.Add(model.Star);
             }

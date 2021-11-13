@@ -22,19 +22,50 @@ namespace BlazorServerApp.Models
             return base.OnInitializedAsync();
         }
 
-        public string Error;
 
-        public async Task<List<DisplayRecipeModel>> BuildRecipeTreeFromDataModel(List<DisplayRecipeModel> recipes)
+        public async Task DeleteMethodModels(List<Method> displayMethodModels)
+        {
+            foreach (Method displayMethodModel in displayMethodModels)
+            {
+               await _data.SaveData(displayMethodModel.SqlDeleteStatement(), displayMethodModel.SqlDeleteAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+            }
+
+        }
+
+        public async Task DeleteEquipmentModels(uint RecipeID)
+        {
+            await _data.SaveData("DELETE FROM EquipmentInRecipe WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task DeleteIngredientInRecipeModel(uint RecipeID)
+        {
+            await _data.SaveData("DELETE FROM IngredientsInRecipe WHERE RecipeID = @recipeID",new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+
+        public async Task UpdateRecipe(Recipe NewModel)
+        {
+            List<Recipe> models = await GetRecipe(NewModel.RecipeID);
+            Recipe staleModel = models[0];
+            await DeleteMethodModels(staleModel.Method);
+            await DeleteEquipmentModels(NewModel.RecipeID);
+            await DeleteIngredientInRecipeModel(NewModel.RecipeID);
+            await _data.SaveData(NewModel.SqlUpdateStatement(), NewModel.SqlAnonymousType(NewModel.RecipeID),_config.GetConnectionString("recipeDatabase"));
+            await InsertRelatedFields(NewModel);
+        }
+
+        public async Task<List<Recipe>> BuildRecipeTreeFromDataModel(List<Recipe> recipes)
         {
             
-            foreach (DisplayRecipeModel recipe in recipes)
+            foreach (Recipe recipe in recipes)
             {
                 if (ValidRecipeID.Validate(recipe.RecipeID))
                 {
-                    recipe.DisplayNutritionModel = new DisplayNutritionModel(recipe.Kcal, recipe.Fat, recipe.Saturates, recipe.Sugar, recipe.Fibre, recipe.Carbohydrates, recipe.Salt, DisplayRecipeModel.RecomendedIntake);
+                    recipe.DisplayNutritionModel = new DisplayNutritionModel(recipe.Kcal, recipe.Fat, recipe.Saturates, recipe.Sugar, recipe.Fibre, recipe.Carbohydrates, recipe.Salt, Recipe.RecomendedIntake);
                     recipe.Method = await GetMethod(recipe.RecipeID);
                     recipe.Reviews = await GetReviews(recipe.RecipeID);
                     recipe.Equipment = await GetEquipment(recipe.RecipeID);
+                    recipe.Ingredients = await GetIngredientsInRecipe(recipe.RecipeID);
                 }
                 else
                 {
@@ -43,18 +74,18 @@ namespace BlazorServerApp.Models
             }
             return recipes;
         }
-        public async Task<List<DisplayMethodModel>> GetMethod(uint RecipeID)
+        public async Task<List<Method>> GetMethod(uint RecipeID)
         {
-            return await _data.LoadData<DisplayMethodModel, dynamic>($"SELECT * FROM Method WHERE RecipeID=@RecipeID;", new { RecipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+            return await _data.LoadData<Method, dynamic>($"SELECT * FROM Method WHERE RecipeID=@RecipeID;", new { RecipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
         }
 
-        public async Task<List<DisplayEquipmentModel>> GetEquipment(uint RecipeID)
+        public async Task<List<Equipment>> GetEquipment(uint RecipeID)
         {
-            List<EquipmentInRecipeDataModel> models = await _data.LoadData<EquipmentInRecipeDataModel, dynamic>($"SELECT * FROM EquipmentInRecipe WHERE RecipeID=@RecipeID;", new { RecipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
-            List<DisplayEquipmentModel> equipmentDataModels = new List<DisplayEquipmentModel>();
-            foreach (EquipmentInRecipeDataModel model in models)
+            List<EquipmentInRecipe> models = await _data.LoadData<EquipmentInRecipe, dynamic>($"SELECT * FROM EquipmentInRecipe WHERE RecipeID=@RecipeID;", new { RecipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+            List<Equipment> equipmentDataModels = new List<Equipment>();
+            foreach (EquipmentInRecipe model in models)
             {
-                var resutlt = await _data.LoadData<DisplayEquipmentModel, dynamic>($"SELECT * FROM Equipment WHERE EquipmentID=@EquipmentID", new { EquipmentID = model.EquipmentID }, _config.GetConnectionString("recipeDatabase"));
+                var resutlt = await _data.LoadData<Equipment, dynamic>($"SELECT * FROM Equipment WHERE EquipmentID=@EquipmentID", new { EquipmentID = model.EquipmentID }, _config.GetConnectionString("recipeDatabase"));
 
                 equipmentDataModels.Add(resutlt[0]);
             }
@@ -62,21 +93,31 @@ namespace BlazorServerApp.Models
 
         }
 
-        public async Task<DisplayIngredientModel> GetIngredient(uint? IngredientID)
+        public async Task<List<IngredientInRecipe>> GetIngredientsInRecipe(uint RecipeID)
+        {
+             return await _data.LoadData<IngredientInRecipe, dynamic>($"SELECT * FROM IngredientsInRecipe WHERE RecipeID =@recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<List<Ingredient>> GetIngredientModel(uint IngredientID)
+        {
+            return  await _data.LoadData<Ingredient, dynamic>($"SELECT * FROM Ingredients WHERE IngredientID =@ingredientID", new { ingredientID = IngredientID }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<Ingredient> GetIngredient(uint? IngredientID)
         {
             if (IngredientID != null)
             {
-                List<DisplayIngredientModel> model = await _data.LoadData<DisplayIngredientModel, dynamic>($"SELECT * FROM Ingredients WHERE IngredientID =@ingredientID", new { ingredientID = IngredientID }, _config.GetConnectionString("recipeDatabase"));
+                List<Ingredient> model = await GetIngredientModel((uint)IngredientID);
                 return model[0];
             }
             return null;
         }
 
-        public async Task<List<DisplayReviewModel>> GetReviews(uint RecipeID)
+        public async Task<List<Review>> GetReviews(uint RecipeID)
         {
-            List<DisplayReviewModel> reveiews = await _data.LoadData<DisplayReviewModel, dynamic>($"SELECT * FROM Review WHERE RecipeID=@RecipeID", new { RecipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
-            List<DisplayReviewModel> returnModels = new List<DisplayReviewModel>(reveiews.Count);
-            foreach (DisplayReviewModel displayReview in reveiews)
+            List<Review> reveiews = await _data.LoadData<Review, dynamic>($"SELECT * FROM Review WHERE RecipeID=@RecipeID", new { RecipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+            List<Review> returnModels = new List<Review>(reveiews.Count);
+            foreach (Review displayReview in reveiews)
             {
                 displayReview.Star = Star.CreateStar(displayReview.StarCount);
                 returnModels.Add(displayReview);
@@ -101,7 +142,7 @@ namespace BlazorServerApp.Models
             }
         }
 
-        public async Task SaveNewReview(DisplayReviewModel review)
+        public async Task SaveNewReview(Review review)
         {
             await _data.SaveData(review.SQLInsertStatement(), review.SQLAnonymousType(), _config.GetConnectionString("recipeDatabase"));
         }
@@ -123,44 +164,12 @@ namespace BlazorServerApp.Models
             return 0;
         }
 
-        public async Task InsertRecipeAndRelatedFields(DisplayRecipeModel displayModel)
+        public async Task InsertRecipeAndRelatedFields(Recipe displayModel)
         {
             List<uint> autoIncrementResult = await _data.LoadData<uint, dynamic>(displayModel.SqlInsertStatement() + "SELECT LAST_INSERT_ID();", displayModel.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
-
             uint RecipeId = autoIncrementResult[0];
-            foreach (DisplayMethodModel model in displayModel.Method)
-            {
-                if (model.MethodText != null)
-                {
-                    model.RecipeID = RecipeId;
-                    await _data.SaveData(model.SqlInsertStatement(), model.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
-                }
-            }
-
-            if (displayModel.Equipment != null)
-            {
-                foreach (DisplayEquipmentModel model in displayModel.Equipment)
-                {
-                    EquipmentInRecipeDataModel model1 = new();
-                    model1.EquipmentID = model.EquipmentID;
-                    model1.RecipeID = RecipeId;
-                    await _data.SaveData(model1.SqlInsertStatement(), model1.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
-                }
-            }
-
-            if (displayModel.Ingredients != null)
-            {
-                foreach (DisplayIngredientInRecipeModel model in displayModel.Ingredients)
-                {
-                    if (model.IngredientID != default(uint))
-                    {
-                        
-                        Console.WriteLine("attempted to submit" + model.SqlInsertStatement() + model.SqlAnonymousType((uint)model.IngredientID,RecipeId));
-
-                        await _data.SaveData(model.SqlInsertStatement(),model.SqlAnonymousType((uint)model.IngredientID, RecipeId),_config.GetConnectionString("recipeDatabase"));
-                    }
-                }
-            }
+            displayModel.RecipeID = RecipeId;
+            await InsertRelatedFields(displayModel);
         }
 
         public async Task ProcessEquipmentCsvAndSaveToDB(string csvData)
@@ -170,16 +179,16 @@ namespace BlazorServerApp.Models
             {
 
                 string[] cols = line.Split(',');
-                EquipmentDataModel model = new EquipmentDataModel();
+                Equipment model = new Equipment();
 
                 if (cols.Length > 0)
                 {
                     model.EquipmentName = cols[0];
-                    if (EquipmentDataModel.Types.Contains(cols[1]))
+                    if (Equipment.Types.Contains(cols[1]))
                     {
                         model.TypeOf = cols[1];
                         //Check to see if a similar record exists. 
-                        List<EquipmentDataModel> equipment = await _data.LoadData<EquipmentDataModel, dynamic>("SELECT * FROM Equipment WHRE EquipmentName LIKE @equipmentName", new { equipmentName = model.EquipmentName }, _config.GetConnectionString("recipeDatabase"));
+                        List<Equipment> equipment = await _data.LoadData<Equipment, dynamic>("SELECT * FROM Equipment WHRE EquipmentName LIKE @equipmentName", new { equipmentName = model.EquipmentName }, _config.GetConnectionString("recipeDatabase"));
                         if (equipment.Count == 0)
                         {
                             await _data.SaveData(model.SqlInsertStatement(), model.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
@@ -195,6 +204,44 @@ namespace BlazorServerApp.Models
 
         }
 
+        public async Task InsertRelatedFields(Recipe displayModel)
+        {
+            
+            foreach (Method model in displayModel.Method)
+            {
+                if (model.MethodText != null)
+                {
+                    model.RecipeID = displayModel.RecipeID;
+                    await _data.SaveData(model.SqlInsertStatement(), model.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+                }
+            }
+
+            if (displayModel.Equipment != null)
+            {
+                foreach (Equipment model in displayModel.Equipment)
+                {
+                    EquipmentInRecipe model1 = new();
+                    model1.EquipmentID = model.EquipmentID;
+                    model1.RecipeID = displayModel.RecipeID;
+                    await _data.SaveData(model1.SqlInsertStatement(), model1.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+                }
+            }
+
+            if (displayModel.Ingredients != null)
+            {
+                foreach (IngredientInRecipe model in displayModel.Ingredients)
+                {
+                    if (model.IngredientID != default(uint))
+                    {
+
+                        Console.WriteLine("attempted to submit" + model.SqlInsertStatement() + model.SqlAnonymousType((uint)model.IngredientID, displayModel.RecipeID));
+
+                        await _data.SaveData(model.SqlInsertStatement(), model.SqlAnonymousType((uint)model.IngredientID, displayModel.RecipeID), _config.GetConnectionString("recipeDatabase"));
+                    }
+                }
+            }
+        }
+
         public async Task ProcessIngredientCsvAndSaveToDB(string csvData)
         {
             string[] lines = csvData.Split(Environment.NewLine);
@@ -205,12 +252,12 @@ namespace BlazorServerApp.Models
             }
         }
 
-        public async Task<List<DisplayIngredientModel>> FindExistingIngredients(string foodCode)
+        public async Task<List<Ingredient>> FindExistingIngredients(string foodCode)
         {
-            return await _data.LoadData<DisplayIngredientModel, dynamic>("SELECT * FROM Ingredients WHERE FoodCode=@FoodCode;", new { FoodCode = foodCode }, _config.GetConnectionString("recipeDatabase"));
+            return await _data.LoadData<Ingredient, dynamic>("SELECT * FROM Ingredients WHERE FoodCode=@FoodCode;", new { FoodCode = foodCode }, _config.GetConnectionString("recipeDatabase"));
         }
 
-        public async Task InsertIngredient(DisplayIngredientModel model)
+        public async Task InsertIngredient(Ingredient model)
         {
             await _data.SaveData(model.SqlInsertStatement(), model.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
         }
@@ -222,10 +269,10 @@ namespace BlazorServerApp.Models
             {
                 if (Regex.IsMatch(cols[0], "[0-9]{2}-[0-9]{3,4}"))
                 {
-                    DisplayIngredientModel model = new DisplayIngredientModel();
+                    Ingredient model = new Ingredient();
                     model.FoodCode = cols[0];
                     //Check to see if a similar record exists. 
-                    List<DisplayIngredientModel> existingIngredients = await FindExistingIngredients(model.FoodCode);
+                    List<Ingredient> existingIngredients = await FindExistingIngredients(model.FoodCode);
 
                     if (existingIngredients.Count == 0)
                     {
@@ -233,7 +280,9 @@ namespace BlazorServerApp.Models
                         int rowindex = 2;
                         foreach (string property in model)
                         {
+#pragma warning disable CS0642 // Possible mistaken empty statement
                             if (double.TryParse(cols[rowindex], out double number)) ;
+#pragma warning restore CS0642 // Possible mistaken empty statement
                             {
                                 model.GetType().GetProperty(property).SetValue(model, number, null);
                             }
@@ -246,29 +295,29 @@ namespace BlazorServerApp.Models
             }
         }
 
-        public async Task<IEnumerable<DisplayEquipmentModel>> FindEquipmentLike(string text)
+        public async Task<IEnumerable<Equipment>> FindEquipmentLike(string text)
         {
-            return await _data.LoadData<DisplayEquipmentModel, dynamic>("SELECT *  FROM Equipment WHERE EquipmentName LIKE Concat('%',@Text,'%') LIMIT 20;", new { Text = text }, _config.GetConnectionString("recipeDatabase"));
+            return await _data.LoadData<Equipment, dynamic>("SELECT *  FROM Equipment WHERE EquipmentName LIKE Concat('%',@Text,'%') LIMIT 20;", new { Text = text }, _config.GetConnectionString("recipeDatabase"));
         }
 
-        public async Task<IEnumerable<DisplayIngredientModel>> FindIngredients(string text)
+        public async Task<IEnumerable<Ingredient>> FindIngredients(string text)
         {
             text = $"%{text}%".Replace(" ", "%");
-            return await _data.LoadData<DisplayIngredientModel, dynamic>("SELECT *  FROM Ingredients WHERE IngredientName LIKE @Text OR AlternateName LIKE @Text LIMIT 30;", new { Text = text }, _config.GetConnectionString("recipeDatabase")); ;
+            return await _data.LoadData<Ingredient, dynamic>("SELECT *  FROM Ingredients WHERE IngredientName LIKE @Text OR AlternateName LIKE @Text LIMIT 30;", new { Text = text }, _config.GetConnectionString("recipeDatabase")); ;
         }
 
 
 
-        public async Task<List<DisplayRecipeModel>> GetHomepageRecipes()
+        public async Task<List<Recipe>> GetHomepageRecipes()
         {
-            List<DisplayRecipeModel> datas = await _data.LoadData<DisplayRecipeModel, dynamic>("SELECT * FROM Recipe ORDER BY PageVisits DESC LIMIT 20", new { }, _config.GetConnectionString("recipeDatabase"));
+            List<Recipe> datas = await _data.LoadData<Recipe, dynamic>("SELECT * FROM Recipe ORDER BY PageVisits DESC LIMIT 20", new { }, _config.GetConnectionString("recipeDatabase"));
             return await BuildRecipeTreeFromDataModel(datas);
         }
 
 
-        public async Task<List<DisplayRecipeModel>> GetRecipe(uint RecipeID)
+        public async Task<List<Recipe>> GetRecipe(uint RecipeID)
         {
-            List<DisplayRecipeModel> result = await _data.LoadData<DisplayRecipeModel, dynamic>("SELECT * FROM Recipe WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+            List<Recipe> result = await _data.LoadData<Recipe, dynamic>("SELECT * FROM Recipe WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
             return await BuildRecipeTreeFromDataModel(result);
         }
 
@@ -276,6 +325,8 @@ namespace BlazorServerApp.Models
         {
             await _data.SaveData(sql, new { }, _config.GetConnectionString("recipeDatabase"));
         }
+
+      
     }
 
 }

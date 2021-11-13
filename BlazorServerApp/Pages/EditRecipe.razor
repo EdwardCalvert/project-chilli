@@ -1,0 +1,51 @@
+﻿@page  "/Recipe/{RecipeIDRequest:long}/Edit"
+@inherits RecipeDataLoader
+<h3>EditRecipe</h3>
+@if (recipeModel == null)
+{
+    <LoadingElement />
+}
+else if (!validIdentifier)
+{
+    <ErrorNotification ErrorMessage="Sorry, the ID you provided was not recognised as valid!" />
+}
+else
+{
+    <RecipeForm RecipeModel="@recipeModel" mode="RecipeForm.MODES.Edit"/>
+}
+
+<button @onclick="@((_)=>error = !error)"></button>
+
+    @code {
+        [Parameter]
+        public long RecipeIDRequest { get; set; }
+
+        private bool validIdentifier;
+        private uint RecipeID;
+        private bool pageRequested = false;
+        private Recipe recipeModel = new Recipe();
+
+        bool error = false;
+
+        protected override async Task OnInitializedAsync()
+        {
+            uint Result;
+            validIdentifier = uint.TryParse(RecipeIDRequest.ToString(), out Result);
+            if (validIdentifier)
+            {
+                RecipeID = Result;
+                List<Recipe> models = await BuildRecipeTreeFromDataModel(await GetRecipe(Result));
+                if (!pageRequested)
+                {
+
+                    await IncrementViews(RecipeID);
+                    pageRequested = true;
+                }
+
+                if (models.Count > 0)
+                {
+                    recipeModel = models[0];
+                }
+            }
+        }
+    }

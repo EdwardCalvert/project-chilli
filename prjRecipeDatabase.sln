@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataLibrary", "DataLibrary\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnderstandText", "UnderstandText\UnderstandText.csproj", "{49B7CEAA-9B8F-4B48-8016-AC9C2D2CDEC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingCatalyst", "TestingCatalyst\TestingCatalyst.csproj", "{DF80F9E2-CEF3-4B03-8026-3E6D760C9A4B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestingCatalyst", "TestingCatalyst\TestingCatalyst.csproj", "{DF80F9E2-CEF3-4B03-8026-3E6D760C9A4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

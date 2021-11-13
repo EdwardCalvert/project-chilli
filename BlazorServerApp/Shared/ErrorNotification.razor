@@ -1,4 +1,4 @@
-﻿@if (isVisible)
+﻿@if (Show)
 {
     <div class="wordblock__container ">
         <span class="wordblock__word @wordClassModifier"> ⚠ @ErrorMessage </span>
@@ -9,12 +9,13 @@
     </div>
 }
 @code {
-    private bool isVisible = true;
+    [Parameter]
+    public bool Show { get; set; } = true;
     [Parameter]
     public string ErrorMessage { get; set; }
     private string wordClassModifier = "";
     private void OnMouseDown()
     {wordClassModifier = "wordblock__word-shrinked";}
-    private void OnMouseUp(){isVisible = false;}
+    private void OnMouseUp(){Show = false;}
     private void OnMouseOut(){wordClassModifier = "";}
 }

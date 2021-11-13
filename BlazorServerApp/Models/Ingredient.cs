@@ -7,7 +7,7 @@ using System.Collections;
 
 namespace BlazorServerApp.Models
 {
-    public class DisplayIngredientModel : IEnumerable
+    public class Ingredient : IEnumerable
     {
 
         public uint IngredientID { get; set; }

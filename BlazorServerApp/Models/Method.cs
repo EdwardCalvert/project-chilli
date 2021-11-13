@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace BlazorServerApp.Models
 {
-    public class DisplayMethodModel
+    public class Method
     {
         public string MethodText { get; set; }
 
@@ -13,7 +13,7 @@ namespace BlazorServerApp.Models
 
         public uint RecipeID { get; set; }
 
-        public DisplayMethodModel()
+        public Method()
         {
 
         }
@@ -26,6 +26,16 @@ namespace BlazorServerApp.Models
         public dynamic SqlAnonymousType()
         {
             return new { stepNumber = StepNumber, recipeID = RecipeID, methodText = MethodText };
+        }
+
+        public string SqlDeleteStatement()
+        {
+            return "DELETE FROM `RecipeDatabase`.`Method` WHERE  `StepNumber`=@stepNumber AND `RecipeID`=@recipeID;";
+        }
+
+        public dynamic SqlDeleteAnonymousType()
+        {
+            return new { stepNumber = StepNumber, recipeID = RecipeID};
         }
     }
 }

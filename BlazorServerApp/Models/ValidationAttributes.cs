@@ -26,9 +26,9 @@ AttributeTargets.Field, AllowMultiple = true)]
 
         public static bool CustomValidation(object value, ValidationContext validationContext)
         {
-            var model = (DisplayRecipeModel)validationContext.ObjectInstance;
+            var model = (Recipe)validationContext.ObjectInstance;
 
-            foreach (DisplayIngredientInRecipeModel ingredient in model.Ingredients)
+            foreach (IngredientInRecipe ingredient in model.Ingredients)
             {
                 if (!ValidRecipeID.Validate(ingredient.IngredientID) || ingredient.Quantity is default(double) || !ValidUnit.Validate(ingredient.Unit))
                 {
@@ -58,9 +58,9 @@ AttributeTargets.Field, AllowMultiple = true)]
 
         public static bool CustomValidation(object value, ValidationContext validationContext)
         {
-            var model = (DisplayRecipeModel)validationContext.ObjectInstance;
+            var model = (Recipe)validationContext.ObjectInstance;
 
-            foreach (DisplayMethodModel ingredient in model.Method)
+            foreach (Method ingredient in model.Method)
             {
                 if (!ValidMethodText.ValidateMethodText(ingredient))
                 {
@@ -77,7 +77,7 @@ AttributeTargets.Field, AllowMultiple = true)]
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
 
-            if (ValidMethodText.ValidateMethodText((DisplayMethodModel)validationContext.ObjectInstance))
+            if (ValidMethodText.ValidateMethodText((Method)validationContext.ObjectInstance))
             {
                 return ValidationResult.Success;
             }
@@ -88,7 +88,7 @@ AttributeTargets.Field, AllowMultiple = true)]
         }
 
 
-        public static bool ValidateMethodText(DisplayMethodModel model)
+        public static bool ValidateMethodText(Method model)
         {
             //var model = (string ) validationContext.ObjectInstance;
             return true;
@@ -109,7 +109,7 @@ AttributeTargets.Field, AllowMultiple = true)]
 
         public static bool ValidIngredient(object value)
         {
-            return DisplayRecipeModel.mealType.Contains(value);
+            return Recipe.mealType.Contains(value);
         }
 
     }
@@ -136,7 +136,7 @@ AttributeTargets.Field, AllowMultiple = true)]
 
         public static bool Validate(object value)
         {
-            return DisplayRecipeModel.SUPPORTEDUNITS.Contains(value);
+            return Recipe.SUPPORTEDUNITS.Contains(value);
         }
     }
 }

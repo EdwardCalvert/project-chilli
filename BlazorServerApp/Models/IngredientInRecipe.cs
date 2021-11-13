@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace BlazorServerApp.Models
 {
-    public class DisplayIngredientInRecipeModel 
+    public class IngredientInRecipe 
     {
         [Required, Range(0.01, 1000)]
         public double Quantity { get; set; }
@@ -18,13 +18,13 @@ namespace BlazorServerApp.Models
         [Required, ValidRecipeID]
         public uint? IngredientID { get; set; }
 
-        public DisplayIngredientInRecipeModel(int quantity, string unit)
+        public IngredientInRecipe(int quantity, string unit)
         {
             Quantity = quantity;
             Unit = unit;
         }
 
-        public DisplayIngredientInRecipeModel() { }
+        public IngredientInRecipe() { }
 
        public string SqlInsertStatement()
         {

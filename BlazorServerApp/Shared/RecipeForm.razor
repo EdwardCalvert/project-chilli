@@ -1,0 +1,280 @@
+﻿@inherits RecipeDataLoader
+@inject NavigationManager NavManager
+
+<ErrorNotification ErrorMessage="@ErrorMessage" Show="@error" />
+<table cellspacing="0" id="NewRecipeForm" style="width:100%;border-collapse:collapse;">
+    <tbody>
+        <tr>
+            <td colspan="2">
+                <EditForm Model="@RecipeModel" OnValidSubmit="@HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="FieldLine">
+                        <div class="FieldHeader">
+                            <label id="recipeNameLabel">Recipe Name*</label>
+                        </div>
+                        <div class="FieldData">
+                            <InputText style=" width:100%;" id="recipeNameInput" @bind-Value="RecipeModel.RecipeName" />
+                        </div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipeDescriptionLabel">Recipe Description*</label></div>
+                        <div class="FieldData"><InputTextArea style="width: 100%;" id="recipeDescriptionInput" @bind-Value="RecipeModel.Description" /></div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipeIngredientsLabel">Ingredients* </label></div>
+                        <div class="row row-cols-1">
+
+                            @for (int i = 0; i < RecipeModel.Ingredients.Count; i++)
+                            {
+                                IngredientInRecipe copyOfIngredient = RecipeModel.Ingredients[i];
+                                <div class="col" style="flex-basis: unset;">
+                                    <div class="FieldData">
+                                        <InputNumber id="@("recipePreparationTimeInput" + i)" class="TimeInputField" @bind-Value="@copyOfIngredient.Quantity" style="padding-left: 5px; margin-right: 5px;" />
+                                        <InputSelect id="@("recipieIngredientsQuanity" + i)" @bind-Value="copyOfIngredient.Unit" style="padding-left: 5px; margin-right: 5px;">
+                                            @foreach (var value in Recipe.SUPPORTEDUNITS)
+                                                {
+                                                <option>@value</option>
+                                                }
+                                        </InputSelect>
+
+
+                                        <BlazoredTypeahead SearchMethod="FindIngredients"
+                                                           @bind-Value="copyOfIngredient.IngredientID"
+                                                           EnableDropDown="true"
+                                                           MinimumLength="3"
+                                                           ConvertMethod="ConvertIngredientToID"
+                                                           placeholder="Search by ingredientName..."
+                                                           style="padding-right: 5px; margin-right: 5px;">
+                                            <SelectedTemplate Context="ingredient">
+                                                @(GetIngredient(ingredient).Result.IngredientName)
+                                            </SelectedTemplate>
+                                            <HelpTemplate>
+                                                Please enter at least 3 character to perform a search.<hr />
+                                                Things you can search for:
+                                                <ul>
+                                                    <li>Ingredient Name</li>
+                                                    <li>Type of ingredient</li>
+                                                    <li>CoFID Food Code</li>
+                                                </ul>
+                                            </HelpTemplate>
+                                            <ResultTemplate Context="ingredient">
+                                                @ingredient.IngredientName <br /> <p style="font-size: 10px">(a.k.a: @ingredient.AlternateName)</p><hr />
+                                            </ResultTemplate>
+                                        </BlazoredTypeahead>
+
+
+
+                                        <div class="FieldLine">
+                                            <button type="button" style="margin-right:5px" class="btn btn-danger" @onclick="@(e=>DeleteIngredient(i-1))">✕</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div>
+                                <ValidationMessage For="@(() => RecipeModel.Ingredients)" />
+                            </div>
+                            @if (RecipeModel.Ingredients.Count >= Recipe.INGREDIENTSCAPACITY)
+                            {
+                                <p class="alert-danger">Sorry, you can't add any more rows</p>
+                                <ErrorNotification ErrorMessage="@($"You can't add any more rows. Only a dominos pizza needs more than {Recipe.INGREDIENTSCAPACITY} rows! ")" />
+
+                            }
+                            else
+                            {
+                                <div>
+                                    <button class="btn btn-primary" type="button" @onclick="IncrementCount">Add Ingredient</button>
+                                </div>}
+                        </div>
+
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="EquipmentLable">Equipment* </label></div>
+                        <div class="row row-cols-1">
+                            <BlazoredTypeahead SearchMethod="FindEquipmentLike"
+                                               @bind-Values="RecipeModel.Equipment"
+                                               EnableDropDown="true"
+                                               MinimumLength="2"
+                                               placeholder="Search by first name...">
+                                <SelectedTemplate Context="equipment">
+                                    @equipment.EquipmentName
+                                </SelectedTemplate>
+                                <HelpTemplate>
+                                    Please enter a minimum of 2 characters to perform a search. <a href="/admin">Add Equipment from the Admin pannel.</a>
+                                </HelpTemplate>
+                                <ResultTemplate Context="equipment">
+                                    @equipment.EquipmentName  (@equipment.TypeOf)
+                                </ResultTemplate>
+                            </BlazoredTypeahead>
+                            <ValidationMessage For="@(() => RecipeModel.Equipment)" />
+                        </div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="MethodLabel">Method* </label></div>
+                        <ol>
+                            @for (int i = 0; i < RecipeModel.Method.Count; i++)
+                            {
+                                Method copyOfMethod = RecipeModel.Method[i];
+                                <li>
+
+                                    <div class="FieldData">
+                                        <InputText class="" style="width: 100%;" id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfMethod.MethodText" />
+
+                                        <div class="FieldLine">
+                                            <button class="btn btn-danger" type="button" @onclick="@(e=>DeleteStep(i-1))">✕</button>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ol>
+                        <ValidationMessage For="@(() => RecipeModel.Method)" />
+                        @if (RecipeModel.Method.Count >= Recipe.METHODCAPACITY)
+                        {
+                            <p class="alert-danger">Sorry, you can't add any more rows</p>
+                            <ErrorNotification ErrorMessage="@($"You can't add any more rows. Only a skyscraper would need more than {Recipe.METHODCAPACITY} instructions! Remove some and try again. ")" />
+
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary" type="button" @onclick="AddMethod">Add Instruction</button>
+                        }
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipeServingsLabel">Servings </label></div>
+                        <div class="FieldData"><InputNumber id="recipeServingsInput" class="QuantityInputField" @bind-Value="RecipeModel.Servings" /></div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipeCookingTimeLabel">Cooking Time </label></div>
+                        <div class="FieldData">
+                            <div class="InputFieldContainer"><InputNumber id="recipeCookingTimeInput" class="TimeInputField" @bind-Value="RecipeModel.CookingTime" /></div>
+                            <div class="InputLabelContainer"><p>Minutes</p></div>
+                        </div>
+
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipePreparationTimeLabel">Preperation Time </label></div>
+                        <div class="FieldData"><div class="InputFieldContainer"><InputNumber id="recipePreparationTimeInput" class="TimeInputField" @bind-Value="RecipeModel.PreperationTime" /></div><div class="InputLabelContainer"><p>Minutes</p></div></div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="recipeMealTypeLabel">Meal Type </label></div>
+                        <div class="InputFieldContainer">
+                            <InputSelect id="recipeMealTypeInput" @bind-Value="RecipeModel.MealType">
+                                <option></option>
+                                @foreach (var value in Recipe.mealType)
+                                {
+                                    <option>@value</option>
+                                }
+
+                            </InputSelect>
+                            <ValidationMessage For="@(() => RecipeModel.MealType)" />
+                        </div>
+                    </div>
+                    <div class="FieldLine">
+                        <div class="FieldHeader"><label id="difficultySetterLabel">Difficulty </label></div>
+                        <div class="InputFieldContainer">
+                            <InputSelect id="difficultySetterInput" @bind-Value="RecipeModel.Difficulty">
+                                <option></option>
+                                @foreach (var value in Recipe.DIFICULTY)
+                                {
+                                    <option>@value</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => RecipeModel.Difficulty)" />
+                        </div>
+                    </div>
+                    <div class="FormViewFieldLineSpacer"></div>
+                    @if (mode == MODES.Create)
+                    {
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-primary">Submit &amp; view</button>
+                    }
+
+
+                </EditForm>
+            </td>
+        </tr>
+    </tbody>
+</table>
+@code{
+    [Parameter]
+    public Recipe RecipeModel { get; set; }
+
+    [Parameter]
+    public MODES mode { get; set; }
+
+    bool error = false;
+    string ErrorMessage = "";
+
+    public enum MODES
+    {
+        Edit,
+        Create,
+    }
+
+    private async Task HandleSubmit()
+
+    {
+        try
+        {
+            if (mode == MODES.Create)
+            {
+                await InsertRecipeAndRelatedFields(RecipeModel);
+                await OnInitializedAsync();
+            }
+            else if (mode == MODES.Edit)
+            {
+                await UpdateRecipe(RecipeModel);
+                NavManager.NavigateTo($"/Recipe/{RecipeModel.RecipeID}");
+            }
+        }
+        catch (Exception e)
+        {
+            error = true;
+            ErrorMessage = e.Message;
+        }
+    }
+
+    private uint? ConvertIngredientToID(Ingredient ingredient)
+    {
+        return ingredient?.IngredientID;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        if(mode == MODES.Create)
+        {
+            RecipeModel = new();
+            RecipeModel.InsertEmptyIngredient(3);
+            RecipeModel.InsertEmptyMethod(5);
+
+        }
+        return base.OnInitializedAsync();
+    }
+
+    private void DeleteIngredient(int index)
+    {
+        RecipeModel.Ingredients.RemoveAt(index);
+    }
+
+    private void DeleteStep(int index)
+    {
+        RecipeModel.Method.RemoveAt(index);
+    }
+
+    private void IncrementCount()
+    {
+        if (RecipeModel.Ingredients.Count != Recipe.INGREDIENTSCAPACITY)
+        {
+            RecipeModel.InsertEmptyIngredient(2);
+
+        }
+    }
+
+    private void AddMethod()
+    {
+        RecipeModel.InsertEmptyMethod();
+    }
+}

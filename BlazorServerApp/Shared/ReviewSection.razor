@@ -5,7 +5,7 @@
     @if (Reviews.Count > 0)
     {
         <ReviewSummary DisplayReviewModel="Reviews" />
-        @foreach (DisplayReviewModel displayReviewModel in Reviews)
+        @foreach (Review displayReviewModel in Reviews)
         {
             <div class="card m-3">
                 <div class="card-header No-Decoration ColourBlack">
@@ -67,11 +67,11 @@
 </div>
 @code {
     [Parameter]
-    public List<DisplayReviewModel> Reviews { get; set; }
+    public List<Review> Reviews { get; set; }
     [Parameter]
     public uint RecipeID { get; set; }
 
-    private DisplayReviewModel newReview = new DisplayReviewModel();
+    private Review newReview = new Review();
     private int StarCount { get; set; }
 
 
@@ -90,7 +90,7 @@
         newReview.RecipeID = RecipeID;
         await SaveNewReview(newReview);
 
-        newReview = new DisplayReviewModel();
+        newReview = new Review();
 
         await UpdateReviews();
     }

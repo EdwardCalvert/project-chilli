@@ -3,7 +3,7 @@
 <h3>Here are the top recipies- ordered by popularity!</h3>
 <!--Potentially create an input select box here to allow it to be sorted by different criteria. -->
 
-@if (Error != null)
+@if (Error)
 {
     <ErrorNotification ErrorMessage="This is a sample error message. Please visit the support page if you need further help. " />
 
@@ -16,7 +16,7 @@ else
 {
     //style=" min-width: 18rem; max-width: 30.5%"
 <div class="row" >
-    @foreach (DisplayRecipeModel model in _models) {
+    @foreach (Recipe model in _models) {
     <div class="col-12 col-lg-6">
         
         <div class="RecipeCard">
@@ -52,7 +52,8 @@ else
 
 @code {
 
-    private List<DisplayRecipeModel> _models;
+    private List<Recipe> _models;
+    private bool Error = false;
 
     protected override async Task OnInitializedAsync()
 
