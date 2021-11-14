@@ -308,7 +308,7 @@ namespace BlazorServerApp.Models
         public async Task<IEnumerable<Ingredient>> FindIngredients(string text)
         {
             text = $"%{text}%".Replace(" ", "%");
-            return await _data.LoadData<Ingredient, dynamic>("SELECT *  FROM Ingredients WHERE IngredientName LIKE @Text OR AlternateName LIKE @Text LIMIT 100;", new { Text = text }, _config.GetConnectionString("recipeDatabase")); ;
+            return await _data.LoadData<Ingredient, dynamic>("SELECT *  FROM Ingredients WHERE IngredientName LIKE @Text OR AlternateName LIKE @Text ORDER BY CHAR_LENGTH(IngredientName) LIMIT 100;", new { Text = text }, _config.GetConnectionString("recipeDatabase")); ;
         }
 
 

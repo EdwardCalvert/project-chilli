@@ -62,7 +62,7 @@
                                                 </ul>
                                             </HelpTemplate>
                                             <ResultTemplate Context="ingredient">
-                                                @ingredient.IngredientName <br /> <p style="font-size: 10px">(a.k.a: @ingredient.AlternateName)</p><hr />
+                                                @ingredient.AlternateName (@ingredient.FoodGroup)<br /> <p style="font-size: 10px"> @ingredient.IngredientName</p>
                                             </ResultTemplate>
                                         </BlazoredTypeahead>
 

@@ -99,7 +99,7 @@ a, .btn-link {
 }
 
 .TimeInputField, .QuantityInputField{
-    width: 50px;
+    width: 100px;
 }
 .InputLableContainer {
     padding-right: 5px;
