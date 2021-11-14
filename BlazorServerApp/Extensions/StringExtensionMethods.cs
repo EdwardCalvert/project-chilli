@@ -23,7 +23,7 @@ namespace BlazorServerApp.Extensions
             var strArr = fullString.Split(new char[] { '.' });
             for (int iCount = 0; iCount < strArr.Count(); iCount++)
             {
-                if (strArr.Length > 0)
+                if (strArr[iCount].Length > 0)
                 {
                     strArr[iCount] = strArr[iCount].Insert(0, strArr[iCount][0].ToString().ToUpper());
                     strArr[iCount] = strArr[iCount].Remove(1, 1);

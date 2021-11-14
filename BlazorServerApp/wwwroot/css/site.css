@@ -114,6 +114,69 @@ a, .btn-link {
     margin-bottom: 30px;
 }
 
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    margin-top: 7px;
+}
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding-top: 2px;
+    background-color: #737272;
+    -webkit-transition: .7s;
+    transition: .7s;
+    width: 62px;
+    height: 29px;
+}
+
+    .slider:before {
+        position: absolute;
+        content: "\2716";
+        text-align: center;
+        color: dimgrey;
+        height: 25px;
+        width: 25px;
+        left: 2px;
+        bottom: 2px;
+        padding-top: 1px;
+        background-color: white;
+        -webkit-transition: .8s;
+        transition: .8s;
+    }
+
+input:checked + .slider {
+    background-color: limegreen;
+}
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(33px);
+        -ms-transform: translateX(33px);
+        transform: translateX(33px);
+        content: "\2714";
+        text-align: center;
+        color: dodgerblue;
+    }
+
+.slider.round {
+    border-radius: 20px;
+}
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
 
 
 .RecipeCard {

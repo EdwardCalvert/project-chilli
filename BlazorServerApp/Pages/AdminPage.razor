@@ -6,81 +6,50 @@
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
 @inject RecipeDataLoader dataLoader
 
-    <h3>Welcome to the admin page!</h3>
-    <h4>Please use this page with caution, as you have the facility to delete tables from the database, which doesn't seem like a great idea!</h4>
-    <h3>Create and delete tables</h3>
-    <table class="table table-striped">
-        <thead class="thead-dark">
+<h3>Welcome to the admin page!</h3>
+<h4>Please use this page with caution, as you have the facility to delete tables from the database, which doesn't seem like a great idea!</h4>
+<h3>Create and delete tables</h3>
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Table Name</th>
+            <th>Button to intitalise process</th>
+            <th>Number of records on table</th>
+            <th>Create sample data</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (string tableName in tables)
+        {
             <tr>
-                <th>Table Name</th>
-                <th>Button to intitalise process</th>
-                <th>Number of records on table</th>
-                <th>Create sample data</th>
+                <td>@tableName</td>
+
+                @if (dataLoader.DoTablesExist(tableName).Result)
+                {
+                    <td><button class="btn btn-danger">@tableName Table exists. I would give you the option of deleting it,<br />but I haven't made that script yet! </button></td>
+
+                    <td>@dataLoader.SumRecords(tableName).Result</td>
+                    <td><button class="btn btn-primary">Add Data @Result</button></td>
+                }
+                else
+                {
+                    <td><button class="btn btn-primary" @onclick="e=> dataLoader.RunSql(tableCreationCodes[tableName])">Create recipe table</button></td>
+                    <td>0</td>
+                    <td><button class="btn btn-danger">Can't add sample data! Table doesn't exist!</button></td>
+                }
+
             </tr>
-        </thead>
-        <tbody>
-            @foreach (string tableName in tables)
-            {
-                <tr>
-                    <td>@tableName</td>
-
-                    @if (dataLoader.DoTablesExist(tableName).Result)
-                    {
-                        <td><button class="btn btn-danger">@tableName Table exists. I would give you the option of deleting it,<br />but I haven't made that script yet! </button></td>
-
-                        <td>@dataLoader.SumRecords(tableName).Result</td>
-                        <td><button class="btn btn-primary">Add Data @Result</button></td>
-                    }
-                    else
-                    {
-                        <td><button class="btn btn-primary" @onclick="e=> dataLoader.RunSql(tableCreationCodes[tableName])">Create recipe table</button></td>
-                        <td>0</td>
-                        <td><button class="btn btn-danger">Can't add sample data! Table doesn't exist!</button></td>
-                    }
-
-                </tr>
-            }
-
-        </tbody>
-    </table>
-
-    <h3>DataLoaders</h3>
-    <p>The equipment and ingredients table require data to operate correctly. Upload a csv/ or work manually to add for the first time.</p>
-
-    <h5>Equipment Table</h5>
-    <form @onsubmit="AsyncSubmitEquipment">
-        <InputFile OnChange="OnInputFileChange" multiple />
-        <br /><br />
-        <button type="submit" class="btn btn-primary">Upload Selected File(s) to the Equipment Table</button>
-        <p>@Message</p>
-    </form>     
-    <h5>IngredientsTable</h5>
-    <form @onsubmit="SubmitIngredintsAsync">
-        <InputFile OnChange="OnInputFileChange" multiple  />
-        <br /><br />
-        @if (!spinning) { 
-        <button type="submit" class="btn btn-primary">Upload Selected File(s) to the Ingredients Table</button>
         }
-            else
-            {
-            
-                <LoadingElement></LoadingElement>
-                <p>Please be patient. Ingredients are being loaded to the database.</p>
-            
-        }
-        <p>@Message</p>
-    </form> 
-@if (spinning) { 
-    <div class="progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="@IngredientInsertPercent" aria-valuemin="0" aria-valuemax="100" style="width: @($"{IngredientInsertPercent}%")">
-            <span class="sr-only">@($"{IngredientInsertPercent}% Complete")"</span>
-        </div>
-    </div>
+
+    </tbody>
+</table>
+
+
+
+@if (error)
+{
+    <ErrorNotification ErrorMessage="@Message" />
 }
-    @if (error) { 
-        <ErrorNotification ErrorMessage="@Message"/>
-    }
-
 
 @code {
     private List<string> tables = new List<string>() { "Recipe", "Method", "Review", "Equipment", "EquipmentInRecipe" };
@@ -88,105 +57,13 @@
     bool error = false;
     bool spinning = false;
 
-    int IngredientInsertPercent { get; set; } 
+    int IngredientInsertPercent { get; set; }
 
     string Message = "No file(s) selected";
     IReadOnlyList<IBrowserFile> selectedFiles;
     const int largestFileSize = 1873691000;
 
-    private void OnInputFileChange(InputFileChangeEventArgs e)
-    {
-        selectedFiles = e.GetMultipleFiles();
-        Message = $"{selectedFiles.Count} file(s) selected";
-        this.StateHasChanged();
-    }
-
-    private async Task SubmitIngredients()
-    {
-        try
-        {
-            double count = 0;
-            foreach (var file in selectedFiles)
-            {
-                var csvData = await new StreamReader(file.OpenReadStream(18736910000)).ReadToEndAsync();
-
-                string[] lines = csvData.Split(Environment.NewLine);
-                foreach (string line in lines)
-                {
-                    await Task.Run(() => dataLoader.InsertIngredientIntoDB(line));
-                    IngredientInsertPercent = (int)((count / lines.Count()) * 100);
-                    count++;
-                    this.StateHasChanged();
-                }
-
-            }
-            Message = $"{selectedFiles.Count} file(s) uploaded on server";
-            //this.StateHasChanged();
-            error = false;
-        }
-        catch (NullReferenceException)
-        {
-            Message = "Sorry, please attach some files!";
-            error = true;
-        }
-        catch (Exception e)
-        {
-            Message = "Error encoundtered:" + e.Message;
-            error = true;
-        }
-    }
-
-    private async Task SubmitEquipment()
-    {
-        try
-        {
-
-            foreach (var file in selectedFiles)
-            {
-                var reader = await new StreamReader(file.OpenReadStream()).ReadToEndAsync();
-                await dataLoader.ProcessIngredientCsvAndSaveToDB(reader);
-
-            }
-            Message = $"{selectedFiles.Count} file(s) uploaded on server";
-            //this.StateHasChanged();
-            error = false;
-        }
-        catch (NullReferenceException)
-        {
-            Message = "Sorry, please attach some files!";
-            error = true;
-        }
-        catch (Exception e)
-        {
-            Message = "Error encoundtered:" + e.Message;
-            error = true;
-        }
-    }
-
-    private async Task AsyncSubmitEquipment()    // this is an async task
-    {
-        spinning = true;
-        await Task.Delay(1);      // flushing changes. The trick!!
-        await SubmitEquipment();               // non-async code
-        spinning = false;
-        await Task.Delay(1);      // changes are flushed again    
-    }
-
-
-    private async Task SubmitIngredintsAsync()    // this is an async task
-    {
-        spinning = true;
-        await Task.Delay(1);      // flushing changes. The trick!!
-        await SubmitIngredients();               // non-async code
-        spinning = false;
-        await Task.Delay(1);      // changes are flushed again    
-    }
-
-    //protected override Task OnInitializedAsync()
-    //{
-    //    return base.OnInitializedAsync();
-    //}
-
+    
 
     private readonly Dictionary<string, List<string>> sampleData = new Dictionary<string, List<string>>()
 {

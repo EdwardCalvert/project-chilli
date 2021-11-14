@@ -11,7 +11,7 @@ namespace BlazorServerApp.Models
     {
 
         public uint IngredientID { get; set; }
-        public string FoodCode { get; set; }
+        public string FoodGroup { get; set; }
         public string IngredientName { get; set; }
         public double Protein { get; set; }
         public double Fat { get; set; }
@@ -37,12 +37,12 @@ namespace BlazorServerApp.Models
 
         public string SqlInsertStatement()
         {
-            return "INSERT INTO Ingredients(FoodCode,IngredientName,Protein,Fat,Carbohydrates,Kcal,Starch,TotalSugars, Glucose, Fructose, Sucrose, Maltose, Lactose, Alchohol, NSP, Fibre, SaturatedFattyAcids, MonounsaturatedFattyAcids, PolyunsaturatedFattyAcids, Cholesterol,AlternateName) VALUES(@foodCode,@ingredientName,@protein,@fat,@carbohydrates,@kcal,@starch,@totalSugars, @glucose, @fructose, @sucrose, @maltose, @lactose, @alchohol, @nSP, @fibre,@saturatedFattyAcids, @monounsaturatedFattyAcids, @polyunsaturatedFattyAcids, @cholesterol,@alternateName)";
+            return "INSERT INTO Ingredients(FoodGroup,IngredientName,Protein,Fat,Carbohydrates,Kcal,Starch,TotalSugars, Glucose, Fructose, Sucrose, Maltose, Lactose, Alchohol, NSP, Fibre, SaturatedFattyAcids, MonounsaturatedFattyAcids, PolyunsaturatedFattyAcids, Cholesterol,AlternateName) VALUES(@foodCode,@ingredientName,@protein,@fat,@carbohydrates,@kcal,@starch,@totalSugars, @glucose, @fructose, @sucrose, @maltose, @lactose, @alchohol, @nSP, @fibre,@saturatedFattyAcids, @monounsaturatedFattyAcids, @polyunsaturatedFattyAcids, @cholesterol,@alternateName)";
         }
 
         public dynamic SqlAnonymousType()
         {
-            return new { foodCode = FoodCode, ingredientName = IngredientName, protein = Protein, @fat = Fat, @carbohydrates = Carbohydrates, @kcal = Kcal, @starch = Starch, @totalSugars = TotalSugars, @glucose = Glucose, @fructose = Fructose, @sucrose = Sucrose, @maltose = Maltose, @lactose = Lactose, @alchohol = Alchohol, @nSP = NSP, fibre = Fibre, @saturatedFattyAcids = SaturatedFattyAcids, @monounsaturatedFattyAcids = MonounsaturatedFattyAcids, @polyunsaturatedFattyAcids = PolyunsaturatedFattyAcids, cholesterol = Cholesterol,alternateName = AlternateName };
+            return new { foodCode = FoodGroup, ingredientName = IngredientName, protein = Protein, @fat = Fat, @carbohydrates = Carbohydrates, @kcal = Kcal, @starch = Starch, @totalSugars = TotalSugars, @glucose = Glucose, @fructose = Fructose, @sucrose = Sucrose, @maltose = Maltose, @lactose = Lactose, @alchohol = Alchohol, @nSP = NSP, fibre = Fibre, @saturatedFattyAcids = SaturatedFattyAcids, @monounsaturatedFattyAcids = MonounsaturatedFattyAcids, @polyunsaturatedFattyAcids = PolyunsaturatedFattyAcids, cholesterol = Cholesterol,alternateName = AlternateName };
         }
 
         public IEnumerator GetEnumerator()

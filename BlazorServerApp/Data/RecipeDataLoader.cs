@@ -252,20 +252,9 @@ namespace BlazorServerApp.Models
                 }
             }
         }
-
-        public async Task ProcessIngredientCsvAndSaveToDB(string csvData)
+        public async Task<List<Ingredient>> FindExistingIngredients(string foodName)
         {
-            string[] lines = csvData.Split(Environment.NewLine);
-            foreach (string line in lines)
-            {
-                await Task.Run(() => InsertIngredientIntoDB(line));
-
-            }
-        }
-
-        public async Task<List<Ingredient>> FindExistingIngredients(string foodCode)
-        {
-            return await _data.LoadData<Ingredient, dynamic>("SELECT * FROM Ingredients WHERE FoodCode=@FoodCode;", new { FoodCode = foodCode }, _config.GetConnectionString("recipeDatabase"));
+            return await _data.LoadData<Ingredient, dynamic>("SELECT * FROM Ingredients WHERE IngredientName=@FoodCode;", new { FoodCode = foodName }, _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task InsertIngredient(Ingredient model)
@@ -273,36 +262,41 @@ namespace BlazorServerApp.Models
             await _data.SaveData(model.SqlInsertStatement(), model.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
         }
 
-        public async Task InsertIngredientIntoDB(string line)
+        public async Task InsertIngredientIntoDB(string line, bool runDeduplication)
         {
             string[] cols = line.Split(',');
             if (cols.Length == 20)
             {
-                if (Regex.IsMatch(cols[0], "[0-9]{2}-[0-9]{3,4}") ||uint.TryParse(cols[0],out _))
-                {
-                    Ingredient model = new Ingredient();
-                    model.FoodCode = cols[0];
-                    //Check to see if a similar record exists. 
-                    List<Ingredient> existingIngredients = await FindExistingIngredients(model.FoodCode);
 
-                    if (existingIngredients.Count == 0)
-                    {
-                        model.IngredientName = cols[1].Replace('#', ',');
-                        int rowindex = 2;
-                        foreach (string property in model)
-                        {
-#pragma warning disable CS0642 // Possible mistaken empty statement
-                            if (double.TryParse(cols[rowindex], out double number)) ;
-#pragma warning restore CS0642 // Possible mistaken empty statement
-                            {
-                                model.GetType().GetProperty(property).SetValue(model, number, null);
-                            }
-                            rowindex++;
-                        }
-                        model.AlternateName = model.IngredientName.ReverseCSVValues().SentenceCase();
-                        await InsertIngredient(model);
-                    }
+                Ingredient model = new Ingredient();
+                model.FoodGroup = cols[1].Replace('#', ','); ;
+            model.IngredientName = cols[0];
+                //Check to see if a similar record exists. 
+                int existingIngredients = 0;
+                if (runDeduplication)
+                {
+                    Console.WriteLine("Running deup");
+                    List<Ingredient> result = await FindExistingIngredients(model.IngredientName);
+                    existingIngredients = result.Count;
+
                 }
+                if (existingIngredients ==0)
+                {
+                    int rowindex = 2;
+                    foreach (string property in model)
+                    {
+#pragma warning disable CS0642 // Possible mistaken empty statement
+                        if (double.TryParse(cols[rowindex], out double number)) ;
+#pragma warning restore CS0642 // Possible mistaken empty statement
+                        {
+                            model.GetType().GetProperty(property).SetValue(model, number, null);
+                        }
+                        rowindex++;
+                    }
+                    model.AlternateName = model.IngredientName.ReverseCSVValues().SentenceCase();
+                    await InsertIngredient(model);
+                }
+
             }
         }
 
@@ -314,10 +308,15 @@ namespace BlazorServerApp.Models
         public async Task<IEnumerable<Ingredient>> FindIngredients(string text)
         {
             text = $"%{text}%".Replace(" ", "%");
-            return await _data.LoadData<Ingredient, dynamic>("SELECT *  FROM Ingredients WHERE IngredientName LIKE @Text OR AlternateName LIKE @Text LIMIT 30;", new { Text = text }, _config.GetConnectionString("recipeDatabase")); ;
+            return await _data.LoadData<Ingredient, dynamic>("SELECT *  FROM Ingredients WHERE IngredientName LIKE @Text OR AlternateName LIKE @Text LIMIT 100;", new { Text = text }, _config.GetConnectionString("recipeDatabase")); ;
         }
 
 
+        public async Task<string> GetIngredientName(uint ingredientID)
+        {
+           List<string> results =  await _data.LoadData<string, dynamic>("SELECT IngredientName From Ingredients WHERE IngredientID = @ingredientID", new { ingredientID = ingredientID }, _config.GetConnectionString("recipeDatabase"));
+            return results[0];
+        }
 
         public async Task<List<Recipe>> GetHomepageRecipes()
         {

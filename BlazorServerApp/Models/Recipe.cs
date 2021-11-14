@@ -65,6 +65,7 @@ namespace BlazorServerApp.Models
         public DateTime LastRequested { get; set; }
 
         public static readonly List<string> SUPPORTEDUNITS = new List<string>{
+            "x",
             "Grams",
             "Cup",
             "Litre",

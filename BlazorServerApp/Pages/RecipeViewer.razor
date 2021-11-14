@@ -44,7 +44,7 @@ else
             <ul>
                 @foreach (IngredientInRecipe ingredient in model.Ingredients)
                 {
-                    <li><em>@ingredient.Quantity @ingredient.Unit</em> @ingredient.IngredientID</li>
+                    <li><em>@ingredient.Quantity @ingredient.Unit</em> @( dataLoader.GetIngredientName((uint)ingredient.IngredientID).Result) </li>
                 }
             </ul>
         </div>
