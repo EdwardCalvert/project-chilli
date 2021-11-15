@@ -1,0 +1,95 @@
+﻿@using DataLibrary
+@using BlazorServerApp.Shared
+@using BlazorServerApp.Models
+@using Microsoft.Extensions.Configuration
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
+@inject RecipeDataLoader dataLoader
+@inherits FileUpload
+
+<h5>Bulk upload word documents</h5>
+<form @onsubmit="SubmitAsync">
+    <InputFile OnChange="OnInputFileChange" ShowCustomButton="true" ButtonText="Start" AllowedExtensions=".csv;" FilterByExtension="true" MaxFileSize=@largestFileSize CustomExtensionMessage="Only .csv is supported." CustomButtonClassName="btn-primary" multiple />
+    <br />
+    @if (selectedFiles != null && selectedFiles.Count > 0 && !spinning)
+    {
+        <button type="submit" class="btn btn-primary">Upload Selected File(s) to the Ingredients Table</button>
+    }
+    else if (!spinning)
+            {
+                <p>Select some files to get started.</p>
+            }
+    else
+    {
+
+        <LoadingElement></LoadingElement>
+        <p>Please be patient. Documetns are being uploaded. Hang tight.</p>
+        <ProgressBar Percent="@InsertPercent"/>
+
+    }
+</form>
+@if (Error)
+{
+    <BlazorServerApp.Shared.ErrorNotification ErrorMessage="@Message" ></BlazorServerApp.Shared.ErrorNotification>
+}
+
+@code {
+
+
+
+
+    private async Task SubmitIngredients()
+    {
+        try
+        {
+            double count = 0;
+            foreach (var file in selectedFiles)
+            {
+
+                if (file.Size > largestFileSize)
+                {
+                    throw new Exception("The file you uploaded was too large");
+
+                }
+                else if (Path.GetExtension(file.Name) != ".docx")
+                {
+                    throw new Exception("Please only upload .docx files.");
+                }
+                else
+                {
+                    
+                    InsertPercent = (int)((count / selectedFiles.Count) * 100);
+                    count++;
+                    this.StateHasChanged();
+                }
+            }
+
+
+            Message = $"{selectedFiles.Count} file(s) uploaded on server";
+            Error = false;
+
+        }
+        catch (NullReferenceException)
+        {
+            Message = "Sorry, please attach some files!";
+            Error = true;
+        }
+        catch (Exception e)
+        {
+            Message = "Error encoundtered:" + e.Message;
+            Error = true;
+        }
+    }
+
+
+
+    public async Task SubmitAsync()    // this is an async task
+    {
+        spinning = true;
+        await Task.Delay(1);      // flushing changes. The trick!!
+        await SubmitIngredients();               // non-async code
+        spinning = false;
+        await Task.Delay(1);      // changes are flushed again
+    }
+
+
+}

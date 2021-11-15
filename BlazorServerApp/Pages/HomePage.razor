@@ -1,8 +1,5 @@
 ﻿@page "/"
 @inject RecipeDataLoader _recipeLoader
-<h3>Here are the top recipies- ordered by popularity!</h3>
-<!--Potentially create an input select box here to allow it to be sorted by different criteria. -->
-<SearchBox></SearchBox>
 @if (Error)
 {
     <ErrorNotification ErrorMessage="This is a sample error message. Please visit the support page if you need further help. " />

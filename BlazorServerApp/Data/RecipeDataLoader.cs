@@ -275,7 +275,6 @@ namespace BlazorServerApp.Models
                 int existingIngredients = 0;
                 if (runDeduplication)
                 {
-                    Console.WriteLine("Running deup");
                     List<Ingredient> result = await FindExistingIngredients(model.IngredientName);
                     existingIngredients = result.Count;
 
@@ -295,6 +294,7 @@ namespace BlazorServerApp.Models
                     }
                     model.AlternateName = model.IngredientName.ReverseCSVValues().SentenceCase();
                     await InsertIngredient(model);
+
                 }
 
             }
