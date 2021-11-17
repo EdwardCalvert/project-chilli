@@ -28,7 +28,7 @@ AttributeTargets.Field, AllowMultiple = true)]
         {
             var model = (Recipe)validationContext.ObjectInstance;
 
-            foreach (IngredientInRecipe ingredient in model.Ingredients)
+            foreach (UserDefinedIngredientInRecipe ingredient in model.Ingredients)
             {
                 if (!ValidRecipeID.Validate(ingredient.IngredientID) || ingredient.Quantity is default(double) || !ValidUnit.Validate(ingredient.Unit))
                 {

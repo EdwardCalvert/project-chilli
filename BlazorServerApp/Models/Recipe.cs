@@ -57,7 +57,7 @@ namespace BlazorServerApp.Models
             "Light Meal",
         };
         [Required, ValidIngredientsInRecipe]
-        public List<IngredientInRecipe> Ingredients { get; set; } = new List<IngredientInRecipe>();
+        public List<UserDefinedIngredientInRecipe> Ingredients { get; set; } = new List<UserDefinedIngredientInRecipe>();
 
         public string DocxFilePath;
 
@@ -142,7 +142,7 @@ namespace BlazorServerApp.Models
 
         public void InsertEmptyIngredient()
         {
-            Ingredients.Add(new IngredientInRecipe());
+            Ingredients.Add(new UserDefinedIngredientInRecipe());
         }
 
 

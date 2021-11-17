@@ -4,7 +4,7 @@
 @using BlazorServerApp.Models
 @using Microsoft.Extensions.Configuration
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
-@inject RecipeDataLoader dataLoader
+@inject IRecipeDataLoader dataLoader
 
 <h3>DataLoaders</h3>
 <p>The equipment and ingredients table require data to operate correctly. Upload a csv/ or work manually to add for the first time.</p>
@@ -43,42 +43,42 @@
 
 
 
-    private async Task SubmitEquipment()
-    {
-        try
-        {
+    //private async Task SubmitEquipment()
+    //{
+    //    try
+    //    {
 
-            foreach (var file in selectedFiles)
-            {
-                using (StreamReader streamReader = new StreamReader(file.OpenReadStream()))
-                {
-                    string reader = await streamReader.ReadToEndAsync();
-                    await dataLoader.ProcessEquipmentCsvAndSaveToDB(reader);
-                }
-            }
-            Message = $"{selectedFiles.Count} file(s) uploaded on server";
-            //this.StateHasChanged();
-            error = false;
-        }
-        catch (NullReferenceException)
-        {
-            Message = "Sorry, please attach some files!";
-            error = true;
-        }
-        catch (Exception e)
-        {
-            Message = "Error encoundtered:" + e.Message;
-            error = true;
-        }
-    }
+    //        foreach (var file in selectedFiles)
+    //        {
+    //            using (StreamReader streamReader = new StreamReader(file.OpenReadStream()))
+    //            {
+    //                string reader = await streamReader.ReadToEndAsync();
+    //                await dataLoader.ProcessEquipmentCsvAndSaveToDB(reader);
+    //            }
+    //        }
+    //        Message = $"{selectedFiles.Count} file(s) uploaded on server";
+    //        //this.StateHasChanged();
+    //        error = false;
+    //    }
+    //    catch (NullReferenceException)
+    //    {
+    //        Message = "Sorry, please attach some files!";
+    //        error = true;
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        Message = "Error encoundtered:" + e.Message;
+    //        error = true;
+    //    }
+    //}
 
-    private async Task AsyncSubmitEquipment()    // this is an async task
-    {
-        spinning = true;
-        await Task.Delay(1);      // flushing changes. The trick!!
-        await SubmitEquipment();               // non-async code
-        spinning = false;
-        await Task.Delay(1);      // changes are flushed again
-    }
+    //private async Task AsyncSubmitEquipment()    // this is an async task
+    //{
+    //    spinning = true;
+    //    await Task.Delay(1);      // flushing changes. The trick!!
+    //    await SubmitEquipment();               // non-async code
+    //    spinning = false;
+    //    await Task.Delay(1);      // changes are flushed again
+    //}
 
 }

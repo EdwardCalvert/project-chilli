@@ -1,4 +1,4 @@
-﻿@inject RecipeDataLoader dataLoader
+﻿@inject IRecipeDataLoader dataLoader
 @inject NavigationManager NavManager
 
 <ErrorNotification ErrorMessage="@ErrorMessage" Show="@error" />
@@ -6,7 +6,7 @@
     <tbody>
         <tr>
             <td colspan="2">
-                <EditForm Model="@RecipeModel" OnValidSubmit="@HandleSubmit">
+                <EditForm Model="@RecipeModel" OnValidSubmit="@HandleSubmit" Context="RecipeForm">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
                     <div class="FieldLine">
@@ -27,7 +27,7 @@
 
                             @for (int i = 0; i < RecipeModel.Ingredients.Count; i++)
                             {
-                                IngredientInRecipe copyOfIngredient = RecipeModel.Ingredients[i];
+                                UserDefinedIngredientInRecipe copyOfIngredient = RecipeModel.Ingredients[i];
                                 <div class="col" style="flex-basis: unset;">
                                     <div class="FieldData">
                                         <InputNumber id="@("recipePreparationTimeInput" + i)" class="TimeInputField" @bind-Value="@copyOfIngredient.Quantity" style="padding-left: 5px; margin-right: 5px;" />
@@ -40,29 +40,29 @@
                                                 }
                                         </InputSelect>
 
-
+                                        
                                         <BlazoredTypeahead SearchMethod="dataLoader.FindIngredients"
                                                            @bind-Value="copyOfIngredient.IngredientID"
                                                            EnableDropDown="true"
                                                            MinimumLength="3"
                                                            ConvertMethod="ConvertIngredientToID"
-                                                           MaximumSuggestions="100"
+                                                           MaximumSuggestions="20"
+                                                           Disabled="false"
+                                                           AddItemOnEmptyResultMethod="ItemAddedMethod"
                                                            placeholder="Search by ingredientName..."
                                                            style="padding-right: 5px; margin-right: 5px;">
                                             <SelectedTemplate Context="ingredient">
-                                                @(dataLoader.GetIngredient(ingredient).Result.IngredientName)
+                                                @dataLoader.GetIngredient(ingredient).Result.IngredientName
                                             </SelectedTemplate>
+                                            <NotFoundTemplate Context="searchText">
+                                                Add "@searchText" as a new ingredient <br />
+                                                The newly added ingredient will be selected after being added.
+                                            </NotFoundTemplate>
                                             <HelpTemplate>
                                                 Please enter at least 3 character to perform a search.<hr />
-                                                Things you can search for:
-                                                <ul>
-                                                    <li>Ingredient Name</li>
-                                                    <li>Type of ingredient</li>
-                                                    <li>CoFID Food Code</li>
-                                                </ul>
                                             </HelpTemplate>
                                             <ResultTemplate Context="ingredient">
-                                                @ingredient.AlternateName (@ingredient.FoodGroup)<br /> <p style="font-size: 10px"> @ingredient.IngredientName</p>
+                                                @ingredient.IngredientName
                                             </ResultTemplate>
                                         </BlazoredTypeahead>
 
@@ -103,15 +103,36 @@
                                     @equipment.EquipmentName
                                 </SelectedTemplate>
                                 <HelpTemplate>
-                                    Please enter a minimum of 2 characters to perform a search. <a href="/admin">Add Equipment from the Admin pannel.</a>
+                                    Please enter a minimum of 2 characters to perform a search. 
                                 </HelpTemplate>
                                 <ResultTemplate Context="equipment">
                                     @equipment.EquipmentName  (@equipment.TypeOf)
                                 </ResultTemplate>
+                                <FooterTemplate>
+                                    <a href="/upload"> You can bulk upload equipment from the recipe pannel (will discard changes)></a>
+                                </FooterTemplate>
                             </BlazoredTypeahead>
                             <ValidationMessage For="@(() => RecipeModel.Equipment)" />
                         </div>
-                    </div>
+                        <div class="FieldHeader">Add equipment to the equipment table </div>
+                        
+                        <EditForm Model="@addEquipmentModel" Context="UploadEquipment" OnValidSubmit="HandleEquipmentSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+                            <div class="FieldData">
+                                <InputText @bind-Value="@addEquipmentModel.EquipmentName" style="width:100%;"></InputText>
+                                <InputSelect @bind-Value="@addEquipmentModel.TypeOf">
+                                    <option></option>
+                                    @foreach (string value in Equipment.Types)
+                                    {
+                                        <option>@value</option>
+                                    }
+                                </InputSelect>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </EditForm>
+                        </div>
+                        
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="MethodLabel">Method* </label></div>
                         <ol>
@@ -211,10 +232,27 @@
     bool error = false;
     string ErrorMessage = "";
 
+    Equipment addEquipmentModel { get; set; } = new();
+
     public enum MODES
     {
         Edit,
         Create,
+    }
+
+    private async Task HandleEquipmentSubmit()
+    {
+        if (await dataLoader.EquipmentCount(addEquipmentModel) == 0)
+        {
+            error = false;
+            await dataLoader.InsertEquipment(addEquipmentModel);
+            addEquipmentModel = new();
+        }
+        else
+        {
+            ErrorMessage = "Equipment already exists. ";
+            error = true;
+        }
     }
 
     private async Task HandleSubmit()
@@ -240,7 +278,18 @@
         }
     }
 
-    private uint? ConvertIngredientToID(Ingredient ingredient)
+    private async Task<UserDefinedIngredient> ItemAddedMethod(string searchText)
+    {
+        Console.WriteLine("Should add ingredient");
+
+        UserDefinedIngredient newIngredient = new UserDefinedIngredient();
+        newIngredient.IngredientName = searchText;
+        uint ingredientID =  await dataLoader.InsertIngredient(newIngredient); // Because Ingredient ID is null, no text is shown
+        newIngredient.IngredientID = ingredientID;
+        return newIngredient;
+    }
+
+    private uint? ConvertIngredientToID(UserDefinedIngredient ingredient)
     {
         return ingredient?.IngredientID;
     }

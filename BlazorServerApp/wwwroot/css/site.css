@@ -206,11 +206,7 @@ input:checked + .slider {
 
 /*Field form- borrowed from Winscouts.org*/
 .FieldHeader {
-    -ms-flex: 0 0 30%;
-    flex: 0 0 30%;
-    max-width: 30%;
     text-align: left;
-    text-decoration: underline;
     font-weight: 700;
 }
 .FormViewFieldLineSpacer {
