@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-namespace BlazorServerApp.Models
+namespace BlazorServerApp.Models.Unsupported
 {
     public class IngredientInRecipe 
     {

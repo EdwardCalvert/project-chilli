@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Collections;
 
-namespace BlazorServerApp.Models
+namespace BlazorServerApp.Models.Unsupported
 {
     public class Ingredient : IEnumerable
     {

@@ -12,13 +12,12 @@ namespace BlazorServerApp.Models
         public Task<List<Recipe>> GetHomepageRecipes();
         public  Task DeleteRecipeAndRelatedValues(uint RecipeID);
         public  Task UpdateRecipe(Recipe NewModel);
-        public  Task<Ingredient> GetIngredient(uint? IngredientID);
+        //public  Task<Ingredient> GetIngredient(uint? IngredientID);
         public  Task IncrementViews(uint RecipeID);
         public Task<bool> DoTablesExist(string tableName);
         public Task<int> SumRecords(string tableName);
         public Task InsertRecipeAndRelatedFields(Recipe displayModel);
         public Task InsertRelatedFields(Recipe displayModel);
-        public  Task<List<Ingredient>> FindExistingIngredients(string foodName);
         public  Task<uint> InsertIngredient(UserDefinedIngredient model);
         public Task RunSql(string sql);
         public  Task<List<Recipe>> GetRecipe(uint RecipeID);

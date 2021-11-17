@@ -20,14 +20,5 @@ namespace BlazorServerApp.Models
             return new { equipmentID = EquipmentID, recipeID = RecipeID};
         }
 
-        //public string SqlDeleteStatement()
-        //{
-        //    return "DELETE FROM `RecipeDatabase`.`EquipmentInRecipe` WHERE  `EquipmentID`=@equipmentID AND `RecipeID`=@recipeID;";
-        //}
-
-        //public dynamic SqlDeleteAnonymousType()
-        //{
-        //    return new {equipmentID = EquipmentID, recipeID = RecipeID };
-        //}
     }
 }

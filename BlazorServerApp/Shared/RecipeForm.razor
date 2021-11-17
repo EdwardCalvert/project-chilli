@@ -52,7 +52,7 @@
                                                            placeholder="Search by ingredientName..."
                                                            style="padding-right: 5px; margin-right: 5px;">
                                             <SelectedTemplate Context="ingredient">
-                                                @dataLoader.GetIngredient(ingredient).Result.IngredientName
+                                                @dataLoader.GetIngredientName((uint)ingredient)
                                             </SelectedTemplate>
                                             <NotFoundTemplate Context="searchText">
                                                 Add "@searchText" as a new ingredient <br />

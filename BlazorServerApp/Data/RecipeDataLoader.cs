@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BlazorServerApp.Models.Unsupported;
 
 namespace BlazorServerApp.Models
 {
@@ -106,20 +107,20 @@ namespace BlazorServerApp.Models
             return await _data.LoadData<UserDefinedIngredientInRecipe, dynamic>($"SELECT * FROM UserDefinedIngredientsInRecipe WHERE RecipeID =@recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
         }
 
-        private async Task<List<Ingredient>> GetIngredientModel(uint IngredientID)
-        {
-            return await _data.LoadData<Ingredient, dynamic>($"SELECT * FROM UserDefinedIngredients WHERE IngredientID =@ingredientID", new { ingredientID = IngredientID }, _config.GetConnectionString("recipeDatabase"));
-        }
+        //private async Task<List<Ingredient>> GetIngredientModel(uint IngredientID)
+        //{
+        //    return await _data.LoadData<Ingredient, dynamic>($"SELECT * FROM UserDefinedIngredients WHERE IngredientID =@ingredientID", new { ingredientID = IngredientID }, _config.GetConnectionString("recipeDatabase"));
+        //}
 
-        public async Task<Ingredient> GetIngredient(uint? IngredientID)
-        {
-            if (IngredientID != null)
-            {
-                List<Ingredient> model = await GetIngredientModel((uint)IngredientID);
-                return model[0];
-            }
-            return null;
-        }
+        //public async Task<Ingredient> GetIngredient(uint? IngredientID)
+        //{
+        //    if (IngredientID != null)
+        //    {
+        //        List<Ingredient> model = await GetIngredientModel((uint)IngredientID);
+        //        return model[0];
+        //    }
+        //    return null;
+        //}
 
         public async Task SaveNewReview(Review review)
         {
