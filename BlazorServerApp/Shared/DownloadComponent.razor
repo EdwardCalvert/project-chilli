@@ -1,0 +1,23 @@
+﻿@*@using System.IO
+@inject IJSRuntime JS
+@using Microsoft.JSInterop
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
+@inject IFileManger fileManager
+
+<button @onclick="DownloadFileFromStream">
+    Download File From Stream
+</button>
+@code {
+    [Parameter]
+    public uint RecipeID { get; set; }
+
+    private File DownloadFileFromStream()
+    {
+
+        var filePath = fileManager.GetFilePath(RecipeID);
+
+        byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+
+        return File(fileBytes, "application/force-download", "file1.xlsx");
+    }
+}*@

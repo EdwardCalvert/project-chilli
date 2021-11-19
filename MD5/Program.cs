@@ -24,27 +24,26 @@ namespace MD5
                 {
                     s.Append(b.ToString("x2").ToLower());
                 }
-                line =  "system says" + s.ToString();
+                //line =  "system says" + s.ToString();
                 Console.WriteLine(line);
                 Console.WriteLine("I say:");
                 CustomMD5 customMD5 = new CustomMD5();
+                Console.WriteLine(customMD5.Run(line));
 
-               byte[] m_byteInput = new byte[line.Length];
-                for (int i = 0; i < line.Length; i++)
-                    m_byteInput[i] = (byte)line[i];
-                customMD5.Dostuff(m_byteInput);
             }
         }
     }
 
 
-
+    /// <summary>
+    /// A Class which creates an MD5 like 128 bit hash. 
+    /// </summary>
         public class CustomMD5
         {
 
             // : All variables are unsigned 32 bit and wrap modulo 2^32 when calculating
             // s specifies the per-round shift amounts
-            int[] degreesOfRotation = new int[64] { 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21 };
+            ushort[] degreesOfRotation = new ushort[64] { 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21 };
 
 
         /// <summary>
@@ -75,37 +74,6 @@ namespace MD5
             uint C = 0x98BADCFE;
             uint D = 0X10325476;
 
-            /*
-     * Padding used to make the size (in bits) of the input congruent to 448 mod 512
-     */
-            static byte[] PADDING = new byte[] {0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
-        //protected byte[] CreatePaddedBuffer(byte[] input)
-        //{
-        //    uint bitLength = (uint)input.Length * 8; //Number of bytes * 8 = bits
-        //    uint bitLengthWithPadding = CalculateNewBitLength(input);// find the new length of the list, by addi
-        //    byte[] paddedData = new byte[bitLengthWithPadding / 8];
-
-        //    uint arrayIndex = bitLength - 1; //Index for slicing array. 
-        //    uint paddingIndex = 0;
-        //    do
-        //    {
-        //        paddedData[arrayIndex] = PADDING[paddingIndex];
-        //        arrayIndex++;
-        //        paddingIndex++;
-        //    }
-        //    while (bitLengthWithPadding - bitLength != arrayIndex + 1); //
-        //                                                                //bitLengthWithPadding (448 +512 = 960) -bitLength(448) (so result is 512) !=arrayIndex+1 (448 and will increment until the 960th index!) => will stop when the two are teh same
-
-        //    return paddedData;
-        //}
 
 
 
@@ -145,79 +113,34 @@ namespace MD5
             return bMsg;
         }
 
-        private uint CalculateNewBitLength(byte[] input)
+
+
+            private uint F(uint X, uint Y, uint Z)
             {
-                uint bitLength = (uint)input.Length * 8;
-                uint bitLengthMOD512 = bitLength % 512;
-                if (bitLengthMOD512 == 0)
-                {
-                    return bitLength + 448;
-                }
-                else
-                {
-                    return bitLength + 488 - bitLengthMOD512;
-                }
+                return (X & Y) | (~X & Z);
             }
-
-            private byte[] AddPaddingToCreateMultipleOf512(byte[] initialMessage)
+            private uint G(uint X, uint Y, uint Z)
             {
-                uint initalMessageArrayLength = (uint)initialMessage.Length;
-                uint bitsToIncreaseLengthBy = initalMessageArrayLength % 512;
-                byte[] messageLengthInBits = BitConverter.GetBytes(initalMessageArrayLength);
-
-                messageLengthInBits.Reverse();
-                byte[] first32bits = new byte[4];
-                Array.Copy(messageLengthInBits, first32bits, 4);
-
-                byte[] last32bits = new byte[4];
-                Array.Copy(messageLengthInBits, 4, last32bits, 0, 4);
-
-                byte[] paddedMessage = new byte[initialMessage.Length + bitsToIncreaseLengthBy];
-                paddedMessage = initialMessage;
-                Array.Copy(first32bits, 0, paddedMessage, initalMessageArrayLength - 8 - 1, 4);
-                Array.Copy(last32bits, 0, paddedMessage, initalMessageArrayLength - 4 - 1, 4);
-                return paddedMessage;
+                return (X & Z) | (Y & ~Z);
             }
-
-            private uint F(uint BB, uint CC, uint DD)
+            private uint H(uint X, uint Y, uint Z)
             {
-                return (BB & CC) | (~BB & DD);
+                return X ^ Y ^ Z;
             }
-
-            private uint G(uint BB, uint CC, uint DD)
-            {
-                return (BB & DD) | (CC & ~DD);
-            }
-
-            private uint H(uint BB, uint CC, uint DD)
-            {
-                return BB ^ CC ^ DD;
-            }
-
             private uint I(uint X, uint Y, uint Z)
             {
                 return Y ^ (X | ~Z);
             }
-
-
-
-            private void Transform(uint[] array)
+            private void Transform(uint[] inputArray)
             {
-            //
-
             uint AA = A;
             uint BB = B;
             uint CC = C;
             uint DD = D; 
             uint E;
             int j = 0;
-            
-
-                //Potentially looking at 8 bits.
                 for (int i = 0; i <= 63; i++)
                 {
-                
-
                     if (0 <= i && i <= 15)
                     {
                         E = F(BB, CC, DD);
@@ -237,38 +160,31 @@ namespace MD5
                     {
                         E = I(BB, CC, DD);
                         j = (i * 7) % 16;
-                    //Console.WriteLine($"a: {AA} b: " +
-                    //$"{BB} c:{CC} d:{DD} LUT INDEX {i}  DEGREES OF ROTATION {degreesOfRotation[i]} i : {i} j: {j} ");
+
                     
                 }
-                //Console.WriteLine($"a: {AA} b: {BB} c:{CC} d:{DD} E: {E} rotation {degreesOfRotation[i]} sin : {SinLookupTable[i]} 32 bit word: {array[j]} j{j}");
                 uint temp = DD;
-                //Bytes has 64 indexes
                     DD = CC;
                     CC = BB;
-                    BB = BB + BitOperations.RotateLeft(AA + E + SinLookupTable[i] + array[j], degreesOfRotation[i]);
+
+                    BB = BB + RotateLeft(AA + E + SinLookupTable[i] + inputArray[j], degreesOfRotation[i]);
                     AA = temp;
                 }
-            //Console.WriteLine($"A:{A}, B:{B}, C:{C}, D:{D}");
-            //Console.WriteLine($"AA:{AA}, BB:{BB}, CC:{CC}, DD:{DD}");
-
-            //AA is incorrect. Not A. 
-            A += AA;
+                A += AA;
                 B += BB;
                 C += CC;
                 D += DD;
 
-            //Console.WriteLine($"AA:{AA}, BB:{BB}, CC:{CC}, DD:{DD}");
-            //Console.WriteLine($"A:{A}, B:{B}, C:{C}, D:{D}");
+  
             }
 
-            public static uint RotateLeft(uint uiNumber, ushort shift)
+            private static uint RotateLeft(uint uiNumber, ushort shift)
             {
                 return ((uiNumber >> 32 - shift) | (uiNumber << shift));
             }
 
 
-        public static uint ReverseByte(uint uiNumber)
+        private static uint ReverseByte(uint uiNumber)
         {
             return (((uiNumber & 0x000000ff) << 24) |
                         (uiNumber >> 24) |
@@ -276,12 +192,19 @@ namespace MD5
                     ((uiNumber & 0x0000ff00) << 8));
         }
 
-        public void Dostuff(byte[] input)
+        public string Run(string inputString)
+        
+        {
+            byte[] byteInput = new byte[inputString.Length];
+            for (int i = 0; i < inputString.Length; i++)
             {
+                byteInput[i] = (byte)inputString[i];
+            }
+            return (Run(byteInput));
+        }
 
-
-                byte[] paddedArray = CreatePaddedBuffer(input);
-            //byte[] multipleOf512Array = AddPaddingToCreateMultipleOf512(paddedArray);
+        public string Run(byte[] input) { 
+            byte[] paddedArray = CreatePaddedBuffer(input);
 
 
             uint N = (uint)(paddedArray.Length * 8) / 32;
@@ -291,11 +214,14 @@ namespace MD5
                 uint[] uintBlocks =  CopyBlock(paddedArray, i);
                 Transform(uintBlocks);
             }
-                Console.WriteLine($"{A}{B}{C}{D}");
-            Console.WriteLine(ReverseByte(A).ToString("X8") + ReverseByte(B).ToString("X8") + ReverseByte(C).ToString("X8") + ReverseByte(D).ToString("X8"));
-            //Console.WriteLine($"{A+B+C+D}");
+            Console.WriteLine();
+            return HexValue();
         }
 
+        private string HexValue()
+        {
+            return ReverseByte(A).ToString("X8") + ReverseByte(B).ToString("X8") + ReverseByte(C).ToString("X8") + ReverseByte(D).ToString("X8");
+        }
 
         protected uint[] CopyBlock(byte[] bMsg, uint block)
         {

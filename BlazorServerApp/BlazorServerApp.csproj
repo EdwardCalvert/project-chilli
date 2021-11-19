@@ -17,6 +17,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataLibrary\DataLibrary.csproj" />
+    <ProjectReference Include="..\DocxReader\DocxReader.csproj" />
+    <ProjectReference Include="..\MD5\MD5.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,6 +26,10 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\unsafe_uploads\" />
   </ItemGroup>
 
 </Project>

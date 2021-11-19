@@ -32,6 +32,7 @@ namespace BlazorServerApp
             services.AddServerSideBlazor();
             services.AddSingleton<IDataAccess,MySqlDataAccess>(); //Inject the mysql data access- could be changed to any data layer implementing IDataAcess. This launches it in memory- the overhead is worth it as data layer is vital. 
             services.AddSingleton<IRecipeDataLoader, RecipeDataLoader>();
+            services.AddSingleton<IFileManger, FileManager>();
 
             services.AddHttpClient();
             services.AddStackExchangeRedisCache(options =>
