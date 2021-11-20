@@ -170,12 +170,13 @@ namespace BlazorServerApp.Models
             }
             return 0;
         }
-        public async Task InsertRecipeAndRelatedFields(Recipe displayModel)
+        public async Task<uint> InsertRecipeAndRelatedFields(Recipe displayModel)
         {
             List<uint> autoIncrementResult = await _data.LoadData<uint, dynamic>(displayModel.SqlInsertStatement() + "SELECT LAST_INSERT_ID();", displayModel.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
             uint RecipeId = autoIncrementResult[0];
             displayModel.RecipeID = RecipeId;
             await InsertRelatedFields(displayModel);
+            return RecipeId;
         }
         
         public async Task InsertRelatedFields(Recipe displayModel)
@@ -210,11 +211,6 @@ namespace BlazorServerApp.Models
                     }
                 }
             }
-        }
-
-        public async Task<List<Ingredient>> FindExistingIngredients(string foodName)
-        {
-            return await _data.LoadData<Ingredient, dynamic>("SELECT * FROM Ingredients WHERE IngredientName=@FoodCode;", new { FoodCode = foodName }, _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task<uint> InsertIngredient(UserDefinedIngredient model)
@@ -263,6 +259,12 @@ namespace BlazorServerApp.Models
         public async Task RunSql(string sql)
         {
             await _data.SaveData(sql, new { }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<int>CountNumberOfSimilarIngredients(string ingredientName)
+        {
+            List<int> vars =  await _data.LoadData<int, dynamic>("SELECT Count(*) FROM Ingredients WHERE IngredientName=@FoodCode;", new { FoodCode = ingredientName }, _config.GetConnectionString("recipeDatabase"));
+            return vars[0];
         }
     }
 }

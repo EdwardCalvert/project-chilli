@@ -16,7 +16,7 @@ namespace BlazorServerApp.Models
         public  Task IncrementViews(uint RecipeID);
         public Task<bool> DoTablesExist(string tableName);
         public Task<int> SumRecords(string tableName);
-        public Task InsertRecipeAndRelatedFields(Recipe displayModel);
+        public Task<uint> InsertRecipeAndRelatedFields(Recipe displayModel);
         public Task InsertRelatedFields(Recipe displayModel);
         public  Task<uint> InsertIngredient(UserDefinedIngredient model);
         public Task RunSql(string sql);
@@ -29,5 +29,6 @@ namespace BlazorServerApp.Models
         public Task SaveNewReview(Review newReview);
         public Task InsertEquipment(Equipment equipment);
         public  Task<List<Recipe>> BuildRecipeTreeFromDataModel(List<Recipe> recipes);
+        public Task<int> CountNumberOfSimilarIngredients(string ingredientName);
     }
 }

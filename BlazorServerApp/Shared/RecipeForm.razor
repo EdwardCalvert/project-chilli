@@ -262,6 +262,7 @@
         {
             if (mode == MODES.Create)
             {
+                RecipeModel.ManualUpload = true;
                 await dataLoader.InsertRecipeAndRelatedFields(RecipeModel);
                 await OnInitializedAsync();
             }

@@ -58,8 +58,8 @@ namespace BlazorServerApp.Models
         };
         [Required, ValidIngredientsInRecipe]
         public List<UserDefinedIngredientInRecipe> Ingredients { get; set; } = new List<UserDefinedIngredientInRecipe>();
-
-        public string DocxFilePath;
+        
+        public bool ManualUpload { get; set; }
 
 
         public DateTime LastRequested { get; set; }
@@ -111,14 +111,14 @@ namespace BlazorServerApp.Models
 
         public string SqlInsertStatement()
         {
-            return $"INSERT INTO Recipe(Servings, MealType, RecipeName, Kcal, Saturates, Carbohydrates, Sugar, Fibre, Protein, Salt, Fat, CookingTime, PreperationTime, Difficulty, PageVisits,LastRequested, Description)" +
-                $"VALUES( @servings, @mealType, @recipeName, @kcal, @saturates, @carbohydrates, @sugar, @fibre, @protein, @salt, @fat, @cookingTime, @preperationTime, @difficulty, @pageVisits, @lastRequested, @description); ";
+            return $"INSERT INTO Recipe(Servings, MealType, RecipeName, Kcal, Saturates, Carbohydrates, Sugar, Fibre, Protein, Salt, Fat, CookingTime, PreperationTime, Difficulty, PageVisits,LastRequested, Description, ManualUpload)" +
+                $"VALUES( @servings, @mealType, @recipeName, @kcal, @saturates, @carbohydrates, @sugar, @fibre, @protein, @salt, @fat, @cookingTime, @preperationTime, @difficulty, @pageVisits, @lastRequested, @description,@manualUpload); ";
 
         }
 
         public dynamic SqlAnonymousType()
         {
-            return new { servings = Servings, mealType = MealType, recipeName = RecipeName, kcal = Kcal, saturates = Saturates, carbohydrates = Carbohydrates, sugar = Sugar, fibre = Fibre, protein = Protein, salt = Salt, fat = Fat, cookingTime = CookingTime, preperationTime = PreperationTime, difficulty = Difficulty, pageVisits = PageVisits, lastRequested = DateTime.Now, description = Description };
+            return new { servings = Servings, mealType = MealType, recipeName = RecipeName, kcal = Kcal, saturates = Saturates, carbohydrates = Carbohydrates, sugar = Sugar, fibre = Fibre, protein = Protein, salt = Salt, fat = Fat, cookingTime = CookingTime, preperationTime = PreperationTime, difficulty = Difficulty, pageVisits = PageVisits, lastRequested = DateTime.Now, description = Description,manualUpload = ManualUpload };
         }
 
         public dynamic SqlAnonymousType(uint RecipeID)

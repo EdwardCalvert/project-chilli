@@ -1,0 +1,54 @@
+﻿@using BlazorServerApp.proccessService
+@if (Result.GetCount(1) > 0)
+{
+    <h3>This is the list of successfully uploaded files</h3>
+    @foreach (var file in Result.GetIBrowserFiles(1))
+    {
+        <ul>
+            <li>
+                <ul>
+                    <li>Name: @file.Name</li>
+                    <li>Last modified: @file.LastModified.ToString()</li>
+                    <li>Size (bytes): @file.Size</li>
+                    <li>Content type: @file.ContentType</li>
+                </ul>
+            </li>
+        </ul>
+    }
+
+
+}
+
+@if (Result.ContainsErrors())// Ie 1 for success, then 556 for queued.
+{
+    <hr />
+    <h3>For troubleshooting purposes, here is a list of files that wern't considered valid. </h3>
+    <p>The code given in brackets is custom to this program (they are not HTTP codes)</p>
+    @foreach (KeyValuePair<int, List<IBrowserFile>> keyValuePair in Result.GetKeyValuePairs())
+    {
+
+        @if (keyValuePair.Value != null && keyValuePair.Value.Count > 0 && keyValuePair.Key != 1 && keyValuePair.Key != 556)
+        {
+<h4>Files that @ResultCode.RESULTCODES[keyValuePair.Key]  (@keyValuePair.Key)</h4>
+            @foreach (var file in keyValuePair.Value)
+            {
+                <ul>
+                    <li>
+                        <ul>
+                            <li>Name: @file.Name</li>
+                            <li>Last modified: @file.LastModified.ToString()</li>
+                            <li>Size (bytes): @file.Size</li>
+                            <li>Content type: @file.ContentType</li>
+                        </ul>
+                    </li>
+                </ul>
+            }
+        }
+
+    }
+}
+
+@code{
+    [Parameter]
+    public ResultCode Result { get; set; }
+}

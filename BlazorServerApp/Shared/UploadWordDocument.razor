@@ -5,8 +5,6 @@
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
 @inject IRecipeDataLoader dataLoader
 @inherits FileUpload
-
-<h5>Bulk upload word documents</h5>
 <form @onsubmit="SubmitAsync">
     <InputFile OnChange="OnInputFileChange" ShowCustomButton="true" ButtonText="Start" AllowedExtensions=".csv;" FilterByExtension="true" MaxFileSize=@largestFileSize CustomExtensionMessage="Only .csv is supported." CustomButtonClassName="btn-primary" multiple />
     <br />
@@ -33,10 +31,6 @@
 }
 
 @code {
-
-
-
-
     private async Task SubmitIngredients()
     {
         try
@@ -79,8 +73,6 @@
             Error = true;
         }
     }
-
-
 
     public async Task SubmitAsync()    // this is an async task
     {

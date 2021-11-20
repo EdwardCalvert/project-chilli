@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestingCatalyst", "TestingC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MD5", "MD5\MD5.csproj", "{2F534FA0-0A94-4001-AD29-398B2974D9F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocxReader", "DocxReader\DocxReader.csproj", "{36C02BAB-67BC-46DF-BCB8-38E7CAD24296}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocxReader", "DocxReader\DocxReader.csproj", "{36C02BAB-67BC-46DF-BCB8-38E7CAD24296}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

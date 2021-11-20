@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using DataLibrary;
 
-namespace BlazorServerApp.Data
+namespace BlazorServerApp.proccessService
 {
     public class FileManager :IFileManger
     {
@@ -17,8 +17,6 @@ namespace BlazorServerApp.Data
         private IWebHostEnvironment _environment;
         private IDataAccess _dataAccess;
 
-        public const long MAXFILESIZE = 1024 * 15*1024;
-        public const int MAXALLOWEDFILES = 3;
 
         public FileManager(IWebHostEnvironment Environment, IDataAccess dataAccess)
         {
@@ -30,12 +28,12 @@ namespace BlazorServerApp.Data
             }
         }
 
-        public async Task<int> InsertFile(IBrowserFile file, uint recipeID)
+        public async Task<(int,string)> InsertFile(IBrowserFile file, int maxFileSizeInBytes)
         {
             try
             {
                 string fileAsString;
-                using (StreamReader streamReader = new StreamReader(file.OpenReadStream(MAXFILESIZE)))
+                using (StreamReader streamReader = new StreamReader(file.OpenReadStream(maxFileSizeInBytes)))
                 {
                     fileAsString = await streamReader.ReadToEndAsync();
                 }
@@ -45,32 +43,24 @@ namespace BlazorServerApp.Data
                         md5AsHex);
                 if (Directory.Exists(path))
                 {
-                    //throw new Exception("File already uploaded");
-                    return 898; //Code for file uploaded previously.
+                    return (898,""); 
                 }
                 Directory.CreateDirectory(path);
                 await using FileStream fs = new(Path.Combine(path, file.Name), FileMode.Create);
-                await file.OpenReadStream(MAXFILESIZE).CopyToAsync(fs);
-            return 1;
+                await file.OpenReadStream(maxFileSizeInBytes).CopyToAsync(fs);
+                return (1, md5AsHex);
                         
             }
             catch(Exception e)
             {
                 Console.WriteLine($"Error: {e.Message}");
-                return -1;
+                return (-1,"");
             }
             }
-                //var trustedFileNameForFileStorage = ;
-
-                //var path = Path.Combine(_environment.ContentRootPath, "wwwroot", "unsafe_uploads",
-                //        trustedFileNameForFileStorage);
-
-                //await using FileStream fs = new(path, FileMode.Create);
-                //await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
 
 
 
-        public string GetFilePath(uint RecipeID) {
+        public string GetFilePath(string MD5Hash) {
             return "";
         }
 
@@ -83,8 +73,8 @@ namespace BlazorServerApp.Data
 
     public interface IFileManger
     {
-        public string GetFilePath(uint RecipeID);
-        public Task<int> InsertFile(IBrowserFile browserFiles, uint RecipeID);
+        public string GetFilePath(string MD5Hash);
+        public Task<(int,string)> InsertFile(IBrowserFile browserFiles, int maxFileSizeInBytes);
         public const long MAXFILESIZE = 1024 * 15;
         public const int MAXALLOWEDFILES = 3;
     }

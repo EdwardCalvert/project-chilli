@@ -15,10 +15,10 @@ else if (model != null)
 {
     <h2>@model.RecipeName</h2>
     <h5>@model.MealType</h5>
-    if (model.DocxFilePath != null)
+    if (model != null) // THis should  check if there is a document affiliated. 
     {
         <div>
-            <a href="@model.DocxFilePath" class="btn btn-primary">Download</a>
+            <a href="@model" class="btn btn-primary">Download</a>
             <a href="/Recipe/@RecipeID/Edit" class="btn btn-primary">Edit Recipe</a>
             <a @onclick="@(() =>DeleteRecipe())" class="btn btn-danger">⚠ Delete Recipe</a>
         </div>
@@ -81,10 +81,10 @@ else if (model != null)
 
         <ReviewSection RecipeID="@RecipeID" />
     </div>
-    if (model.DocxFilePath != null)
+    @*if (model.DocxFilePath != null)
     {
         <div><a href="@model.DocxFilePath" class="btn btn-primary">Download</a></div>
-    }
+    }*@
 
 }
 else

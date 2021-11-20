@@ -1,4 +1,4 @@
-using BlazorServerApp.Data;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataLibrary;
 using BlazorServerApp.Models;
+using BlazorServerApp.proccessService;
 
 namespace BlazorServerApp
 {
@@ -33,6 +34,7 @@ namespace BlazorServerApp
             services.AddSingleton<IDataAccess,MySqlDataAccess>(); //Inject the mysql data access- could be changed to any data layer implementing IDataAcess. This launches it in memory- the overhead is worth it as data layer is vital. 
             services.AddSingleton<IRecipeDataLoader, RecipeDataLoader>();
             services.AddSingleton<IFileManger, FileManager>();
+            services.AddSingleton<IRecipeProcessorService, RecipeProcessorService>();
 
             services.AddHttpClient();
             services.AddStackExchangeRedisCache(options =>
@@ -43,7 +45,7 @@ namespace BlazorServerApp
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,IRecipeProcessorService recipeProcessorService)
         {
             if (env.IsDevelopment())
             {

@@ -4,7 +4,7 @@
 @using Microsoft.Extensions.Configuration
 @using BlazorServerApp.Models.Unsupported
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
-@inject RecipeDataLoader dataLoader
+@inject IRecipeDataLoader dataLoader
 @inherits FileUpload
 
 
@@ -31,7 +31,6 @@
 
         <LoadingElement></LoadingElement>
         <p>Please be patient. Ingredients are being loaded to the database.</p>
-        <p>Progress: @InsertPercent %</p>
         <ProgressBar Percent="@InsertPercent" />
     }
 </form>
@@ -98,7 +97,6 @@
     }
 
 
-
     public async Task SubmitAsync()    // this is an async task
     {
         spinning = true;
@@ -106,6 +104,7 @@
         await SubmitIngredients();               // non-async code
         spinning = false;
         await Task.Delay(1);      // changes are flushed again
+        Message = "Successfully submitted file";
     }
 
     public async Task InsertIngredientIntoDB(string line, bool runDeduplication)
@@ -113,32 +112,36 @@
         string[] cols = line.Split(',');
         if (cols.Length == 20)
         {
-            Ingredient model = new Ingredient();
-            model.FoodGroup = cols[1].Replace('#', ','); ;
-            model.IngredientName = cols[0];
-            //Check to see if a similar record exists.
-            int existingIngredients = 0;
-            if (runDeduplication)
+             await Task.Run(() => RunAsynchronously(cols, runDeduplication));
+        }
+    }
+
+    public async Task RunAsynchronously(string[] cols, bool runDeduplication)
+    {
+        Ingredient model = new Ingredient();
+        model.FoodGroup = cols[1].Replace('#', ','); ;
+        model.IngredientName = cols[0];
+        //Check to see if a similar record exists.
+        int existingIngredients = 0;
+        if (runDeduplication)
+        {
+            existingIngredients = await dataLoader.CountNumberOfSimilarIngredients(model.IngredientName);
+        }
+        if (existingIngredients == 0)
+        {
+            int rowindex = 2;
+            foreach (string property in model)
             {
-                List<Ingredient> result = await dataLoader.FindExistingIngredients(model.IngredientName);
-                existingIngredients = result.Count;
-            }
-            if (existingIngredients == 0)
-            {
-                int rowindex = 2;
-                foreach (string property in model)
-                {
 #pragma warning disable CS0642 // Possible mistaken empty statement
-                    if (double.TryParse(cols[rowindex], out double number)) ;
+                if (double.TryParse(cols[rowindex], out double number)) ;
 #pragma warning restore CS0642 // Possible mistaken empty statement
-                    {
-                        model.GetType().GetProperty(property).SetValue(model, number, null);
-                    }
-                    rowindex++;
+                {
+                    model.GetType().GetProperty(property).SetValue(model, number, null);
                 }
-                model.AlternateName = model.IngredientName.ReverseCSVValues().SentenceCase();
-                //await InsertIngredient(model);
+                rowindex++;
             }
+            model.AlternateName = model.IngredientName.ReverseCSVValues().SentenceCase();
+            //await InsertIngredient(model);
         }
     }
 
