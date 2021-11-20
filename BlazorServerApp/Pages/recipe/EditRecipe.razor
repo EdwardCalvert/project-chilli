@@ -32,7 +32,7 @@ else
             if (validIdentifier)
             {
                 RecipeID = Result;
-                List<Recipe> models = await dataLoader.BuildRecipeTreeFromDataModel(await dataLoader.GetRecipe(Result));
+                Recipe models = await dataLoader.GetRecipeAndTree(Result);
                 if (!pageRequested)
                 {
 
@@ -40,10 +40,6 @@ else
                     pageRequested = true;
                 }
 
-                if (models.Count > 0)
-                {
-                    recipeModel = models[0];
-                }
             }
         }
     }

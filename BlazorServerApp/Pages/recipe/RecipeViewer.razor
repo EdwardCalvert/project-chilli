@@ -39,7 +39,11 @@ else if (model != null)
         {
             <hr />
             <h3>Description</h3>
-            <p>@model.Description</p>}
+            foreach (string line in model.Description.Split("\n")) 
+            {
+            <p style="margin-bottom:0;">@line</p>
+            }
+        }
         @if (model.Ingredients != null && model.Ingredients.Count > 0)
         {
             <h3>Ingredients</h3>
@@ -119,19 +123,19 @@ else
         if (validIdentifier)
         {
             RecipeID = Result;
-            List<Recipe> result = await dataLoader.GetRecipe(RecipeID);
+            model = await dataLoader.GetRecipeAndTree(RecipeID);
 
-            if (!pageRequested)
+
+            if (model != null)
             {
-
-                await dataLoader.IncrementViews(RecipeID);
-                pageRequested = true;
-            }
-
-            if (result.Count > 0)
-            {
-                model = result[0];
                 recipeFound = true;
+                if (!pageRequested)
+                {
+
+                    await dataLoader.IncrementViews(RecipeID);
+                    pageRequested = true;
+                }
+
             }
         }
     }

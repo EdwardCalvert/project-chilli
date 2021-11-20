@@ -11,18 +11,15 @@ namespace BlazorServerApp.Models
         [Required]
         public string EquipmentName { get; set; }
         public uint EquipmentID { get; set; }
-        //[Required]
-        //public string TypeOf { get; set; }
-        //public static readonly List<string> Types = new List<string> { "Food Preparation Equipment", "Serving Equipment", "Cooking Equipment", "Storage Equipment", "Miscellaneous Equipment" };
 
         public string SqlInsertStatement()
         {
-            return $"INSERT INTO Equipment(EquipmentName) VALUES(@equipmentName);"; //,TypeOf,@typeOf
+            return $"INSERT INTO Equipment(EquipmentName) VALUES(@equipmentName);"; 
         }
 
         public dynamic SqlAnonymousType()
         {
-            return new { equipmentName = EquipmentName }; //, typeOf = TypeOf
+            return new { equipmentName = EquipmentName };
         }
     }
 }

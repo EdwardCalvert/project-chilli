@@ -20,7 +20,7 @@ namespace BlazorServerApp.Models
         public Task InsertRelatedFields(Recipe displayModel);
         public  Task<uint> InsertIngredient(UserDefinedIngredient model);
         public Task RunSql(string sql);
-        public  Task<List<Recipe>> GetRecipe(uint RecipeID);
+        public  Task<Recipe> GetRecipeAndTree(uint RecipeID);
         public  Task<string> GetIngredientName(uint ingredientID);
         public  Task<IEnumerable<UserDefinedIngredient>> FindIngredients(string text);
         public  Task<uint> EquipmentCount(Equipment equipment);
@@ -30,5 +30,6 @@ namespace BlazorServerApp.Models
         public Task<uint> InsertEquipment(Equipment equipment);
         public  Task<List<Recipe>> BuildRecipeTreeFromDataModel(List<Recipe> recipes);
         public Task<int> CountNumberOfSimilarIngredients(string ingredientName);
+        public  Task<List<uint>> GetSearchDatabaseTextFields(string searchText);
     }
 }

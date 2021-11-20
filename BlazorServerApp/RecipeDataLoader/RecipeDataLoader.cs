@@ -249,10 +249,41 @@ namespace BlazorServerApp.Models
             return await BuildRecipeTreeFromDataModel(datas);
         }
 
-        public async Task<List<Recipe>> GetRecipe(uint RecipeID)
+        public async Task<Recipe> GetRecipeAndTree(uint RecipeID)
         {
             List<Recipe> result = await _data.LoadData<Recipe, dynamic>("SELECT * FROM Recipe WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
-            return await BuildRecipeTreeFromDataModel(result);
+            if (result.Count == 1)
+            {
+                result = await BuildRecipeTreeFromDataModel(result);
+
+                return result[0];
+            }
+            return null;
+        }
+
+        public async Task<List<uint>> GetSearchDatabaseTextFields(string searchText)
+        {
+            string sql = @"SELECT  RecipeID FROM Method
+WHERE MATCH(MethodText) AGAINST(@searchText IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION) > 2
+UNION DISTINCT
+SELECT RecipeID FROM Recipe
+WHERE MATCH(RecipeName, Description) AGAINST(@searchText IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION) > 2
+UNION DISTINCT
+SELECT RecipeID FROM UserDefinedIngredientsInRecipe
+INNER JOIN(
+SELECT IngredientID FROM UserDefinedIngredients
+WHERE MATCH(IngredientName) AGAINST (@searchText IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION)> 2
+) AS T2 ON UserDefinedIngredientsInRecipe.IngredientID = T2.IngredientID
+UNION DISTINCT
+SELECT RecipeID FROM EquipmentInRecipe
+INNER JOIN(
+SELECT EquipmentID
+FROM Equipment
+WHERE MATCH(EquipmentName) AGAINST (@searchText IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION)> 2
+) AS T2 ON EquipmentInRecipe.EquipmentID = T2.EquipmentID
+LIMIT 20
+;";
+            return await _data.LoadData<uint, dynamic>(sql, new { searchText = searchText }, _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task RunSql(string sql)
