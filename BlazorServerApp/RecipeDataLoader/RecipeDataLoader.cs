@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BlazorServerApp.Models.Unsupported;
 
 namespace BlazorServerApp.Models
 {
@@ -97,9 +96,10 @@ namespace BlazorServerApp.Models
             return equipmentDataModels;
         }
 
-        public async Task InsertEquipment(Equipment equipment)
+        public async Task<uint> InsertEquipment(Equipment equipment)
         {
-            await _data.SaveData(equipment.SqlInsertStatement(), equipment.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+            List<uint> autoIncrementResult  = await _data.LoadData<uint,dynamic>(equipment.SqlInsertStatement() + "SELECT LAST_INSERT_ID();", equipment.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+            return autoIncrementResult[0];
         }
 
         private async Task<List<UserDefinedIngredientInRecipe>> GetIngredientsInRecipe(uint RecipeID)
@@ -234,8 +234,7 @@ namespace BlazorServerApp.Models
 
         public async Task<IEnumerable<UserDefinedIngredient>> FindIngredients(string text)
         {
-            text = $"%{text}%".Replace(" ", "%");
-            return await _data.LoadData<UserDefinedIngredient, dynamic>("SELECT *  FROM UserDefinedIngredients WHERE IngredientName LIKE @Text ORDER BY CHAR_LENGTH(IngredientName) LIMIT 100;", new { Text = text }, _config.GetConnectionString("recipeDatabase")); ;
+            return await _data.LoadData<UserDefinedIngredient, dynamic>("SELECT IngredientName, IngredientID FROM UserDefinedIngredients WHERE MATCH(IngredientName) AGAINST(@Text IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION) > 0 ORDER BY MATCH(IngredientName) AGAINST(@Text IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION) DESC LIMIT 50; ", new { Text = text }, _config.GetConnectionString("recipeDatabase")); ;
         }
 
         public async Task<string> GetIngredientName(uint ingredientID)

@@ -8,7 +8,7 @@
             <td colspan="2">
                 <EditForm Model="@RecipeModel" OnValidSubmit="@HandleSubmit" Context="RecipeForm">
                     <DataAnnotationsValidator />
-                    <ValidationSummary />
+
                     <div class="FieldLine">
                         <div class="FieldHeader">
                             <label id="recipeNameLabel">Recipe Name*</label>
@@ -40,7 +40,6 @@
                                                 }
                                         </InputSelect>
 
-                                        
                                         <BlazoredTypeahead SearchMethod="dataLoader.FindIngredients"
                                                            @bind-Value="copyOfIngredient.IngredientID"
                                                            EnableDropDown="true"
@@ -49,10 +48,10 @@
                                                            MaximumSuggestions="20"
                                                            Disabled="false"
                                                            AddItemOnEmptyResultMethod="ItemAddedMethod"
-                                                           placeholder="Search by ingredientName..."
+                                                           placeholder="Search by ingredient name..."
                                                            style="padding-right: 5px; margin-right: 5px;">
                                             <SelectedTemplate Context="ingredient">
-                                                @dataLoader.GetIngredientName((uint)ingredient)
+                                                @dataLoader.GetIngredientName((uint)ingredient).Result
                                             </SelectedTemplate>
                                             <NotFoundTemplate Context="searchText">
                                                 Add "@searchText" as a new ingredient <br />
@@ -65,7 +64,9 @@
                                                 @ingredient.IngredientName
                                             </ResultTemplate>
                                         </BlazoredTypeahead>
-
+                                        <div>
+                                            <ValidationMessage For="@(() => copyOfIngredient)" />
+                                        </div>
 
 
                                         <div class="FieldLine">
@@ -73,6 +74,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                             }
                             <div>
                                 <ValidationMessage For="@(() => RecipeModel.Ingredients)" />
@@ -92,47 +94,35 @@
 
                     </div>
                     <div class="FieldLine">
-                        <div class="FieldHeader"><label id="EquipmentLable">Equipment* </label></div>
+                        <div class="FieldHeader"><label id="EquipmentLable">Equipment used in recipe </label></div>
                         <div class="row row-cols-1">
+
+
                             <BlazoredTypeahead SearchMethod="dataLoader.FindEquipmentLike"
                                                @bind-Values="RecipeModel.Equipment"
                                                EnableDropDown="true"
-                                               MinimumLength="2"
-                                               placeholder="Search by first name...">
+                                               MinimumLength="3"
+                                               MaximumSuggestions="100"
+                                               AddItemOnEmptyResultMethod="AddEquipmentOnEmptyResult"
+                                               placeholder="Search by equipment name...">
                                 <SelectedTemplate Context="equipment">
                                     @equipment.EquipmentName
                                 </SelectedTemplate>
                                 <HelpTemplate>
-                                    Please enter a minimum of 2 characters to perform a search. 
+                                    Please enter a minimum of 2 characters to perform a search.
                                 </HelpTemplate>
+                                <NotFoundTemplate Context="searchText">
+                                    Add "@searchText" as a new equipment <br />
+                                    The newly added ingredient will be selected after being added.
+                                </NotFoundTemplate>
                                 <ResultTemplate Context="equipment">
-                                    @equipment.EquipmentName  (@equipment.TypeOf)
+                                    @equipment.EquipmentName
                                 </ResultTemplate>
-                                <FooterTemplate>
-                                    <a href="/upload"> You can bulk upload equipment from the recipe pannel (will discard changes)></a>
-                                </FooterTemplate>
                             </BlazoredTypeahead>
                             <ValidationMessage For="@(() => RecipeModel.Equipment)" />
                         </div>
-                        <div class="FieldHeader">Add equipment to the equipment table </div>
-                        
-                        <EditForm Model="@addEquipmentModel" Context="UploadEquipment" OnValidSubmit="HandleEquipmentSubmit">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary />
-                            <div class="FieldData">
-                                <InputText @bind-Value="@addEquipmentModel.EquipmentName" style="width:100%;"></InputText>
-                                <InputSelect @bind-Value="@addEquipmentModel.TypeOf">
-                                    <option></option>
-                                    @foreach (string value in Equipment.Types)
-                                    {
-                                        <option>@value</option>
-                                    }
-                                </InputSelect>
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                            </div>
-                        </EditForm>
-                        </div>
-                        
+                    </div>
+
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="MethodLabel">Method* </label></div>
                         <ol>
@@ -142,7 +132,7 @@
                                 <li>
 
                                     <div class="FieldData">
-                                        <InputText class="" style="width: 100%;" id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfMethod.MethodText" />
+                                        <InputText class="" style="width: 100%;" id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfMethod.MethodText" placeholder="Enter one step here..." />
 
                                         <div class="FieldLine">
                                             <button class="btn btn-danger" type="button" @onclick="@(e=>DeleteStep(i-1))">✕</button>
@@ -206,10 +196,12 @@
                             <ValidationMessage For="@(() => RecipeModel.Difficulty)" />
                         </div>
                     </div>
+                    <ValidationSummary />
                     <div class="FormViewFieldLineSpacer"></div>
                     @if (mode == MODES.Create)
                     {
                         <button type="submit" class="btn btn-primary">Submit</button>
+                        
                     }
                     else
                     {
@@ -263,8 +255,10 @@
             if (mode == MODES.Create)
             {
                 RecipeModel.ManualUpload = true;
-                await dataLoader.InsertRecipeAndRelatedFields(RecipeModel);
+                uint recipeID = await dataLoader.InsertRecipeAndRelatedFields(RecipeModel);
                 await OnInitializedAsync();
+                await Task.Delay(25);
+                NavManager.NavigateTo($"/Recipe/{recipeID}");
             }
             else if (mode == MODES.Edit)
             {
@@ -288,6 +282,17 @@
         uint ingredientID =  await dataLoader.InsertIngredient(newIngredient); // Because Ingredient ID is null, no text is shown
         newIngredient.IngredientID = ingredientID;
         return newIngredient;
+    }
+
+    private async Task<Equipment> AddEquipmentOnEmptyResult(string searchText)
+    {
+
+
+        Equipment newEquipment = new Equipment();
+        newEquipment.EquipmentName = searchText;
+        uint equipmentID = await dataLoader.InsertEquipment(newEquipment);
+        newEquipment.EquipmentID = equipmentID;
+        return newEquipment;
     }
 
     private uint? ConvertIngredientToID(UserDefinedIngredient ingredient)

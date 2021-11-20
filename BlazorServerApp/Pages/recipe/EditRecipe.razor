@@ -14,8 +14,6 @@ else
     <RecipeForm RecipeModel="@recipeModel" mode="RecipeForm.MODES.Edit"/>
 }
 
-<button @onclick="@((_)=>error = !error)"></button>
-
     @code {
         [Parameter]
         public long RecipeIDRequest { get; set; }

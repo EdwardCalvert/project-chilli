@@ -1,24 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Timers;
+﻿using BlazorServerApp.Models;
 using Microsoft.AspNetCore.Components.Forms;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using BlazorServerApp.Models;
+using System.Timers;
+
 namespace BlazorServerApp.proccessService
 {
     public class RecipeProcessorService : IRecipeProcessorService
     {
-        private Timer _timer;
-        private CircularQueue<string> _recipesToProcess = new CircularQueue<string>(500);
-
-        IFileManger _fileManager;
-        IRecipeDataLoader _recipeDataLoader;
+        private readonly Timer _timer;
+        private readonly CircularQueue<string> _recipesToProcess = new CircularQueue<string>(500);
+        private readonly IFileManger _fileManager;
+        private readonly IRecipeDataLoader _recipeDataLoader;
 
         public RecipeProcessorService(IFileManger fileManger, IRecipeDataLoader recipeDataLoader)
         {
             _fileManager = fileManger;
             _recipeDataLoader = recipeDataLoader;
-            _timer = new Timer(1000) { AutoReset = true };
+            _timer = new Timer(60000) { AutoReset = true };
             _timer.Enabled = true;
             _timer.Elapsed += TimerElapsed;
         }
@@ -32,7 +32,7 @@ namespace BlazorServerApp.proccessService
         public async Task<ResultCode> QueueBrowserFilesForProcessing(ResultCode resultCode)
         {
             List<IBrowserFile> validFiles = resultCode.GetIBrowserFiles(556);
-            if (validFiles!=null && validFiles.Count < _recipesToProcess.GetCapacity())
+            if (validFiles != null && validFiles.Count < _recipesToProcess.GetCapacity())
             {
                 foreach (IBrowserFile browserFile in validFiles)
                 {
@@ -41,17 +41,14 @@ namespace BlazorServerApp.proccessService
                     {
                         _recipesToProcess.EnqueueItem(MD5Hash);
                     }
-                    resultCode.AddIBrowserFile(intResult,browserFile);
+                    resultCode.AddIBrowserFile(intResult, browserFile);
                 }
             }
-
-
             else
             {
                 resultCode.AddIBrowserFiles(670, validFiles);
             }
             return resultCode;
-
         }
 
         public int GetCurrentQueueCapacity()
@@ -71,7 +68,6 @@ namespace BlazorServerApp.proccessService
                 recipe.MealType = "Service test";
                 uint recipeID = await _recipeDataLoader.InsertRecipeAndRelatedFields(recipe);
 
-
                 FileManagerModel model = new FileManagerModel();
                 model.FileID = MD5ToProcess;
                 model.DateUploaded = DateTime.Now;
@@ -85,19 +81,19 @@ namespace BlazorServerApp.proccessService
             Console.WriteLine("RecipeProcessorService timer elapsed");
             await SortOutFiles();
         }
-
     }
 
     public interface IRecipeProcessorService
     {
         public int GetCurrentQueueCapacity();
+
         public Task<ResultCode> QueueBrowserFilesForProcessing(ResultCode browserFiles);
+
         public int MaximumSingleFileSizeInBytes { get; }
     }
 
     public class ResultCode
     {
-
         public static Dictionary<int, string> RESULTCODES { get; } = new Dictionary<int, string>()
         {
             {1,"Successfully proccessed" },
@@ -108,7 +104,8 @@ namespace BlazorServerApp.proccessService
             {302, "One of the files you uploaded exceeded the maximum file size" },
             {675, "Invalid file type- only word documents are expected" },
         };
-        private Dictionary<int, List<IBrowserFile>> _dictionary = new Dictionary<int, List<IBrowserFile>>();
+
+        private readonly Dictionary<int, List<IBrowserFile>> _dictionary = new Dictionary<int, List<IBrowserFile>>();
 
         public void Clear()
         {
@@ -135,6 +132,7 @@ namespace BlazorServerApp.proccessService
             }
             _dictionary[code].Add(browserFile);
         }
+
         public void AddIBrowserFiles(int code, List<IBrowserFile> browserFile)
         {
             if (!_dictionary.ContainsKey(code))
@@ -143,6 +141,7 @@ namespace BlazorServerApp.proccessService
             }
             _dictionary[code].AddRange(browserFile);
         }
+
         public List<IBrowserFile> GetIBrowserFiles(int code)
         {
             if (_dictionary.ContainsKey(code))
@@ -172,7 +171,6 @@ namespace BlazorServerApp.proccessService
                         return true;
                     }
                 }
-                
             }
             return false;
         }

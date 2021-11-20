@@ -27,7 +27,7 @@ namespace BlazorServerApp.Models
         public  Task<IEnumerable<Equipment>> FindEquipmentLike(string text);
         public Task<List<Review>> GetReviews(uint RecipeID);
         public Task SaveNewReview(Review newReview);
-        public Task InsertEquipment(Equipment equipment);
+        public Task<uint> InsertEquipment(Equipment equipment);
         public  Task<List<Recipe>> BuildRecipeTreeFromDataModel(List<Recipe> recipes);
         public Task<int> CountNumberOfSimilarIngredients(string ingredientName);
     }
