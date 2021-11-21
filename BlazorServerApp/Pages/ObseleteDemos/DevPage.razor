@@ -1,17 +1,74 @@
-﻿@page "/dev"
-<div>
-    CurrentCounterValue in MyFirstComponent is @CurrentCounterValue
-</div>
-<button @onclick=@UpdateCurrentCounterValue>Update</button>
-@code {
-    [Parameter]
-    public int CurrentCounterValue { get; set; }
-    [Parameter]
-    public EventCallback<int> CurrentCounterValueChanged { get; set; }
-    async Task UpdateCurrentCounterValue()
+﻿@using System.Text.RegularExpressions
+@page "/dev"
+<h1>Put text here to analyse</h1>
+<textarea type="text" class="form-control" name="x" placeholder="Search term..." @bind="@textArea"></textarea>
+<button @onclick="@DoProcessing" class="btn btn-primary">Run Regexes</button>
+<p>@textArea</p>
+Ingredients with count:
+<ul>
+@foreach (string s in ingredientsWithCount)
+{
+    <li>@s</li>
+}
+    </ul>
+Ingrediens without counts:
+<ul>
+    @foreach (string s in ingredients)
     {
-        CurrentCounterValue++;
-        await CurrentCounterValueChanged.InvokeAsync(CurrentCounterValue);
+        <li>@s</li>
+    }
+</ul>
+Times;
+
+@foreach (string s in times)
+{
+    <p>@s</p>
+}
+Servings:
+@foreach (string s in servings)
+{
+    <p>@s</p>
+}
+Methods:
+@foreach (string s in methods)
+{
+    <p>@s</p>
+}
+@code {
+    public string textArea { get; set; } = "";
+    List<string> ingredientsWithCount = new List<string>();
+    List<string> ingredients = new List<string>();
+    List<string> times = new List<string>();
+    List<string> servings = new();
+    List<string> methods = new();
+
+    public void DoProcessing()
+    {
+        string spoons = "((rounded|heaped|level) )?((tea|desert|table) spoon|tbsp|tsp)s?";
+        string units = "(((fluid ounce|ounce|oz|kilograms|cup|cup|gram|pint|pound|quart|g|kg|ml|fl\\.|gal\\.|lb\\.|pt|qt\\.)s?)|(((rounded|heaped|level) )?(((tea|desert|table) ?spoon)|tbsp|tsp)s?))"; //sort by length- ie teaspoons before teaspoon
+
+        string numbers = "([0-9]|½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒)";
+        MatchCollection matchList = Regex.Matches(textArea, "[1-9][0-9]? ((?!"+units+")[A-z]| |,|\\([^\r\t\\(\\)\n]{2,100}\\)|-){3,150}[a-z]", RegexOptions.IgnoreCase, new TimeSpan(10000000));
+        ingredientsWithCount = matchList.Cast<Match>().Select(match => match.Value).ToList();
+
+        Console.WriteLine("[1-9][0-9]? ((?!" + units + ")[A-z]| |,|\\([^\r\t\\(\\)\n]{2,100}\\)|-){3,150}[a-z]");
+
+        matchList = Regex.Matches(textArea, "([1-9][0-9]?( (to|-|—) ))?[1-9][0-9]? (minutes|mins|min|minute|hours|hour|seconds|second|days|day)", RegexOptions.IgnoreCase, new TimeSpan(10000000));
+        times = matchList.Cast<Match>().Select(match => match.Value).ToList();
+
+        matchList = Regex.Matches(textArea, "((serves|makes) ?[1-9][0-9]?)|([1-9][0-9]? (servings|serving|portions|portion))", RegexOptions.IgnoreCase, new TimeSpan(10000000));
+        servings = matchList.Cast<Match>().Select(match => match.Value).ToList();
+
+        //Go to https://regexr.com/69vqp to understand how this works
+        matchList = Regex.Matches(textArea, "[1-9][0-9]{0,3}.\t[^\t\n\r]{10,500}", RegexOptions.IgnoreCase, new TimeSpan(10000000));
+        methods = matchList.Cast<Match>().Select(match => match.Value).ToList();
+
+
+        //Go to https://regexr.com/69vn4 for a break down. 
+        string ingredientsSearch = "(([0-9]|½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒) )?([0-9]|½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒)(\\.|\\/| )?([0-9]|½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒){0,6} ?"+units+" [^\\.\\;\n\t]{3,200}";
+
+        matchList = Regex.Matches(textArea, ingredientsSearch, RegexOptions.IgnoreCase, new TimeSpan(10000000));
+        ingredientsWithCount = matchList.Cast<Match>().Select(match => match.Value).ToList();
     }
 
 }

@@ -40,7 +40,7 @@
                                                 }
                                         </InputSelect>
 
-                                        <BlazoredTypeahead SearchMethod="dataLoader.FindIngredients"
+                                        <BlazorServerApp.Blazored_Typeahead.BlazoredTypeahead SearchMethod="dataLoader.FindIngredients"
                                                            @bind-Value="copyOfIngredient.IngredientID"
                                                            EnableDropDown="true"
                                                            MinimumLength="3"
@@ -63,7 +63,7 @@
                                             <ResultTemplate Context="ingredient">
                                                 @ingredient.IngredientName
                                             </ResultTemplate>
-                                        </BlazoredTypeahead>
+                                        </BlazorServerApp.Blazored_Typeahead.BlazoredTypeahead>
                                         <div>
                                             <ValidationMessage For="@(() => copyOfIngredient)" />
                                         </div>
@@ -98,7 +98,7 @@
                         <div class="row row-cols-1">
 
 
-                            <BlazoredTypeahead SearchMethod="dataLoader.FindEquipmentLike"
+                            <BlazorServerApp.Blazored_Typeahead.BlazoredTypeahead SearchMethod="dataLoader.FindEquipmentLike"
                                                @bind-Values="RecipeModel.Equipment"
                                                EnableDropDown="true"
                                                MinimumLength="3"
@@ -115,10 +115,11 @@
                                     Add "@searchText" as a new equipment <br />
                                     The newly added ingredient will be selected after being added.
                                 </NotFoundTemplate>
+
                                 <ResultTemplate Context="equipment">
                                     @equipment.EquipmentName
                                 </ResultTemplate>
-                            </BlazoredTypeahead>
+                            </BlazorServerApp.Blazored_Typeahead.BlazoredTypeahead>
                             <ValidationMessage For="@(() => RecipeModel.Equipment)" />
                         </div>
                     </div>

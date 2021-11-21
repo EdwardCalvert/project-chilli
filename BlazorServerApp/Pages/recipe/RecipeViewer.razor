@@ -11,6 +11,7 @@ else if (!validIdentifier)
 {
     <ErrorNotification ErrorMessage="Sorry, the ID you provided was not recognised as valid!" />
 }
+
 else if (model != null)
 {
     <h2>@model.RecipeName</h2>
@@ -52,7 +53,7 @@ else if (model != null)
                 <ul>
                     @foreach (UserDefinedIngredientInRecipe ingredient in model.Ingredients)
                     {
-                        <li><em>@ingredient.Quantity @ingredient.Unit</em> @( dataLoader.GetIngredientName((uint)ingredient.IngredientID).Result) </li>
+                        <li><em>@ingredient.Quantity@ingredient.Unit</em> @( dataLoader.GetIngredientName((uint)ingredient.IngredientID).Result) </li>
                     }
                 </ul>
             </div>
@@ -84,6 +85,7 @@ else if (model != null)
         }
 
         <ReviewSection RecipeID="@RecipeID" />
+        
     </div>
     @*if (model.DocxFilePath != null)
     {
