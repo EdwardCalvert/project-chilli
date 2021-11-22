@@ -2,8 +2,7 @@
 @page "/dev"
 <h1>Put text here to analyse</h1>
 <textarea type="text" class="form-control" name="x" placeholder="Search term..." @bind="@textArea"></textarea>
-<button @onclick="@DoProcessing" class="btn btn-primary">Run Regexes</button>
-<p>@textArea</p>
+<button @onclick="@CreateRecipe" class="btn btn-primary">Run Regexes</button>
 Ingredients with count:
 <ul>
 @foreach (string s in ingredientsWithCount)
@@ -11,6 +10,8 @@ Ingredients with count:
     <li>@s</li>
 }
     </ul>
+
+Title @title
 Ingrediens without counts:
 <ul>
     @foreach (string s in ingredients)
@@ -18,8 +19,7 @@ Ingrediens without counts:
         <li>@s</li>
     }
 </ul>
-Times;
-
+Total time:
 @foreach (string s in times)
 {
     <p>@s</p>
@@ -30,10 +30,26 @@ Servings:
     <p>@s</p>
 }
 Methods:
-@foreach (string s in methods)
-{
-    <p>@s</p>
-}
+<ol>
+    @foreach (string s in methods)
+    {
+    <li>@s</li>
+    }
+</ol>
+<p>Description</p><p>
+    @foreach (string line in description.Split("\n"))
+    {
+        if (previousLine.Length <=2 && line.Length<=2)
+        {
+            previousLine = line;
+        }
+        else
+        {
+            @line <br>
+            previousLine = line;
+        }
+    }
+</p>
 @code {
     public string textArea { get; set; } = "";
     List<string> ingredientsWithCount = new List<string>();
@@ -41,34 +57,116 @@ Methods:
     List<string> times = new List<string>();
     List<string> servings = new();
     List<string> methods = new();
+    string title = "";
+    string description = "";
+    string previousLine = "";
+    int totalTime = 0;
 
-    public void DoProcessing()
+    public int FindTotalTimeFromInputThatMayHaveHypens(string input)
     {
-        string spoons = "((rounded|heaped|level) )?((tea|desert|table) spoon|tbsp|tsp)s?";
-        string units = "(((fluid ounce|ounce|oz|kilograms|cup|cup|gram|pint|pound|quart|g|kg|ml|fl\\.|gal\\.|lb\\.|pt|qt\\.)s?)|(((rounded|heaped|level) )?(((tea|desert|table) ?spoon)|tbsp|tsp)s?))"; //sort by length- ie teaspoons before teaspoon
+        if(input == null || input.Length == 0)
+        {
+            return 0;
+        }
+        else{
+            MatchCollection numbersWithHypens = Regex.Matches(input,"([1-9][0-9]?( (to|-|—) ))[1-9][0-9]?");
+            foreach(Match match in numbersWithHypens)
+                {
 
-        string numbers = "([0-9]|½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒)";
-        MatchCollection matchList = Regex.Matches(textArea, "[1-9][0-9]? ((?!"+units+")[A-z]| |,|\\([^\r\t\\(\\)\n]{2,100}\\)|-){3,150}[a-z]", RegexOptions.IgnoreCase, new TimeSpan(10000000));
-        ingredientsWithCount = matchList.Cast<Match>().Select(match => match.Value).ToList();
+                }
+            return 0;
+        }
 
-        Console.WriteLine("[1-9][0-9]? ((?!" + units + ")[A-z]| |,|\\([^\r\t\\(\\)\n]{2,100}\\)|-){3,150}[a-z]");
+    }
 
-        matchList = Regex.Matches(textArea, "([1-9][0-9]?( (to|-|—) ))?[1-9][0-9]? (minutes|mins|min|minute|hours|hour|seconds|second|days|day)", RegexOptions.IgnoreCase, new TimeSpan(10000000));
-        times = matchList.Cast<Match>().Select(match => match.Value).ToList();
+    public void CreateRecipe()
+    {
+        title = textArea.Split("\n")[0];
+        description = textArea;
+        //see https://regexr.com/69vg0
+        const string SPOONS = "((rounded|heaped|level) )?((tea|desert|table)? ?(spoonful|spoon|tbsp|tsp))s?";
+        const string UNITS = "(((fluid ounce|ounce|oz|kilograms|cup|cup|gram|pint|pound|quart|g|kg|ml|fl\\.|gal\\.|lb\\.|pt|qt\\.|bunch|handful)s?)|(" + SPOONS+"))"; //sort by length- ie teaspoons before teaspoon
+        const string NUMBERS = "([0-9]|½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒)";
+        const string TIMEWORDS = "(minutes|minute|mins|min|hours|hour|seconds|second|days|day)";
+        const string ingredientsSearch = "" + NUMBERS + "{0,3} ?" + NUMBERS + "(\\.|\\/| |-)?" + NUMBERS + "{0,6} ?" + UNITS + " [^\\.\\;\n\t]{3,200}";
 
-        matchList = Regex.Matches(textArea, "((serves|makes) ?[1-9][0-9]?)|([1-9][0-9]? (servings|serving|portions|portion))", RegexOptions.IgnoreCase, new TimeSpan(10000000));
-        servings = matchList.Cast<Match>().Select(match => match.Value).ToList();
+
+        MatchCollection timeRegex = Regex.Matches(textArea, "([1-9][0-9]?( (to|-|—) ))?[1-9][0-9]? "+TIMEWORDS, RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
+        string textAreaWithoutTimes = "";
+        foreach (Match match in timeRegex)
+        {
+            string unit = "";
+            int totalTimeInMinutes = 0;
+
+            //if(match.Value.Contains(minutes|minute|mins|mi))
+            MatchCollection units =  Regex.Matches(match.Value, TIMEWORDS, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if(units.Count ==1)
+            {
+                unit = units[0].Value;
+                switch (unit)
+                {
+                    case "minutes":
+                    case "minute":
+                    case "mins":
+                    case "min":
+                        //add numerical value to total time;
+                        break;
+                    case "hours":
+                    case "hour":
+                        break;
+                    case "second":
+                    case "seconds":
+                        break;
+                    case "day":
+                    case "days":
+                        break;
+
+                }
+            }
+            textAreaWithoutTimes = description.Replace(match.Value, "");
+            times.Add(match.Value);
+        }
+
+        //https://regexr.com/69vg0
+        MatchCollection servingRegularExpression = Regex.Matches(textArea, "((serves|makes) ?[1-9][0-9]? ?(to|-)? ?[1-9]?[0-9]?)|([1-9][0-9]? ?(to|-)? ?[1-9]?[0-9]? ?(servings|serving|portions|portion))", RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
+        foreach (Match match in servingRegularExpression)
+        {
+            //description = description.Replace(match, "");
+            textAreaWithoutTimes = description.Replace(match.Value, "");
+            servings.Add(match.Value);
+        }
 
         //Go to https://regexr.com/69vqp to understand how this works
-        matchList = Regex.Matches(textArea, "[1-9][0-9]{0,3}.\t[^\t\n\r]{10,500}", RegexOptions.IgnoreCase, new TimeSpan(10000000));
-        methods = matchList.Cast<Match>().Select(match => match.Value).ToList();
-
+        MatchCollection methodMatchCollection = Regex.Matches(textArea, "[1-9][0-9]{0,3}\\.(\t| )[^\t\n\r]{10,500}",RegexOptions.Compiled| RegexOptions.IgnoreCase, new TimeSpan(10000000));
+        foreach (Match match in methodMatchCollection)
+        {
+            description = description.Replace(match.Value, "");
+            textAreaWithoutTimes = description.Replace(match.Value, "");
+            methods.Add(Regex.Replace(match.Value, "[1-9][0-9]{0,3}\\.(\t| )", ""));
+        }
 
         //Go to https://regexr.com/69vn4 for a break down. 
-        string ingredientsSearch = "(([0-9]|½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒) )?([0-9]|½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒)(\\.|\\/| )?([0-9]|½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒){0,6} ?"+units+" [^\\.\\;\n\t]{3,200}";
+        MatchCollection ingredientsWithUnitsRegex = Regex.Matches(textArea, ingredientsSearch, RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
+        foreach (Match match in ingredientsWithUnitsRegex)
+        {
+            string unit = "";
+            MatchCollection units = Regex.Matches(match.Value, UNITS, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if (units.Count == 1)
+            {
+                unit = units[0].Value;
+            }
+            description = description.Replace(match.Value, "");
+            textAreaWithoutTimes = description.Replace(match.Value, "");
+            ingredientsWithCount.Add(match.Value);
+        }
 
-        matchList = Regex.Matches(textArea, ingredientsSearch, RegexOptions.IgnoreCase, new TimeSpan(10000000));
-        ingredientsWithCount = matchList.Cast<Match>().Select(match => match.Value).ToList();
+        MatchCollection ingredientsWithNumber = Regex.Matches(textAreaWithoutTimes, "[1-9][0-9]? ((?!" + UNITS +"|"+ TIMEWORDS+ ")[A-z]| |,|\\([^\r\t\\(\\)\n]{2,100}\\)|-){3,150}[a-z]", RegexOptions.Compiled, new TimeSpan(10000000));
+        foreach (Match match in ingredientsWithNumber)
+        {
+            description= description.Replace(match.Value, "");
+            ingredients.Add(match.Value);
+        }
+       // description = description.Replace("Ingredients", "Ingredients- download recipe for a more comprehensive view");
     }
 
 }

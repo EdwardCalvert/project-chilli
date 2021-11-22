@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MD5", "MD5\MD5.csproj", "{2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocxReader", "DocxReader\DocxReader.csproj", "{36C02BAB-67BC-46DF-BCB8-38E7CAD24296}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Levensthein distance", "Levensthein distance\Levensthein distance.csproj", "{6C4AADC2-71BD-4DC7-B0FC-9892D1BAA1AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{36C02BAB-67BC-46DF-BCB8-38E7CAD24296}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36C02BAB-67BC-46DF-BCB8-38E7CAD24296}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36C02BAB-67BC-46DF-BCB8-38E7CAD24296}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C4AADC2-71BD-4DC7-B0FC-9892D1BAA1AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C4AADC2-71BD-4DC7-B0FC-9892D1BAA1AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C4AADC2-71BD-4DC7-B0FC-9892D1BAA1AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C4AADC2-71BD-4DC7-B0FC-9892D1BAA1AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
