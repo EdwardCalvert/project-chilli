@@ -243,9 +243,9 @@ namespace BlazorServerApp.Models
             return results[0];
         }
 
-        public async Task<List<Recipe>> GetHomepageRecipes()
+        public async Task<List<Recipe>> GetHomepageRecipes(int offset)
         {
-            List<Recipe> datas = await _data.LoadData<Recipe, dynamic>("SELECT * FROM Recipe ORDER BY PageVisits DESC LIMIT 20", new { }, _config.GetConnectionString("recipeDatabase"));
+            List<Recipe> datas = await _data.LoadData<Recipe, dynamic>($"SELECT * FROM Recipe ORDER BY PageVisits DESC LIMIT 20 OFFSET {offset}", new { }, _config.GetConnectionString("recipeDatabase"));
             return await BuildRecipeTreeFromDataModel(datas);
         }
 

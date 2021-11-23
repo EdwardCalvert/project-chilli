@@ -9,7 +9,7 @@ namespace BlazorServerApp.Models
 {
     public interface IRecipeDataLoader
     {
-        public Task<List<Recipe>> GetHomepageRecipes();
+        public Task<List<Recipe>> GetHomepageRecipes(int offset);
         public  Task DeleteRecipeAndRelatedValues(uint RecipeID);
         public  Task UpdateRecipe(Recipe NewModel);
         //public  Task<Ingredient> GetIngredient(uint? IngredientID);

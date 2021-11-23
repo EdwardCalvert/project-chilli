@@ -5,8 +5,7 @@
 @inject NavigationManager NavManager
 @using System.Web;
 
-homepage: @homepage
-<h3>SearchPage</h3>
+<h3>@(homepage? "Homepage": "Search page")</h3>
 <div style="display:flex;">
     <input type="text" class="form-control" name="x" placeholder="Search term..." @bind="searchText">
     <button class="btn btn-primary" @onclick="@ButtonClicked">🔍</button>
@@ -15,7 +14,7 @@ homepage: @homepage
         <button class="btn btn-info" @onclick="@(()=>showHelpText=true)">help</button>
     }
 </div>
-@if (!homepage)
+@if (!homepage || showHelpText)
 {
     <br />
     <p>Things you can search for...</p>
@@ -58,9 +57,16 @@ homepage: @homepage
 
             </div>
 
-        } }
-    else
-    {
+        } 
+
+        @if (recipes.Count % resultsPerQuery == 0)
+        {
+        <btn class="btn btn-primary" @onclick="@LoadMoreRecipesOnRequest">Load more recipes</btn>
+            }
+        }
+
+        else
+        {
         <p>Sorry- no recipes were found.</p>
     }
 </div>
@@ -77,6 +83,8 @@ homepage: @homepage
 
     bool showHelpText = false;
     bool homepage = true;
+    int offset = 0;
+    int resultsPerQuery = 20;
     protected override async Task OnInitializedAsync()
     {
         homepage = !NavManager.ToBaseRelativePath(NavManager.Uri).Contains("search");
@@ -93,7 +101,6 @@ homepage: @homepage
             Recipe r = await dataLoader.GetRecipeAndTree(recipeID);
             recipes.Add(r);
         }
-        this.StateHasChanged();
     }
 
     private async void FindRecipes()
@@ -102,7 +109,7 @@ homepage: @homepage
 
         if (searchText == null)
         {
-            recipes = await dataLoader.GetHomepageRecipes();
+            await GetHomepageRecipes();
         }
 
         else if (searchText.Length > 0)
@@ -115,6 +122,18 @@ homepage: @homepage
     {
         MovePage();
 
+    }
+
+    private async Task GetHomepageRecipes()
+    {
+        List<Recipe> resultsFromDB = await dataLoader.GetHomepageRecipes(offset);
+        offset += resultsFromDB.Count;
+        recipes.AddRange(resultsFromDB);
+    }
+
+    private async Task LoadMoreRecipesOnRequest()
+    {
+        Task.Run(()=> GetHomepageRecipes());
     }
 
     private async void MovePage()

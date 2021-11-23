@@ -81,6 +81,7 @@ namespace BlazorServerApp.Models
             "Kilograms",
             "Pound",
             "Ounce",
+            "Fluid Ounces",
             };
 
         public double Kcal { get; set; }
