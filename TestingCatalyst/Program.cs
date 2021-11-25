@@ -11,6 +11,7 @@ using P = Catalyst.PatternUnitPrototype;
 using System.Text;
 using Microsoft.Extensions.Logging;
 namespace TestingCatalyst
+
 {
     class Program
     {
@@ -21,19 +22,13 @@ namespace TestingCatalyst
             await DoStuff();
         }
 
-        public const string AppleAmber = @"APPLE AMBER
+        public const string AppleAmberWithoutIngredients = @"APPLE AMBER
 Serves 4
 
- Ingredients 
- 750g cooking apples 
- 100g caster sugar  
- 2 eggs
-
-ovenproof dish
 
 Method
 1.	Prepare an oven, Gas 3 or 170°C.Grease the sides of the oven proof dish.
-2.	Peel and slice the apples.Put into a medium saucepan with 2 tbsp of water and cook over low heat until soft.   
+2.	Peel and slice the .Put into a medium saucepan with 2 tbsp of water and cook over low heat until soft.   
 3.	Separate the eggs (break the egg onto a saucer and place an egg cup over the yolk, pour the white into a large bowl).    
 4.	Add the egg yolks to the cooked apple and stir well.
 5.	Put the apple into the oven proof dish.
@@ -51,56 +46,64 @@ Variations:
  
 ";
 
+         const string LotsOfEquipment = @"Apple corer To remove the core and pips from apples and similar fruits		
+Apple cutter		To cut apple and similar fruits easily while simultaneously removing the core and pips.	Cf. peeler	
+Baster		Used during cooking to cover meat in its own juices or with a sauce.	An implement resembling a simple pipette, consisting of a tube to hold the liquid, and a rubber top which makes use of a partial vacuum to control the liquid's intake and release. The process of drizzling the liquid over meat is called basting – when a pastry brush is used in place of a baster, it is known as a basting brush.	
+Beanpot		A deep, wide-bellied, short-necked vessel used to cook bean-based dishes	Beanpots are typically made of ceramic, though pots made of other materials, like cast iron, can also be found. The relatively narrow mouth of the beanpot minimizes evaporation and heat loss, while the deep, wide, thick-walled body of the pot facilitates long, slow cooking times. They are typically glazed both inside and out, and so cannot be used for clay pot cooking.";
+
         public static async Task DoStuff()
         {
-            while (true)
+            string processedDoc = AppleAmberWithoutIngredients.Replace(".", ".  ").Replace(",", ",  ").Replace("\t"," ");
+
+            Storage.Current = new DiskStorage("catalyst-models");
+            var nlp = await Pipeline.ForAsync(Language.English);
+            var doc = new Document(processedDoc, Language.English);
+            nlp.ProcessSingle(doc);
+            Console.WriteLine(doc.TokenizedValue());
+            List<string> noungs = new();
+            foreach (List<TokenData> tokenDatas in doc.TokensData)
             {
-                string text = Console.ReadLine();
-                Storage.Current = new DiskStorage("catalyst-models");
-                var nlp = await Pipeline.ForAsync(Language.English);
-                var doc = new Document(text, Language.English);
-                nlp.ProcessSingle(doc);
-                Console.WriteLine(doc.ToJson());
+                Console.WriteLine("---------------------------------------NEW SENTENCE");
+                PartOfSpeech previousTag = PartOfSpeech.NONE;
+
+               foreach(TokenData data in tokenDatas)
+                {
+                    if(previousTag == PartOfSpeech.ADJ && data.Tag == PartOfSpeech.NOUN)
+                    {
+                        Console.WriteLine("Noun phrase");
+                    }
+                    if(data.Tag == PartOfSpeech.NOUN)
+                    {
+                        noungs.Add(doc.Value.Slice(data.LowerBound, data.UpperBound + 1));
+                    }
+                    Console.WriteLine(data.Tag);
+                    Console.WriteLine(doc.Value.Slice(data.LowerBound,data.UpperBound+1));
+                    Console.WriteLine();
+                    previousTag = data.Tag;
+                }
             }
 
-            //Console.WriteLine("Loading models... This might take a bit longer the first time you run this sample, as the models have to be downloaded from the online repository");
-            //var nlp3 = await Pipeline.ForAsync(Language.English);
-            //nlp.Add(await AveragePerceptronEntityRecognizer.FromStoreAsync(language: Language.English, version: Version.Latest, tag: "WikiNER"));
-            //var isApattern = new PatternSpotter(Language.English, 0, tag: "is-a-pattern", captureTag: "IsA");
-            //isApattern.NewPattern(
-            //    "Is+Noun",
-            //    mp => mp.Add(
-            //        new PatternUnit(P.Single().WithToken("is").WithPOS(PartOfSpeech.VERB)),
-            //        new PatternUnit(P.Multiple().WithPOS(PartOfSpeech.NOUN, PartOfSpeech.PROPN, PartOfSpeech.AUX, PartOfSpeech.DET, PartOfSpeech.ADJ))
-            //));
-            //nlp3.Add(isApattern);
-            //Console.WriteLine(nlp3);
-            //Console.WriteLine(doc.Value);
-            //Console.WriteLine(doc.TokensData);
-            //Console.WriteLine(doc.TokenizedValue());
-            //Console.WriteLine(doc.EntityData);
-            ////Console.WriteLine(doc.)
-            //foreach (KeyValuePair<long,Dictionary<string,string>> keyValuePair in doc.TokenMetadata) {
+            foreach(string s in noungs)
+            {
+                Console.WriteLine(s);
+            }
+        }
 
-            //    Console.WriteLine(keyValuePair.Key);
-            //    foreach(KeyValuePair<string,string> keyValuePair1 in keyValuePair.Value)
-            //    {
-            //        Console.WriteLine(keyValuePair1.Key);
-            //        Console.WriteLine(keyValuePair1.Value);
-            //    }
-            //}
+        
+    }
 
-
-            //Console.WriteLine(doc.ToJson());
-
-
-            //    var nlp2 = await Pipeline.ForAsync(Language.English);
-            //    var ft = new FastText(Language.English, 0, "wiki-word2vec");
-            //    ft.Data.Type = FastText.ModelType.CBow;
-            //    ft.Data.Loss = FastText.LossType.NegativeSampling;
-            //    ft.Train(nlp.Process(GetDocs()));
-            //    ft.StoreAsync();
-            //}
+    public static class stringExtension
+    {
+        public static string Slice(this string source, int start, int end)
+        {
+            if (end < 0) // Keep this for negative end support
+            {
+                end = source.Length + end;
+            }
+            int len = end - start;               // Calculate length
+            return source.Substring(start, len); // Return Substring of length
         }
     }
+
+
 }

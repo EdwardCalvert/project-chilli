@@ -7,6 +7,15 @@ namespace BlazorServerApp.Extensions
 {
     public static class StringExtensionMethods
     {
+        public static string Slice(this string source, int start, int end)
+        {
+            if (end < 0) // Keep this for negative end support
+            {
+                end = source.Length + end;
+            }
+            int len = end - start;               // Calculate length
+            return source.Substring(start, len); // Return Substring of length
+        }
         public static string SentenceCase(this string text)
         {
             return Split(RemoveSpace(text.ToLower()));

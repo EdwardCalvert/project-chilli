@@ -21,6 +21,16 @@ namespace BlazorServerApp.Models
             _config = config;
         }
 
+        public async Task InsertSearchQuery(SearchQuery search)
+        {
+            await _data.SaveData(search.SqlInsertStatement(),search.SqlAnonymousType(),_config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<List<SearchQuery>> FindWordsAPISearch(string search)
+        {
+            return await _data.LoadData<SearchQuery,dynamic>("SELECT * FROM SearchQuery WHERE SearchTerm = @searchTerm", new { searchTerm = search }, _config.GetConnectionString("recipeDatabase"));
+        }
+
         private async Task DeleteMethod(uint RecipeID)
         {
             await _data.SaveData("DELETE FROM Method WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));

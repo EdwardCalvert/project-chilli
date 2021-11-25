@@ -9,6 +9,8 @@ namespace BlazorServerApp.Models
 {
     public interface IRecipeDataLoader
     {
+        public  Task InsertSearchQuery(SearchQuery search);
+        public Task<List<SearchQuery>> FindWordsAPISearch(string search);
         public Task<List<Recipe>> GetHomepageRecipes(int offset);
         public  Task DeleteRecipeAndRelatedValues(uint RecipeID);
         public  Task UpdateRecipe(Recipe NewModel);
