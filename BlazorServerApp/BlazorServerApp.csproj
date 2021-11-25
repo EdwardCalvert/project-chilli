@@ -11,13 +11,13 @@
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="5.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.11.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Open-XML-SDK" Version="2.9.1" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.50" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DataLibrary\DataLibrary.csproj" />
-    <ProjectReference Include="..\DocxReader\DocxReader.csproj" />
     <ProjectReference Include="..\MD5\MD5.csproj" />
   </ItemGroup>
 

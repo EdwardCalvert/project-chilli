@@ -1,9 +1,10 @@
 ﻿@page "/search"
-@page "/search/{searchRoute}"
+@page "/search/{searchRoute}/{orderByURL}/{sortByURL}"
 @page "/"
 @inject IRecipeDataLoader dataLoader
 @inject NavigationManager NavManager
 @using System.Web;
+@using BlazorServerApp.Extensions
 
 <h3>@(homepage? "Homepage": "Search page")</h3>
 <div style="display:flex;">
@@ -16,131 +17,222 @@
 </div>
 @if (!homepage || showHelpText)
 {
-    <br />
-    <p>Things you can search for...</p>
-    <ul>
-        <li>Ingredient, using keyword <b>ingredient</b></li>
-        <li>Equipment, using keyword <b>ingredient</b></li>
-        <li></li>
-    </ul>
-}
-<div class="row">
-    @if (recipes.Count > 0)
-    {
-        @foreach (Recipe model in recipes)
-        {
-            <div class="col-12 col-lg-6">
-
-                <div class="RecipeCard">
-                    <a href="/Recipe/@model.RecipeID" class="No-Decoration ">
-                        <div class="card m-3">
-                            <div class="card-header No-Decoration ColourBlack">
-                                <h1>@model.RecipeName </h1>
-
-                            </div>
-                            <div class="card-body No-Decoration ColourBlack">
-                                <p>Cooking time: @model.CookingTime minutes </p>
-
-                                <p>Preperation time: @model.PreperationTime mintues</p>
-
-                                <ReviewSummary DisplayReviewModel="@model.Reviews" />
-
-                                <FoodLabel nutritionLabel="model.DisplayNutritionModel" StyleParameters="font-size: 9px; overflow-wrap: anywhere;" ShowTitle="false" />
-                                @if (model.Description != null)
-                                {
-                                    <p>Descritption: @model.ShowShortDescription()</p>
-                                }
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-            </div>
-
-        } 
-
-        @if (recipes.Count % resultsPerQuery == 0)
-        {
-        <btn class="btn btn-primary" @onclick="@LoadMoreRecipesOnRequest">Load more recipes</btn>
+    <div style="display:flex; margin-top:5px;">
+        <p style="margin-bottom:0;">Order:</p>
+        <select style="margin-left: 5px; margin-left: 5px;" @bind="@order">
+            @foreach (var orderOption in Enum.GetValues(typeof(SearchEnginge.Order)))
+            {
+                <option value="@orderOption">@orderOption</option>
             }
+            <value></value>
+        </select>
+        <p style="margin-bottom: 0; margin-left: 10px;">Sort by:</p>
+        <select style="margin-left: 5px; margin-left: 5px;" @bind="@sortBy" >
+            @foreach (var orderOption in Enum.GetValues(typeof(SearchEnginge.SortBy)))
+            {
+                <option value="@orderOption">@orderOption</option>
+            }
+            <value></value>
+        </select>
+        </div>
+        <br />
+        <p>Things you can search for...</p>
+        <ul>
+            <li>Ingredient, using keyword <b>ingredient</b></li>
+            <li>Equipment, using keyword <b>ingredient</b></li>
+            <li></li>
+        </ul>
         }
+        <div class="row">
+            @if (recipes.Count > 0)
+            {
+                @foreach (Recipe model in recipes)
+                {
+                    <div class="col-12 col-lg-6">
 
-        else
-        {
-        <p>Sorry- no recipes were found.</p>
-    }
-</div>
+                        <div class="RecipeCard">
+                            <a href="/Recipe/@model.RecipeID" class="No-Decoration ">
+                                <div class="card m-3">
+                                    <div class="card-header No-Decoration ColourBlack">
+                                        <h1>@model.RecipeName.SentenceCase()  </h1><ReviewSummary DisplayReviewModel="@model.Reviews" />
 
+                                    </div>
+                                    <div class="card-body No-Decoration ColourBlack">
+                                        <p>Cooking time: @model.CookingTime minutes </p>
 
+                                        <p>Preperation time: @model.PreperationTime mintues</p>
 
-@code {
+                                        
 
-    string searchText { get; set; }
-    List<Recipe> recipes = new List<Recipe>();
+                                        <FoodLabel nutritionLabel="model.DisplayNutritionModel" StyleParameters="font-size: 9px; overflow-wrap: anywhere;" ShowTitle="false" />
+                                        @if (model.Description != null)
+                                        {
+                                            <p>Descritption: @model.ShowShortDescription()</p>
+                                        }
+                                    </div>
+                                    <div class="= card-footer  No-Decoration ColourBlack"><p>Difficulty: @(model.Difficulty == null? "unknown":model.Difficulty);     Serves: @(model.Servings == 0?"unkown":model.Servings)</p></div>
+                                </div>
+                            </a>
+                        </div>
 
-    [Parameter]
-    public string searchRoute { get; set; }
+                    </div>
 
-    bool showHelpText = false;
-    bool homepage = true;
-    int offset = 0;
-    int resultsPerQuery = 20;
-    protected override async Task OnInitializedAsync()
-    {
-        homepage = !NavManager.ToBaseRelativePath(NavManager.Uri).Contains("search");
-        FindRecipes();
-        this.StateHasChanged();
-    }
+                }
 
-    private async void GetRecipes()
-    {
-        recipes = new List<Recipe>();
-        List<uint> recipeIDs = await dataLoader.GetSearchDatabaseTextFields(searchText);
-        foreach (uint recipeID in recipeIDs)
-        {
-            Recipe r = await dataLoader.GetRecipeAndTree(recipeID);
-            recipes.Add(r);
+                @if (recipes.Count % resultsPerQuery == 0)
+                {
+                    <btn class="btn btn-primary" @onclick="@LoadMoreRecipesOnRequest">Load more recipes</btn>
+                }
+            }
+
+            else
+            {
+                <p>Sorry- no recipes were found.</p>
+            }
+        </div>
+
+        <ErrorNotification ErrorMessage="An unexpected error occured while connecting to the database." Show="error"></ErrorNotification>
+        @code {
+
+            string searchText { get; set; }
+            List<Recipe> recipes = new List<Recipe>();
+
+            SearchEnginge.Order _oder = SearchEnginge.Order.Ascending;
+            SearchEnginge.Order order { get{
+                    return _oder;
+                }
+                set{
+                    _oder = value;
+                    ReOrderResults();
+                }
+            }
+            SearchEnginge.SortBy _sortBy = SearchEnginge.SortBy.Default;
+            SearchEnginge.SortBy sortBy
+            {
+                get { return _sortBy; }
+                set { _sortBy = value;
+                    ReOrderResults();
+                }
+            }
+
+            [Parameter]
+            public string searchRoute { get; set; }
+
+            [Parameter]
+            public string orderByURL { get; set; }
+
+            [Parameter]
+            public string sortByURL { get; set; }
+
+            bool showHelpText = false;
+            bool homepage = true;
+            int offset = 0;
+            int resultsPerQuery = 20;
+            bool error = false;
+            protected override async Task OnInitializedAsync()
+            {
+                homepage = !NavManager.ToBaseRelativePath(NavManager.Uri).Contains("search");
+
+                if (!homepage)
+                {
+                    try
+                    {
+                        if (orderByURL != null && sortByURL != null)
+                        {
+                            order = (SearchEnginge.Order)Enum.Parse(typeof(SearchEnginge.Order), orderByURL, true);
+                            sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
+                        }
+
+                    }
+                    catch
+                    {
+                        order = SearchEnginge.Order.Descending;
+                        sortBy = SearchEnginge.SortBy.Default;
+                        error = true;
+                    }
+
+                }
+
+                FindRecipes();
+                this.StateHasChanged();
+            }
+
+            private async void GetRecipes()
+            {
+                try
+                {
+                    SearchEnginge searchEnginge = new SearchEnginge();
+                    recipes = new List<Recipe>();
+                    List<uint> recipeIDs = await dataLoader.GetSearchDatabaseTextFields(searchText);
+                    foreach (uint recipeID in recipeIDs)
+                    {
+                        Recipe r = await dataLoader.GetRecipeAndTree(recipeID);
+                        recipes.Add(r);
+                        error = false;
+                    }
+                }
+                catch
+                {
+                    error = true;
+                }
+            }
+
+            private async void FindRecipes()
+            {
+                searchText = HttpUtility.UrlDecode(searchRoute);
+
+                if (searchText == null)
+                {
+                    await GetHomepageRecipes();
+
+                }
+
+                else if (searchText.Length > 0)
+                {
+                    //GetRecipes();
+                    recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText, sortBy, order));
+
+                    recipes = MergeSort.RecipeMergeSort(recipes, sortBy, order);
+                }
+            }
+
+            private async void ButtonClicked()
+            {
+                Task.Run(() => MovePage());
+
+            }
+
+            private async Task GetHomepageRecipes()
+            {
+                try
+                {
+                    List<Recipe> resultsFromDB = await dataLoader.GetHomepageRecipes(offset);
+                    offset += resultsFromDB.Count;
+                    recipes.AddRange(resultsFromDB);
+                    ReOrderResults();
+                    error = false;
+                }
+                catch
+                {
+                    error = true;
+                }
+            }
+
+            private async Task LoadMoreRecipesOnRequest()
+            {
+                Task.Run(() => GetHomepageRecipes());
+            }
+
+            private async void MovePage()
+            {
+                NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}/{HttpUtility.UrlEncode(order.ToString())}/{HttpUtility.UrlEncode(sortBy.ToString())}", forceLoad: true);
+
+            }
+
+            private  void ReOrderResults()
+            {
+                recipes = MergeSort.RecipeMergeSort(recipes, sortBy, order);
+            }
+
         }
-    }
-
-    private async void FindRecipes()
-    {
-        searchText = HttpUtility.UrlDecode(searchRoute);
-
-        if (searchText == null)
-        {
-            await GetHomepageRecipes();
-        }
-
-        else if (searchText.Length > 0)
-        {
-            GetRecipes();
-        }
-    }
-
-    private async void ButtonClicked()
-    {
-        MovePage();
-
-    }
-
-    private async Task GetHomepageRecipes()
-    {
-        List<Recipe> resultsFromDB = await dataLoader.GetHomepageRecipes(offset);
-        offset += resultsFromDB.Count;
-        recipes.AddRange(resultsFromDB);
-    }
-
-    private async Task LoadMoreRecipesOnRequest()
-    {
-        Task.Run(()=> GetHomepageRecipes());
-    }
-
-    private async void MovePage()
-    {
-        //FindRecipes();
-        NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}", forceLoad: true);
-    }
-
-}
 

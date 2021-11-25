@@ -2,7 +2,9 @@
 @inject NavigationManager NavManager
 @using BlazorServerApp.TextProcessor
 
-<textarea type="text" class="form-control" name="x" placeholder="Search term..." @bind="@textArea"></textarea>
+<h3>Paste text and auotmatically insert into the recipe</h3>
+<p>(this will override the current text of the form)</p>
+<textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput"></textarea> 
 <button @onclick="@ProcessRecipeFromText" class="btn btn-primary">Run Regexes</button>
 
 <ErrorNotification ErrorMessage="@ErrorMessage" Show="@error" />
@@ -229,7 +231,8 @@
     bool error = false;
     string ErrorMessage = "";
 
-    string textArea = "";
+    string _textAre = "";
+    string textArea { get{ return _textAre; } set{ _textAre = value; ProcessRecipeFromText(); } }
 
     Equipment addEquipmentModel { get; set; } = new();
 
@@ -282,8 +285,6 @@
 
     private async Task<UserDefinedIngredient> ItemAddedMethod(string searchText)
     {
-        Console.WriteLine("Should add ingredient");
-
         UserDefinedIngredient newIngredient = new UserDefinedIngredient();
         newIngredient.IngredientName = searchText;
         uint ingredientID = await dataLoader.InsertIngredient(newIngredient); // Because Ingredient ID is null, no text is shown
@@ -316,6 +317,10 @@
             RecipeModel.InsertEmptyMethod(5);
 
         }
+        else
+        {
+
+        }
         return base.OnInitializedAsync();
     }
 
@@ -345,6 +350,6 @@
 
     private async void ProcessRecipeFromText()
     {
-        RecipeModel =await TextProcessor.CreateRecipe(dataLoader, textArea);
+        RecipeModel = await TextProcessor.CreateRecipe(dataLoader, textArea);
     }
 }

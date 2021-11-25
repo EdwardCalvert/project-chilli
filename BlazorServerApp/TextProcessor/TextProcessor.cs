@@ -336,9 +336,5 @@ namespace BlazorServerApp.TextProcessor
             }
             return 0; //Hopefully will never be run!
         }
-    }
-
-
-
-   
+    }  
 }

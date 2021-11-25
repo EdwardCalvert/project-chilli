@@ -9,7 +9,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocxReader\DocxReader.csproj" />
     <ProjectReference Include="..\MD5\MD5.csproj" />
   </ItemGroup>
 

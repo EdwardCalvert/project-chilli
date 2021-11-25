@@ -92,12 +92,16 @@ namespace BlazorServerApp.Models
         public double Carbohydrates { get; set; }
         public double Salt { get; set; }
         public double Protein { get; set; }
-
-        public static readonly List<string> DIFICULTY = new List<string>
+        public static Dictionary<string, int> DifficultyEnum = new Dictionary<string, int>()
         {
-            "Easy","Medium","Hard"
+            { "Easy",1},
+            {"Medium",2 },
+            {"Hard",3 },
         };
 
+
+        public static readonly List<string> DIFICULTY = new List<string>(Recipe.DifficultyEnum.Keys);
+        
         public static RecomendedIntake RecomendedIntake = new RecomendedIntake(2000, 70, 20, 260, 90, 50, 6);
 
         [Required]

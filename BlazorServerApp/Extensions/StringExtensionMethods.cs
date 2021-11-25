@@ -9,7 +9,7 @@ namespace BlazorServerApp.Extensions
     {
         public static string SentenceCase(this string text)
         {
-            return Split(RemoveSpace(text));
+            return Split(RemoveSpace(text.ToLower()));
         }
 
         public static string RemoveSpace(string fullString)

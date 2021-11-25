@@ -1,6 +1,7 @@
 ﻿@page "/Recipe/{RecipeIDRequest:long}"
 @inject IRecipeDataLoader dataLoader
 @inject NavigationManager NavManager
+@using BlazorServerApp.Extensions
 
 @if (!recipeFound)
 {
@@ -33,6 +34,7 @@ else if (model != null)
         Cooking time: @model.CookingTime mins <br />
         Preparation time: @model.PreperationTime mins <br />
         Total time: @(model.PreperationTime + model.CookingTime) mins
+        Difficulty: @model.Difficulty
     </p>
 
     <div>

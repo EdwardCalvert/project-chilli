@@ -13,33 +13,43 @@ else
 {
     <RecipeForm RecipeModel="@recipeModel" mode="RecipeForm.MODES.Edit"/>
 }
+<ErrorNotification ErrorMessage="An unhandled exception occured." Show="@error"></ErrorNotification>
 
     @code {
-        [Parameter]
-        public long RecipeIDRequest { get; set; }
+            [Parameter]
+            public long RecipeIDRequest { get; set; }
 
         private bool validIdentifier;
         private uint RecipeID;
         private bool pageRequested = false;
         private Recipe recipeModel = new Recipe();
+        private bool error = false;
 
-        bool error = false;
 
         protected override async Task OnInitializedAsync()
         {
-            uint Result;
-            validIdentifier = uint.TryParse(RecipeIDRequest.ToString(), out Result);
-            if (validIdentifier)
+            try
             {
-                RecipeID = Result;
-                Recipe models = await dataLoader.GetRecipeAndTree(Result);
-                if (!pageRequested)
+                uint Result;
+                validIdentifier = uint.TryParse(RecipeIDRequest.ToString(), out Result);
+                if (validIdentifier)
                 {
+                    RecipeID = Result;
+                     recipeModel = await dataLoader.GetRecipeAndTree(Result);
+                    if (!pageRequested)
+                    {
 
-                    await dataLoader.IncrementViews(RecipeID);
-                    pageRequested = true;
+                        await dataLoader.IncrementViews(RecipeID);
+                        pageRequested = true;
+                    }
+
+
                 }
-
+                error = false;
+            }
+            catch
+            {
+                error = true;
             }
         }
     }
