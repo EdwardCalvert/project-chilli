@@ -9,6 +9,7 @@ namespace BlazorServerApp.Models
 {
     public interface IRecipeDataLoader
     {
+        public  Task<bool> ContainsStopWord(string searchTerm);
         public  Task InsertSearchQuery(SearchQuery search);
         public Task<List<SearchQuery>> FindWordsAPISearch(string search);
         public Task<List<Recipe>> GetHomepageRecipes(int offset);

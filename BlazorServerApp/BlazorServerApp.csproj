@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.Typeahead" Version="4.6.0" />
+    <PackageReference Include="Catalyst" Version="1.0.23862" />
+    <PackageReference Include="Catalyst.Models.English" Version="1.0.23255" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="5.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.11.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

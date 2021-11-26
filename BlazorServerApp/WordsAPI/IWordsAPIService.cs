@@ -8,6 +8,6 @@ namespace BlazorServerApp.WordsAPI
 {
     public interface IWordsAPIService
     {
-        //public List<UserDefinedIngredientInRecipe> 
+        public Task<TypeOf> CallCachedAPI(string searchTerm);
     }
 }

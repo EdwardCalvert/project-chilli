@@ -40,7 +40,7 @@
     string _textAre = "";
     string textArea { get { return _textAre; } set { _textAre = value; } }
     TypeOf type;
-
+    WordsAPIService wordsAPIService;
     [Flags]
     private enum Binary
     {
@@ -62,26 +62,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-
+         wordsAPIService = new WordsAPIService(httpClientFactory, config, dataLoader);
     }
 
     public async Task FetchDefinition()
     {
-        List<SearchQuery> queries = await dataLoader.FindWordsAPISearch(textArea);
-        if (queries.Count == 1)
-        {
-            type = JsonConvert.DeserializeObject<TypeOf>(queries[0].ResultAsJSON);
-        }
-        else
-        {
-            WordsAPIService wordsAPIService = new WordsAPIService(httpClientFactory, config);
-            type = await wordsAPIService.CallAPI(textArea);
-            SearchQuery searchQuery = new SearchQuery();
-            searchQuery.SearchTerm = textArea;
-            searchQuery.ResultAsJSON = JsonConvert.SerializeObject(type);
-            await dataLoader.InsertSearchQuery(searchQuery);
 
-        }
+        type = await wordsAPIService.CallCachedAPI(textArea);
 
     }
     List<Recipe> results = new();

@@ -15,24 +15,26 @@
         <button class="btn btn-info" @onclick="@(()=>showHelpText=true)">help</button>
     }
 </div>
+<div style="display:flex; margin-top:10px;">
+    <p style="margin-bottom:0;">Order:</p>
+    <select style="margin-left: 5px; margin-left: 5px;" @bind="@order">
+        @foreach (var orderOption in Enum.GetValues(typeof(SearchEnginge.Order)))
+        {
+            <option value="@orderOption">@orderOption</option>
+        }
+    </select>
+    <p style="margin-bottom: 0; margin-left: 10px;">Sort by:</p>
+    <select style="margin-left: 5px; margin-left: 5px;" @bind="@sortBy">
+        @foreach (var orderOption in Enum.GetValues(typeof(SearchEnginge.SortBy)))
+        {
+            <option value="@orderOption">@orderOption</option>
+        }
+    </select>
+</div>
+
 @if (!homepage || showHelpText)
 {
-    <div style="display:flex; margin-top:5px;">
-        <p style="margin-bottom:0;">Order:</p>
-        <select style="margin-left: 5px; margin-left: 5px;" @bind="@order">
-            @foreach (var orderOption in Enum.GetValues(typeof(SearchEnginge.Order)))
-            {
-                <option value="@orderOption">@orderOption</option>
-            }
-        </select>
-        <p style="margin-bottom: 0; margin-left: 10px;">Sort by:</p>
-        <select style="margin-left: 5px; margin-left: 5px;" @bind="@sortBy" >
-            @foreach (var orderOption in Enum.GetValues(typeof(SearchEnginge.SortBy)))
-            {
-                <option value="@orderOption">@orderOption</option>
-            }
-        </select>
-        </div>
+    
         <br />
         <p>Things you can search for...</p>
         <ul>
@@ -95,7 +97,7 @@
             string searchText { get; set; }
             List<Recipe> recipes = new List<Recipe>();
 
-            SearchEnginge.Order _oder = SearchEnginge.Order.Ascending;
+            SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
             SearchEnginge.Order order { get{
                     return _oder;
                 }

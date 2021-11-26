@@ -6,6 +6,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using BlazorServerApp.Extensions;
+using BlazorServerApp.Models;
 
 namespace BlazorServerApp.WordsAPI
 {
@@ -14,19 +16,44 @@ namespace BlazorServerApp.WordsAPI
 
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _config;
+        private readonly IRecipeDataLoader _dataLoader;
         private int remainingCallouts = 2000;
         private bool serviceEnabled = true;
 
 
 
 
-        public WordsAPIService(IHttpClientFactory httpClientFactory, IConfiguration config)
+        public WordsAPIService(IHttpClientFactory httpClientFactory, IConfiguration config,IRecipeDataLoader dataAccess)
         {
             _httpClientFactory = httpClientFactory;
             _config = config;
+            _dataLoader = dataAccess;
+        }
+        
+        public async Task<TypeOf> CallCachedAPI(string searchTerm)
+        {
+            searchTerm = searchTerm.ToLower();
+            if (!await _dataLoader.ContainsStopWord(searchTerm))
+            {
+                List<SearchQuery> queries = await _dataLoader.FindWordsAPISearch(searchTerm);
+                if (queries.Count == 1)
+                {
+                    return JsonConvert.DeserializeObject<TypeOf>(queries[0].ResultAsJSON);
+                }
+                else
+                {
+                    TypeOf type = await CallAPI(searchTerm);
+                    SearchQuery searchQuery = new();
+                    searchQuery.SearchTerm = searchTerm;
+                    searchQuery.ResultAsJSON = JsonConvert.SerializeObject(type);
+                    await _dataLoader.InsertSearchQuery(searchQuery);
+                    return type;
+                }
+            }
+            return null;
         }
 
-        public async Task<TypeOf> CallAPI(string word)
+        private async Task<TypeOf> CallAPI(string word)
 
         {
             if(word == null)

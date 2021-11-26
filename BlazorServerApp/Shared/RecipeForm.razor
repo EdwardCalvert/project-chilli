@@ -1,11 +1,22 @@
 ﻿@inject IRecipeDataLoader dataLoader
 @inject NavigationManager NavManager
+@inject IWordsAPIService wordsAPI
 @using BlazorServerApp.TextProcessor
+@using BlazorServerApp.WordsAPI
 
+@if (mode == MODES.Create)
+{
 <h3>Paste text and auotmatically insert into the recipe</h3>
 <p>(this will override the current text of the form)</p>
-<textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput"></textarea> 
-<button @onclick="@ProcessRecipeFromText" class="btn btn-primary">Run Regexes</button>
+
+@if (runningPatternRecognition)
+{
+    <LoadingElement></LoadingElement>
+}
+else
+{
+<textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput" readonly="@PreventTextboxEdit"></textarea> }
+}
 
 <ErrorNotification ErrorMessage="@ErrorMessage" Show="@error" />
 <table cellspacing="0" id="NewRecipeForm" style="width:100%;border-collapse:collapse;">
@@ -25,7 +36,7 @@
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipeDescriptionLabel">Recipe Description*</label></div>
-                        <div class="FieldData"><InputTextArea style="width: 100%;" id="recipeDescriptionInput" @bind-Value="RecipeModel.Description" /></div>
+                        <div class="FieldData"><InputTextArea style="width: 100%;" id="recipeDescriptionInput" @bind-Value="RecipeModel.Description"  rows="@lines"/></div>
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipeIngredientsLabel">Ingredients* </label></div>
@@ -40,10 +51,10 @@
                                         <InputSelect id="@("recipieIngredientsQuanity" + i)" @bind-Value="copyOfIngredient.Unit" style="padding-left: 5px; margin-right: 5px;">
                                             <option></option>
                                             @foreach (var value in Recipe.SUPPORTEDUNITS)
-                                                {
+                                            {
 
                                                 <option>@value</option>
-                                                }
+                                            }
                                         </InputSelect>
 
                                         <BlazorServerApp.Blazored_Typeahead.BlazoredTypeahead SearchMethod="dataLoader.FindIngredients"
@@ -76,7 +87,7 @@
 
 
                                         <div class="FieldLine">
-                                            <button type="button" style="margin-right:5px" class="btn btn-danger" @onclick="@(e=>DeleteIngredient(i-1))">✕</button>
+                                            <button type="button" style="margin-right:5px" class="btn btn-danger" @onclick="@(e => DeleteIngredient(i - 1))">✕</button>
                                         </div>
                                     </div>
                                 </div>
@@ -142,7 +153,7 @@
                                         <InputText class="" style="width: 100%;" id="@($"EquipmentInputBox{i}")" @bind-Value="@copyOfMethod.MethodText" placeholder="Enter one step here..." />
 
                                         <div class="FieldLine">
-                                            <button class="btn btn-danger" type="button" @onclick="@(e=>DeleteStep(i-1))">✕</button>
+                                            <button class="btn btn-danger" type="button" @onclick="@(e => DeleteStep(i - 1))">✕</button>
                                         </div>
                                     </div>
                                 </li>
@@ -221,6 +232,7 @@
         </tr>
     </tbody>
 </table>
+
 @code{
     [Parameter]
     public Recipe RecipeModel { get; set; }
@@ -228,13 +240,20 @@
     [Parameter]
     public MODES mode { get; set; }
 
+    private bool PreventTextboxEdit = false;
+
+    private int lines = 2;
+
     bool error = false;
     string ErrorMessage = "";
 
     string _textAre = "";
-    string textArea { get{ return _textAre; } set{ _textAre = value; ProcessRecipeFromText(); } }
+    string textArea { get { return _textAre; } set { _textAre = value; ProcessRecipeFromText(); } }
 
     Equipment addEquipmentModel { get; set; } = new();
+
+    bool runningPatternRecognition = false;
+
 
     public enum MODES
     {
@@ -348,8 +367,30 @@
         RecipeModel.InsertEmptyMethod();
     }
 
-    private async void ProcessRecipeFromText()
+    private async Task ProcessRecipeFromText()
     {
-        RecipeModel = await TextProcessor.CreateRecipe(dataLoader, textArea);
+        if (textArea.Length > 50)
+        {
+            try
+            {
+                runningPatternRecognition = true;
+                await Task.Delay(1);      // flushing changes. The trick!!
+                RecipeModel = await TextProcessor.CreateRecipe(dataLoader, textArea, wordsAPI);         // non-async code
+                lines = RecipeModel.Description.Count(f => (f == '\n')) + 1;
+                runningPatternRecognition = false;
+                error = false;
+                PreventTextboxEdit = true;
+                await Task.Delay(1);      // changes are flushed again
+                this.StateHasChanged();
+
+            }
+            catch(Exception e)
+            {
+                ErrorMessage = e.Message;
+                error = true;
+            }
+        }
+
+
     }
 }

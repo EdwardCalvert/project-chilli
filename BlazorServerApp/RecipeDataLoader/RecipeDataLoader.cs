@@ -21,6 +21,12 @@ namespace BlazorServerApp.Models
             _config = config;
         }
 
+        public async Task<bool> ContainsStopWord(string searchTerm)
+        {
+           List<int> resutl = await _data.LoadData<int, dynamic>("SELECT COUNT(*) FROM StopWords WHERE VALUE = @searchTem;", new { searchTem = searchTerm }, _config.GetConnectionString("recipeDatabase"));
+            return resutl[0] == 1;
+        }
+
         public async Task InsertSearchQuery(SearchQuery search)
         {
             await _data.SaveData(search.SqlInsertStatement(),search.SqlAnonymousType(),_config.GetConnectionString("recipeDatabase"));

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using DataLibrary;
 using BlazorServerApp.Models;
 using BlazorServerApp.proccessService;
+using BlazorServerApp.WordsAPI;
 
 namespace BlazorServerApp
 {
@@ -35,13 +36,14 @@ namespace BlazorServerApp
             services.AddSingleton<IRecipeDataLoader, RecipeDataLoader>();
             services.AddSingleton<IFileManger, FileManager>();
             services.AddSingleton<IRecipeProcessorService, RecipeProcessorService>();
+            services.AddSingleton<IWordsAPIService, WordsAPIService>();
 
             services.AddHttpClient();
-            services.AddStackExchangeRedisCache(options =>
-            {
-                options.Configuration = Configuration.GetConnectionString("Redis");
-                options.InstanceName = "RedisDemo_";
-            });
+            //services.AddStackExchangeRedisCache(options =>
+            //{
+            //    options.Configuration = Configuration.GetConnectionString("Redis");
+            //    options.InstanceName = "RedisDemo_";
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

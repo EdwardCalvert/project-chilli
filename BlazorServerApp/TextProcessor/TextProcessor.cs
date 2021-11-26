@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using BlazorServerApp;
 using BlazorServerApp.Models;
+using BlazorServerApp.WordsAPI;
 
 namespace BlazorServerApp.TextProcessor
 {
@@ -136,7 +137,6 @@ namespace BlazorServerApp.TextProcessor
                 }
                 else
                 {
-                    
                     newDescription += line + "\n";
                     previousLine = line;
                 }
@@ -217,8 +217,12 @@ namespace BlazorServerApp.TextProcessor
         const string INGREDIENTSSEACH = "[0-9]{0,3} ?" + NUMBERSWITHFRACTIONS + "(\\.|\\/| |-)?[0-9]{0,6} ?" + UNITS + " [^\\.\\;\n\t]{3,200}";
         const string UNITSFROMTEXT = "(?<=" +NUMBERSWITHFRACTIONS + ") ?" + UNITS + " ";
 
-        public async static Task<Recipe> CreateRecipe(IRecipeDataLoader dataLoader,string inputText)
+        public async static Task<Recipe> CreateRecipe(IRecipeDataLoader dataLoader,string inputText,IWordsAPIService wordsAPIService)
         {
+            if (inputText.Length < 50)
+            {
+                throw new Exception("That can't be a valid recipe!");
+            }
             string description;
             Recipe newRecipe = new Recipe();
             newRecipe.RecipeName = inputText.Split("\n")[0];
@@ -275,7 +279,7 @@ namespace BlazorServerApp.TextProcessor
                  ingredientName = ingredientName.Replace(quantity.ToString(),"").Trim();
                 
                 UserDefinedIngredientInRecipe userDefinedIngredientInRecipe = new UserDefinedIngredientInRecipe();
-                userDefinedIngredientInRecipe.IngredientID = await GetIngredientID(dataLoader,ingredientName);
+                userDefinedIngredientInRecipe.IngredientID = await GetIngredientID(dataLoader,ingredientName,wordsAPIService);
                 userDefinedIngredientInRecipe.Quantity = quantity;
                 userDefinedIngredientInRecipe.Unit = unit;
                 newRecipe.Ingredients.Add(userDefinedIngredientInRecipe);
@@ -292,7 +296,7 @@ namespace BlazorServerApp.TextProcessor
                 UserDefinedIngredientInRecipe userDefinedIngredientInRecipe = new UserDefinedIngredientInRecipe();
                 userDefinedIngredientInRecipe.Quantity = TextProcessor.extractMaximumNumber(match.Value);
                 userDefinedIngredientInRecipe.Unit = "x";
-                userDefinedIngredientInRecipe.IngredientID = await TextProcessor.GetIngredientID(dataLoader, match.Value.Replace(userDefinedIngredientInRecipe.Quantity.ToString(),"").Trim());
+                userDefinedIngredientInRecipe.IngredientID = await TextProcessor.GetIngredientID(dataLoader, match.Value.Replace(userDefinedIngredientInRecipe.Quantity.ToString(),"").Trim(),wordsAPIService);
                 newRecipe.Ingredients.Add(userDefinedIngredientInRecipe);
             }
             newRecipe.Description = TextProcessor.RemoveUneccessaryLinesFromDescription( description);
@@ -309,15 +313,70 @@ namespace BlazorServerApp.TextProcessor
             {
                 newRecipe.Difficulty = "Medium";
             }
+
+            newRecipe.Equipment = await GetEquipmentID(dataLoader,inputText, wordsAPIService);
             return newRecipe;
         }
 
-        public static async Task<uint> GetIngredientID(IRecipeDataLoader dataLoader, string ingredientName)
+        public static bool DoesEquipmentAreadyHaveID(List<Equipment> equipment, string equipmentName)
+        {
+            foreach(Equipment equipment1 in equipment)
+            {
+                if(equipment1.EquipmentName == equipmentName)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static async Task<List<Equipment>> GetEquipmentID(IRecipeDataLoader dataLoader, string descriptonToSearch, IWordsAPIService wordsAPIService)
+        {
+            List<Equipment> EquipmentIDs = new();
+            List<string> nouns = await NounExtractor.ExtractNouns(descriptonToSearch);
+            foreach (string noun in nouns)
+            {
+                bool insertMade = false;
+                TypeOf typeOf = await wordsAPIService.CallCachedAPI(noun);
+                if (typeOf != null && (typeOf.typeOf.Contains("equipment")|| typeOf.typeOf.Contains("kitchen appliance") || typeOf.typeOf.Contains("utensil")))
+                {
+                   IEnumerable<Equipment> equipment =  await dataLoader.FindEquipmentLike(noun);
+                    if(equipment.Any())
+                    {
+                        foreach (Equipment equipment1 in equipment)
+                            if (TextProcessor.LevenshteinDistance(noun, equipment1.EquipmentName) <= TextProcessor.CalculateLevenshteinThreshold(noun) && !insertMade)
+                            {
+                                if (!DoesEquipmentAreadyHaveID(EquipmentIDs, equipment1.EquipmentName))
+                                {
+                                    EquipmentIDs.Add(equipment1);
+                                    insertMade = true;
+                                }
+                                else
+                                {
+                                    insertMade = true;
+                                }
+                                
+                            }
+                    }
+                    if (!insertMade)
+                    {
+                        Equipment equipment1 = new Equipment();
+                        equipment1.EquipmentName = noun;
+                        equipment1.EquipmentID = await dataLoader.InsertEquipment(equipment1);
+                        EquipmentIDs.Add(equipment1);
+                        
+                    }
+                }
+            }
+            return EquipmentIDs; 
+        }
+
+        public static async Task<uint> GetIngredientID(IRecipeDataLoader dataLoader, string ingredientName,IWordsAPIService wordsAPIService)
         {
             //Find any existing ingredients
             IEnumerable<UserDefinedIngredient> ingredientsInDB = await dataLoader.FindIngredients(ingredientName);
             bool foundIngredient = false;
-            if (ingredientsInDB.Count() >= 0)
+            if (ingredientsInDB.Any())
             {
                 foreach (UserDefinedIngredient userDefinedIngredient in ingredientsInDB)
                 {
@@ -330,8 +389,20 @@ namespace BlazorServerApp.TextProcessor
             }
             if (!foundIngredient)
             {
-                UserDefinedIngredient userDefined = new UserDefinedIngredient();
+                //The ingredient has not been found. First, find all the nouns in the text. Then call call wordsAPI to find which type the ingredient belongs to. 
+                UserDefinedIngredient.Type type = UserDefinedIngredient.Type.None;
+                List<string> nouns = await NounExtractor.ExtractNouns(ingredientName);
+                if (nouns != null)
+                {
+                    foreach (string noun in nouns)
+                    {
+                        TypeOf typeOf = await wordsAPIService.CallCachedAPI(noun);
+                        type |= UserDefinedIngredient.GetTypeEnum(typeOf);
+                    }
+                }
+                UserDefinedIngredient userDefined = new ();
                 userDefined.IngredientName = ingredientName;
+                userDefined.TypeOf = type;
                 return await dataLoader.InsertIngredient(userDefined);
             }
             return 0; //Hopefully will never be run!

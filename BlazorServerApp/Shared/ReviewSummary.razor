@@ -4,9 +4,12 @@
 }
 else
 {
-    <p>@Models.Review.ReturnStars(DisplayReviewModel)</p>}
+    <p>@TitleText @Models.Review.ReturnStars(DisplayReviewModel)</p>}
 
 @code {
     [Parameter]
     public List<Review> DisplayReviewModel { get; set; }
+
+    [Parameter]
+    public string TitleText { get; set; }
 }

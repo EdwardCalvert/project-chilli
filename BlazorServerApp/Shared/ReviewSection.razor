@@ -3,8 +3,7 @@
 
 
     @if (Reviews.Count > 0)
-    {
-        <ReviewSummary DisplayReviewModel="Reviews" />
+    { <ReviewSummary DisplayReviewModel="Reviews" TitleText="Average review:" />
         @foreach (Review displayReviewModel in Reviews)
         {
             <div class="card m-3">
