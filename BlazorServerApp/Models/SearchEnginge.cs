@@ -4,18 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using BlazorServerApp.HelperMethods;
 using BlazorServerApp.Models;
+using System.Text.RegularExpressions;
+using BlazorServerApp.TextProcessor;
+using BlazorServerApp.WordsAPI;
 
 namespace BlazorServerApp.Models
 {
     public class SearchEnginge
     {
-        public static readonly List<string> KEYWORDS = new List<string>()
-        {
-            "equipment",
-            "time",
-            "ingredient"
-        };
-
        public enum SearchFields //Things that make sense to be looked for in the database
         {
             RecipeName,
@@ -46,39 +42,51 @@ namespace BlazorServerApp.Models
             Descending,
         }
 
-        public static async Task<List<Recipe>> SearchForRecipes(IRecipeDataLoader dataLoader, string searchTerm,SortBy sortBy,Order order)
+        public static async Task<List<Recipe>> SearchForRecipes(IRecipeDataLoader dataLoader, string searchTerm, IWordsAPIService wordsAPIService)
         {
             List<Recipe> searchResults = new List<Recipe>();
+            List<uint> recipeIDs = new();
             searchTerm = searchTerm.ToLower();
-            //foreach(string keywords in SearchEnginge.KEYWORDS) {
-            //    if (searchTerm.Contains(keywords))
-            //    {
-            //        //Find the approprite search method. And return it?
-            //    }
-            //}
+            //TextProcessor.TextProcessor.
+            UserDefinedIngredient.Type  type=UserDefinedIngredient.GetTypeEnum(searchTerm);
+            TextProcessor.TextProcessor textProcessor = new TextProcessor.TextProcessor(new NounExtractor(),wordsAPIService,dataLoader);
 
-            List<uint> recipeIDs = await dataLoader.GetSearchDatabaseTextFields(searchTerm);
-            foreach (uint recipeID in recipeIDs)
+            if( searchTerm.Contains("vegan") )
             {
-                Recipe r = await dataLoader.GetRecipeAndTree(recipeID);
-                searchResults.Add(r);
+                type = UserDefinedIngredient.Veganism;
+            }
+            else if(searchTerm.Contains("vegetarian"))
+            {
+                type = UserDefinedIngredient.Vegetarianism;
             }
 
+            if (type != UserDefinedIngredient.Type.None)
+            {
 
-            //Sort the results, according to how the user wishes
-            if (sortBy == SortBy.Default)
-            {
-                return searchResults;
-            }
-            else if(sortBy == SortBy.Reviews)
-            {
-                //Do something else (since reviews need to use the.average function!)
-                return searchResults;
             }
             else
             {
-                return  MergeSort.RecipeMergeSort(searchResults, sortBy,order);
+
+                List<UserDefinedIngredientInRecipe> ingredientsInRecipes = await textProcessor.GetIngredientsWithUnits(searchTerm, false);
+
+                if (ingredientsInRecipes.Count > 0)
+                {
+                    foreach (UserDefinedIngredientInRecipe ingredient in ingredientsInRecipes)
+                    {
+                        recipeIDs.Add((uint)ingredient.IngredientID);
+                    }
+                }
+
+                recipeIDs = await dataLoader.GetSearchDatabaseTextFields(searchTerm);
+                foreach (uint recipeID in recipeIDs)
+                {
+                    Recipe r = await dataLoader.GetRecipeAndTree(recipeID);
+                    searchResults.Add(r);
+                }
+
             }
+            return searchResults;
+
         }
 
        

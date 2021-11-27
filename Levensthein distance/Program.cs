@@ -45,12 +45,3 @@ static class LevenshteinDistance
     }
 }
 
-class Program
-{
-	static void Main()
-	{
-		Console.WriteLine(LevenshteinDistance.Compute("aunt", "ant"));
-		Console.WriteLine(LevenshteinDistance.Compute("Sam", "Samantha"));
-		Console.WriteLine(LevenshteinDistance.Compute("flomax", "volmax"));
-	}
-}

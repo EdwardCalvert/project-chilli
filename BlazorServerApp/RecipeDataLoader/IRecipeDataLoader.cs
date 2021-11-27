@@ -15,7 +15,6 @@ namespace BlazorServerApp.Models
         public Task<List<Recipe>> GetHomepageRecipes(int offset);
         public  Task DeleteRecipeAndRelatedValues(uint RecipeID);
         public  Task UpdateRecipe(Recipe NewModel);
-        //public  Task<Ingredient> GetIngredient(uint? IngredientID);
         public  Task IncrementViews(uint RecipeID);
         public Task<bool> DoTablesExist(string tableName);
         public Task<int> SumRecords(string tableName);
@@ -32,7 +31,8 @@ namespace BlazorServerApp.Models
         public Task SaveNewReview(Review newReview);
         public Task<uint> InsertEquipment(Equipment equipment);
         public  Task<List<Recipe>> BuildRecipeTreeFromDataModel(List<Recipe> recipes);
-        public Task<int> CountNumberOfSimilarIngredients(string ingredientName);
         public  Task<List<uint>> GetSearchDatabaseTextFields(string searchText);
+        public Task<List<uint>> GetRecipeIDFromIngredientID(int quantity, string unit, uint userDefinedIngredientID);
+        public Task<List<UserDefinedIngredientInRecipe>> GetIngredientsInRecipe(uint RecipeID);
     }
 }

@@ -9,4 +9,13 @@
     <PackageReference Include="MySql.Data" Version="8.0.26" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="IDataAccess.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+    <Compile Update="MySqlDataAccess.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
 </Project>

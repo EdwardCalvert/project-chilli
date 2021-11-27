@@ -12,18 +12,25 @@ using Microsoft.Extensions.Logging;
 
 namespace BlazorServerApp.TextProcessor
 {
-    public class NounExtractor
+    public class NounExtractor :INounExtractor
+
     {
-        public static async Task<List<string>> ExtractNouns(string wallOfText)
+        private Pipeline nlp;
+
+        public NounExtractor()
         {
             Catalyst.Models.English.Register();
-            string processedDoc = wallOfText.Replace(".", ".  ").Replace(",", ",  ").Replace("\t", " ");
-
             Storage.Current = new DiskStorage("catalyst-models");
-            var nlp = await Pipeline.ForAsync(Language.English);
+            
+        }
+
+        public  async Task<List<string>> ExtractNouns(string wallOfText)
+        {
+            nlp = await Pipeline.ForAsync(Language.English);
+            string processedDoc = wallOfText.Replace(".", ".  ").Replace("\t", " ");
             var doc = new Document(processedDoc, Language.English);
-            nlp.ProcessSingle(doc);
-            Console.WriteLine(doc.TokenizedValue());
+             nlp.ProcessSingle(doc);
+            //Console.WriteLine(doc.TokenizedValue());
             List<string> noungs = new();
             foreach (List<TokenData> tokenDatas in doc.TokensData)
             {
@@ -42,6 +49,11 @@ namespace BlazorServerApp.TextProcessor
         }
 
 
+    }
+
+    public interface INounExtractor
+    {
+        public Task<List<string>> ExtractNouns(string wallOfText);
     }
 
     public static class stringExtension

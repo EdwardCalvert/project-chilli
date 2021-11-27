@@ -3,8 +3,10 @@
 @page "/"
 @inject IRecipeDataLoader dataLoader
 @inject NavigationManager NavManager
+@inject IWordsAPIService wordsAPIservice 
 @using System.Web;
 @using BlazorServerApp.Extensions
+@using BlazorServerApp.WordsAPI
 
 <h3>@(homepage? "Homepage": "Search page")</h3>
 <div style="display:flex;">
@@ -30,6 +32,19 @@
             <option value="@orderOption">@orderOption</option>
         }
     </select>
+    <div style="width:40%; margin-left:5px;">
+        <BlazoredTypeahead @bind-Values="@DietaryEnums" SearchMethod="@GetDieateryStyles" EnableDropDown="true" Disabled="@false" placeholder="search for a dietary requirement ...">
+            <SelectedTemplate Context="numbers">
+                @numbers
+            </SelectedTemplate>
+            <HelpTemplate>
+                Please enter a minimum of 2 characters to perform a search.
+            </HelpTemplate>
+            <ResultTemplate Context="numbers">
+                @numbers
+            </ResultTemplate>
+        </BlazoredTypeahead>
+    </div>
 </div>
 
 @if (!homepage || showHelpText)
@@ -92,147 +107,154 @@
         </div>
 
         <ErrorNotification ErrorMessage="An unexpected error occured while connecting to the database." Show="error"></ErrorNotification>
-        @code {
+@code {
 
-            string searchText { get; set; }
-            List<Recipe> recipes = new List<Recipe>();
+        string searchText { get; set; }
+        List<Recipe> recipes = new List<Recipe>();
 
-            SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
-            SearchEnginge.Order order { get{
-                    return _oder;
-                }
-                set{
-                    _oder = value;
-                    ReOrderResults();
-                }
+        [Parameter] public IList<string> DietaryEnums { get; set; }
+
+        SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
+        SearchEnginge.Order order { get{
+                return _oder;
             }
-            SearchEnginge.SortBy _sortBy = SearchEnginge.SortBy.Default;
-            SearchEnginge.SortBy sortBy
-            {
-                get { return _sortBy; }
-                set { _sortBy = value;
-                    ReOrderResults();
-                }
+            set{
+                _oder = value;
+                ReOrderResults();
             }
-
-            [Parameter]
-            public string searchRoute { get; set; }
-
-            [Parameter]
-            public string orderByURL { get; set; }
-
-            [Parameter]
-            public string sortByURL { get; set; }
-
-            bool showHelpText = false;
-            bool homepage = true;
-            int offset = 0;
-            int resultsPerQuery = 20;
-            bool error = false;
-            protected override async Task OnInitializedAsync()
-            {
-                homepage = !NavManager.ToBaseRelativePath(NavManager.Uri).Contains("search");
-
-                if (!homepage)
-                {
-                    try
-                    {
-                        if (orderByURL != null && sortByURL != null)
-                        {
-                            order = (SearchEnginge.Order)Enum.Parse(typeof(SearchEnginge.Order), orderByURL, true);
-                            sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
-                        }
-
-                    }
-                    catch
-                    {
-                        order = SearchEnginge.Order.Descending;
-                        sortBy = SearchEnginge.SortBy.Default;
-                        error = true;
-                    }
-
-                }
-
-                FindRecipes();
-                this.StateHasChanged();
-            }
-
-            private async void GetRecipes()
-            {
-                try
-                {
-                    SearchEnginge searchEnginge = new SearchEnginge();
-                    recipes = new List<Recipe>();
-                    List<uint> recipeIDs = await dataLoader.GetSearchDatabaseTextFields(searchText);
-                    foreach (uint recipeID in recipeIDs)
-                    {
-                        Recipe r = await dataLoader.GetRecipeAndTree(recipeID);
-                        recipes.Add(r);
-                        error = false;
-                    }
-                }
-                catch
-                {
-                    error = true;
-                }
-            }
-
-            private async void FindRecipes()
-            {
-                searchText = HttpUtility.UrlDecode(searchRoute);
-
-                if (searchText == null)
-                {
-                    await GetHomepageRecipes();
-
-                }
-
-                else if (searchText.Length > 0)
-                {
-                    //GetRecipes();
-                    recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText, sortBy, order));
-
-                    recipes = MergeSort.RecipeMergeSort(recipes, sortBy, order);
-                }
-            }
-
-            private async void ButtonClicked()
-            {
-                Task.Run(() => MovePage());
-
-            }
-
-            private async Task GetHomepageRecipes()
-            {
-                try
-                {
-                    List<Recipe> resultsFromDB = await dataLoader.GetHomepageRecipes(offset);
-                    offset += resultsFromDB.Count;
-                    recipes.AddRange(resultsFromDB);
-                    ReOrderResults();
-                    error = false;
-                }
-                catch
-                {
-                    error = true;
-                }
-            }
-
-            private async Task LoadMoreRecipesOnRequest()
-            {
-                Task.Run(() => GetHomepageRecipes());
-            }
-
-            private async void MovePage()
-            {
-                NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}/{HttpUtility.UrlEncode(order.ToString())}/{HttpUtility.UrlEncode(sortBy.ToString())}", forceLoad: true);
-
-            }
-
-            private  void ReOrderResults()
-            {
-                recipes = MergeSort.RecipeMergeSort(recipes, sortBy, order);
-            }
-
         }
+        SearchEnginge.SortBy _sortBy = SearchEnginge.SortBy.Default;
+        SearchEnginge.SortBy sortBy
+    {
+            get { return _sortBy; }
+            set { _sortBy = value;
+                ReOrderResults();
+            }
+        }
+
+        [Parameter]
+        public string searchRoute { get; set; }
+
+        [Parameter]
+        public string orderByURL { get; set; }
+
+        [Parameter]
+        public string sortByURL { get; set; }
+
+        bool showHelpText = false;
+        bool homepage = true;
+        int offset = 0;
+        int resultsPerQuery = 20;
+        bool error = false;
+    bool firstLoad = true;
+
+
+    protected override async Task OnAfterRenderAsync(bool load)
+    {
+        if (firstLoad)
+        {
+            homepage = !NavManager.ToBaseRelativePath(NavManager.Uri).Contains("search");
+
+            if (!homepage)
+            {
+                try
+                {
+                    if (orderByURL != null && sortByURL != null)
+                    {
+                        order = (SearchEnginge.Order)Enum.Parse(typeof(SearchEnginge.Order), orderByURL, true);
+                        sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
+                    }
+
+                }
+                catch
+                {
+                    order = SearchEnginge.Order.Descending;
+                    sortBy = SearchEnginge.SortBy.Default;
+                    error = true;
+                }
+
+            }
+            firstLoad = false;
+            FindRecipes();
+            this.StateHasChanged();
+        }
+    }
+
+    private async Task<IEnumerable<string>> GetDieateryStyles(string text)
+    {
+        List<string> vs = new List<string>();
+        foreach (var irration in Enum.GetValues(typeof(UserDefinedIngredient.Type)))
+        {
+            Console.WriteLine(irration);
+            vs.Add(irration.ToString());
+        }
+
+        return await Task.FromResult(vs);
+    }
+
+    private async void FindRecipes()
+    {
+        try
+        {
+            searchText = HttpUtility.UrlDecode(searchRoute);
+
+            if (searchText == null)
+            {
+                await GetHomepageRecipes();
+
+            }
+
+            else if (searchText.Length > 0)
+            {
+                recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText,wordsAPIservice));
+
+                ReOrderResults();
+            }
+            error = false;
+        }
+        catch
+        {
+            error = true;
+        }
+    }
+
+    private async void ButtonClicked()
+    {
+        await Task.Run(() => MovePage());
+
+    }
+
+    private async Task GetHomepageRecipes()
+    {
+        try
+        {
+            List<Recipe> resultsFromDB = await dataLoader.GetHomepageRecipes(offset);
+            offset += resultsFromDB.Count;
+            recipes.AddRange(resultsFromDB);
+            ReOrderResults();
+            error = false;
+        }
+        catch
+        {
+            error = true;
+        }
+    }
+
+    private async Task LoadMoreRecipesOnRequest()
+    {
+        await Task.Run(() => GetHomepageRecipes());
+    }
+
+    private  void MovePage()
+    {
+        NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}/{HttpUtility.UrlEncode(order.ToString())}/{HttpUtility.UrlEncode(sortBy.ToString())}", forceLoad: true);
+
+    }
+
+    private  void ReOrderResults()
+    {
+        recipes = MergeSort.RecipeMergeSort(recipes, sortBy, order);
+    }
+
+}
 

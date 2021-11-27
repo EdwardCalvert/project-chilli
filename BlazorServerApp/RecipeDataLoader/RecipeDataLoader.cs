@@ -118,25 +118,15 @@ namespace BlazorServerApp.Models
             return autoIncrementResult[0];
         }
 
-        private async Task<List<UserDefinedIngredientInRecipe>> GetIngredientsInRecipe(uint RecipeID)
+        public async Task<List<UserDefinedIngredientInRecipe>> GetIngredientsInRecipe(uint RecipeID)
         {
             return await _data.LoadData<UserDefinedIngredientInRecipe, dynamic>($"SELECT * FROM UserDefinedIngredientsInRecipe WHERE RecipeID =@recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
         }
 
-        //private async Task<List<Ingredient>> GetIngredientModel(uint IngredientID)
-        //{
-        //    return await _data.LoadData<Ingredient, dynamic>($"SELECT * FROM UserDefinedIngredients WHERE IngredientID =@ingredientID", new { ingredientID = IngredientID }, _config.GetConnectionString("recipeDatabase"));
-        //}
-
-        //public async Task<Ingredient> GetIngredient(uint? IngredientID)
-        //{
-        //    if (IngredientID != null)
-        //    {
-        //        List<Ingredient> model = await GetIngredientModel((uint)IngredientID);
-        //        return model[0];
-        //    }
-        //    return null;
-        //}
+        public async Task<List<uint>> GetRecipeIDFromIngredientID(int quantity, string unit,uint userDefinedIngredientID)
+        {
+            return await _data.LoadData<uint, dynamic>($"SELECT RecipeID FROM UserDefinedIngredientsInRecipe WHERE  Quanity=@quantity AND Unit=@unit AND IngredientID = @ingredientID", new { Quantity = quantity,Unit = unit,IngredientID = userDefinedIngredientID }, _config.GetConnectionString("recipeDatabase"));
+        }
 
         public async Task SaveNewReview(Review review)
         {
@@ -305,12 +295,6 @@ LIMIT 20
         public async Task RunSql(string sql)
         {
             await _data.SaveData(sql, new { }, _config.GetConnectionString("recipeDatabase"));
-        }
-
-        public async Task<int>CountNumberOfSimilarIngredients(string ingredientName)
-        {
-            List<int> vars =  await _data.LoadData<int, dynamic>("SELECT Count(*) FROM Ingredients WHERE IngredientName=@FoodCode;", new { FoodCode = ingredientName }, _config.GetConnectionString("recipeDatabase"));
-            return vars[0];
         }
     }
 }

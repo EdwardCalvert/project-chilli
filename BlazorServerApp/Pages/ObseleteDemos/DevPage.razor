@@ -50,19 +50,9 @@
         Four = 4,
     }
 
-    private enum Ingredients
-    {
-        Poulty = 1,
-        Meat = 2,
-        Egg = 4,
-        Fruit = 8,
-        Vegetables = 16,
-        Nuts = 32,
-    }
-
     protected override async Task OnInitializedAsync()
     {
-         wordsAPIService = new WordsAPIService(httpClientFactory, config, dataLoader);
+        wordsAPIService = new WordsAPIService(httpClientFactory, config, dataLoader);
     }
 
     public async Task FetchDefinition()
@@ -75,7 +65,7 @@
 
     public async void Search()
     {
-        results = await SearchEnginge.SearchForRecipes(dataLoader, "cheese", SearchEnginge.SortBy.CookingTime, SearchEnginge.Order.Descending);
+        //results = await SearchEnginge.SearchForRecipes(dataLoader, "cheese", SearchEnginge.SortBy.CookingTime, SearchEnginge.Order.Descending);
     }
 
 }
