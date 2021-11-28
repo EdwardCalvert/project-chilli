@@ -2,7 +2,7 @@
 Part of my A Level Computer Science Course. 
 You can find the doucmentation here:https://1drv.ms/w/s!Al4Lg6dVSrCSg9ARa24R2Y0yDEf5tg?e=cFfevy
 
-If you want to build this server, create a appsettings.json file in Blazor Server App
+If you want to build this server, create a appsettings.json file in Blazor Server App, replacing the bracketed text where appropriate
 
 {
   "Logging": {
@@ -15,7 +15,7 @@ If you want to build this server, create a appsettings.json file in Blazor Serve
 
   "AllowedHosts": "*",
   "ConnectionStrings": {
-    "recipeDatabase": "Server=<yourIP>;Port=<yourPort>;Database=RecipeDatabase;user id=<yourUsername>;Pwd=<yourPassword>;",
-    "WordsAPI": "<yourAPIKey>"
+    "recipeDatabase": "Server=(yourIP);Port=(yourPort);Database=RecipeDatabase;user id=(yourUsername);Pwd=(yourPassword);",
+    "WordsAPI": "(yourAPIKey)"
   }
 }
