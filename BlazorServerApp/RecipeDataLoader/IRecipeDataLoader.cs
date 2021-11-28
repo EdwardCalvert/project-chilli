@@ -31,8 +31,10 @@ namespace BlazorServerApp.Models
         public Task SaveNewReview(Review newReview);
         public Task<uint> InsertEquipment(Equipment equipment);
         public  Task<List<Recipe>> BuildRecipeTreeFromDataModel(List<Recipe> recipes);
-        public  Task<List<uint>> GetSearchDatabaseTextFields(string searchText);
+        public  Task<List<uint>> GetSearchDatabaseTextFields(string searchText,int offset);
+        public Task<List<uint>> GetSearchDatabaseTextFields(string searchText, int offset, ushort invertedTypeOfBitPattern);
         public Task<List<uint>> GetRecipeIDFromIngredientID(int quantity, string unit, uint userDefinedIngredientID);
         public Task<List<UserDefinedIngredientInRecipe>> GetIngredientsInRecipe(uint RecipeID);
+        
     }
 }

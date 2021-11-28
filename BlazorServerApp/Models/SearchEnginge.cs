@@ -42,7 +42,7 @@ namespace BlazorServerApp.Models
             Descending,
         }
 
-        public static async Task<List<Recipe>> SearchForRecipes(IRecipeDataLoader dataLoader, string searchTerm, IWordsAPIService wordsAPIService)
+        public static async Task<List<Recipe>> SearchForRecipes(IRecipeDataLoader dataLoader, string searchTerm, IWordsAPIService wordsAPIService, int offset)
         {
             List<Recipe> searchResults = new List<Recipe>();
             List<uint> recipeIDs = new();
@@ -62,7 +62,7 @@ namespace BlazorServerApp.Models
 
             if (type != UserDefinedIngredient.Type.None)
             {
-
+                recipeIDs.AddRange(await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset, (ushort)~(ushort)type));
             }
             else
             {
@@ -76,14 +76,15 @@ namespace BlazorServerApp.Models
                         recipeIDs.Add((uint)ingredient.IngredientID);
                     }
                 }
+                recipeIDs.AddRange( await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset));
 
-                recipeIDs = await dataLoader.GetSearchDatabaseTextFields(searchTerm);
-                foreach (uint recipeID in recipeIDs)
-                {
-                    Recipe r = await dataLoader.GetRecipeAndTree(recipeID);
-                    searchResults.Add(r);
-                }
 
+            }
+            
+            foreach (uint recipeID in recipeIDs)
+            {
+                Recipe r = await dataLoader.GetRecipeAndTree(recipeID);
+                searchResults.Add(r);
             }
             return searchResults;
 

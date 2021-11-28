@@ -1,23 +1,28 @@
 ﻿@page  "/Recipe/{RecipeIDRequest:long}/Edit"
 @inject IRecipeDataLoader dataLoader
-<h3>EditRecipe</h3>
-@if (recipeModel == null)
-{
-    <LoadingElement />
-}
-else if (!validIdentifier)
-{
-    <ErrorNotification ErrorMessage="Sorry, the ID you provided was not recognised as valid!" />
-}
-else
-{
-    <RecipeForm RecipeModel="@recipeModel" mode="RecipeForm.MODES.Edit"/>
-}
-<ErrorNotification ErrorMessage="An unhandled exception occured." Show="@error"></ErrorNotification>
+
+    <AuthorizeView Roles="Administrator">
+        <h3>EditRecipe</h3>
+        @if (recipeModel == null)
+        {
+            <LoadingElement />
+        }
+        else if (!validIdentifier)
+        {
+            <ErrorNotification ErrorMessage="Sorry, the ID you provided was not recognised as valid!" />
+        }
+        else
+        {
+            <RecipeForm RecipeModel="@recipeModel" mode="RecipeForm.MODES.Edit" />
+        }
+        <ErrorNotification ErrorMessage="An unhandled exception occured." Show="@error"></ErrorNotification>
+    </AuthorizeView>
+
+    <AuthorizeView><NotAuthorized><p>Sorry, you will need to login to edit recipes. I don't trust you. Yet.</p></NotAuthorized></AuthorizeView>
 
     @code {
-            [Parameter]
-            public long RecipeIDRequest { get; set; }
+        [Parameter]
+        public long RecipeIDRequest { get; set; }
 
         private bool validIdentifier;
         private uint RecipeID;
@@ -35,7 +40,7 @@ else
                 if (validIdentifier)
                 {
                     RecipeID = Result;
-                     recipeModel = await dataLoader.GetRecipeAndTree(Result);
+                    recipeModel = await dataLoader.GetRecipeAndTree(Result);
                     if (!pageRequested)
                     {
 

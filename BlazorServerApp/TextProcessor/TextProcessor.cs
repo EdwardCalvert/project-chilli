@@ -389,7 +389,12 @@ namespace BlazorServerApp.TextProcessor
 
             newRecipe.Difficulty = await Task.Run(() => GetDifficulty(newRecipe.Method));
 
-            newRecipe.Equipment = await Task.Run(() => GetEquipmentID(inputText));
+            string possibleNouns = newRecipe.Description;
+            foreach (Method s in newRecipe.Method)
+            {
+                possibleNouns += s.MethodText + "\n ";
+            }
+            newRecipe.Equipment = await Task.Run(() => GetEquipmentID(possibleNouns));
             return newRecipe;
         }
 
@@ -465,12 +470,13 @@ namespace BlazorServerApp.TextProcessor
 
         public  async Task<uint?> GetIngredientID( string ingredientName, bool insertIngredientOnEmptyResult)
         {
+            ingredientName = ingredientName.Replace("•	","");
             uint? ingredientId = await FindIngredientInDatabase(ingredientName);
             if (ingredientId == null && insertIngredientOnEmptyResult)
             {
                 //The ingredient has not been found. First, find all the nouns in the text. Then call call wordsAPI to find which type the ingredient belongs to.
                 UserDefinedIngredient.Type type = UserDefinedIngredient.Type.None;
-                List<string> nouns = await _nounExtractor.ExtractNouns(ingredientName);
+                List<string> nouns = ingredientName.Split(" ").ToList();// await _nounExtractor.ExtractNouns(ingredientName);
                 if (nouns != null)
                 {
                     foreach (string noun in nouns)

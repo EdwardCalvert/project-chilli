@@ -267,9 +267,12 @@ namespace BlazorServerApp.Models
             return null;
         }
 
-        public async Task<List<uint>> GetSearchDatabaseTextFields(string searchText)
+        public async Task<List<uint>> GetSearchDatabaseTextFields(string searchText,int offset)
         {
-            string sql = @"SELECT  RecipeID FROM Method
+            return await _data.LoadData<uint, dynamic>(FullTextSearchWithoutLimit +QueryLimit + Terminator, new { searchText = searchText ,offset = offset}, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        private const string FullTextSearchWithoutLimit = @"SELECT  RecipeID FROM Method
 WHERE MATCH(MethodText) AGAINST(@searchText IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION) > 2
 UNION DISTINCT
 SELECT RecipeID FROM Recipe
@@ -286,10 +289,23 @@ INNER JOIN(
 SELECT EquipmentID
 FROM Equipment
 WHERE MATCH(EquipmentName) AGAINST (@searchText IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION)> 2
-) AS T2 ON EquipmentInRecipe.EquipmentID = T2.EquipmentID
-LIMIT 20
-;";
-            return await _data.LoadData<uint, dynamic>(sql, new { searchText = searchText }, _config.GetConnectionString("recipeDatabase"));
+) AS T2 ON EquipmentInRecipe.EquipmentID = T2.EquipmentID";
+
+        private const string QueryLimit = " LIMIT 20 OFFSET 0";
+        private const string BitwiseDieaterySearch = @"SELECT s.RecipeID
+FROM   UserDefinedIngredientsInRecipe s
+WHERE  s.IngredientID IN (SELECT IngredientID FROM UserDefinedIngredients WHERE TypeOf & @bitPattern = 0) AND s.RecipeID IN (" + FullTextSearchWithoutLimit + @")
+GROUP BY s.RecipeID 
+" +QueryLimit;
+
+        private const string Terminator = ";";
+
+
+        public async Task<List<uint>> GetSearchDatabaseTextFields(string searchText, int offset,ushort  invertedTypeOfBitPattern)
+        {
+            Console.WriteLine(invertedTypeOfBitPattern);
+            return await _data.LoadData<uint, dynamic>(BitwiseDieaterySearch + Terminator, new { searchText = searchText, offset = offset, bitPattern = invertedTypeOfBitPattern}, _config.GetConnectionString("recipeDatabase"));
+
         }
 
         public async Task RunSql(string sql)

@@ -12,43 +12,36 @@
                 <span class="oi oi-home" aria-hidden="true"  ></span> Home
             </NavLink>
         </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" @onclick="NavigateToSearch" Match="NavLinkMatch.All" href="/search">
-                <span class="oi oi-magnifying-glass" aria-hidden="true"></span>Search
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="/support">
-                <span class="oi oi-person" aria-hidden="true"></span>Support Page
-            </NavLink>
-        </li>
+       
     </ul>
 
-    <hr />
+    
+    <AuthorizeView Roles="Administrator">
+        <hr />
+        <ul class="nav flex-column">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="/createRecipe">
+                    <span class="oi oi-plus" aria-hidden="true"></span>Create Recipe
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="/support">
+                    <span class="oi oi-person" aria-hidden="true"></span>Support Page
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="/upload/word">
+                    <span class="oi oi-data-transfer-upload" aria-hidden="true"></span>Upload Docx
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="/admin/home">
+                    <span class="oi oi-browser" aria-hidden="true"></span>Admin Interface
+                </NavLink>
+            </li>
 
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="/createRecipe">
-                <span class="oi oi-plus" aria-hidden="true"></span>Create Recipe
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="/upload/word">
-                <span class="oi oi-data-transfer-upload" aria-hidden="true"></span>Upload Docx
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="/upload/csv">
-                <span class="oi oi-data-transfer-upload" aria-hidden="true"></span>Upload CSV
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="/admin/home">
-                <span class="oi oi-browser" aria-hidden="true"></span>Admin Interface
-            </NavLink>
-        </li>
-
-    </ul>
+        </ul>
+    </AuthorizeView>
 </div>
 
 @code {

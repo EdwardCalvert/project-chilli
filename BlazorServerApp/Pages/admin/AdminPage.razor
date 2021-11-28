@@ -5,74 +5,80 @@
 @using Microsoft.Extensions.Configuration
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
 @inject IRecipeDataLoader dataLoader
+    <AuthorizeView Context="AnotherForm">
+        <AuthorizeView Roles="Administrator">
+            <h3>Welcome to the admin page!</h3>
+        <h4>Please use this page with caution, as you have the facility to delete tables from the database, which doesn't seem like a great idea!</h4>
+        <h3>Create and delete tables</h3>
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Table Name</th>
+                    <th>Button to intitalise process</th>
+                    <th>Number of records on table</th>
+                    <th>Create sample data</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (string tableName in tables)
+                {
+                    <tr>
+                        <td>@tableName</td>
 
-<h3>Welcome to the admin page!</h3>
-<h4>Please use this page with caution, as you have the facility to delete tables from the database, which doesn't seem like a great idea!</h4>
-<h3>Create and delete tables</h3>
-<table class="table table-striped">
-    <thead class="thead-dark">
-        <tr>
-            <th>Table Name</th>
-            <th>Button to intitalise process</th>
-            <th>Number of records on table</th>
-            <th>Create sample data</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (string tableName in tables)
+                        @if (dataLoader.DoTablesExist(tableName).Result)
+                        {
+                            <td><button class="btn btn-danger">@tableName Table exists. I would give you the option of deleting it,<br />but I haven't made that script yet! </button></td>
+
+                            <td>@dataLoader.SumRecords(tableName).Result</td>
+                            <td><button class="btn btn-primary">Add Data @Result</button></td>
+                        }
+                        else
+                        {
+                            <td><button class="btn btn-primary" @onclick="e=> dataLoader.RunSql(tableCreationCodes[tableName])">Create recipe table</button></td>
+                            <td>0</td>
+                            <td><button class="btn btn-danger">Can't add sample data! Table doesn't exist!</button></td>
+                        }
+
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        </AuthorizeView>
+
+
+    </AuthorizeView>
+    <AuthorizeView><NotAuthorized><p>Sorry, you will need to login to view the admin pane. I don't trust you. Yet.</p></NotAuthorized></AuthorizeView>
+
+
+
+        @if (error)
         {
-            <tr>
-                <td>@tableName</td>
-
-                @if (dataLoader.DoTablesExist(tableName).Result)
-                {
-                    <td><button class="btn btn-danger">@tableName Table exists. I would give you the option of deleting it,<br />but I haven't made that script yet! </button></td>
-
-                    <td>@dataLoader.SumRecords(tableName).Result</td>
-                    <td><button class="btn btn-primary">Add Data @Result</button></td>
-                }
-                else
-                {
-                    <td><button class="btn btn-primary" @onclick="e=> dataLoader.RunSql(tableCreationCodes[tableName])">Create recipe table</button></td>
-                    <td>0</td>
-                    <td><button class="btn btn-danger">Can't add sample data! Table doesn't exist!</button></td>
-                }
-
-            </tr>
+            <ErrorNotification ErrorMessage="@Message" />
         }
 
-    </tbody>
-</table>
+        @code {
+            private List<string> tables = new List<string>() { "Recipe", "Method", "Review", "Equipment", "EquipmentInRecipe" };
+            private string Result { get; set; }
+            bool error = false;
+            bool spinning = false;
+
+            int IngredientInsertPercent { get; set; }
+
+            string Message = "No file(s) selected";
+            IReadOnlyList<IBrowserFile> selectedFiles;
+            const int largestFileSize = 1873691000;
 
 
 
-@if (error)
-{
-    <ErrorNotification ErrorMessage="@Message" />
-}
-
-@code {
-    private List<string> tables = new List<string>() { "Recipe", "Method", "Review", "Equipment", "EquipmentInRecipe" };
-    private string Result { get; set; }
-    bool error = false;
-    bool spinning = false;
-
-    int IngredientInsertPercent { get; set; }
-
-    string Message = "No file(s) selected";
-    IReadOnlyList<IBrowserFile> selectedFiles;
-    const int largestFileSize = 1873691000;
-
-    
-
-    private readonly Dictionary<string, List<string>> sampleData = new Dictionary<string, List<string>>()
+            private readonly Dictionary<string, List<string>> sampleData = new Dictionary<string, List<string>>()
 {
         {"Recipe",new List<string>(){}}
 
     };
 
 
-    private readonly Dictionary<string, string> tableCreationCodes = new Dictionary<string, string>()
+            private readonly Dictionary<string, string> tableCreationCodes = new Dictionary<string, string>()
 {
         { "Recipe",@"CREATE TABLE `Recipe` (
     `RecipeID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -148,4 +154,4 @@ ENGINE=InnoDB
 "}
     };
 
-}
+        }

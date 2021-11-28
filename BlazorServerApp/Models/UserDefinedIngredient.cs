@@ -13,7 +13,7 @@ namespace BlazorServerApp.Models
 
         public Type TypeOf { get; set; }
 
-        public enum Type
+        public enum Type : ushort
         {
             None = 0,
             Poultry = 1,

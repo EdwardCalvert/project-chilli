@@ -32,7 +32,7 @@
             <option value="@orderOption">@orderOption</option>
         }
     </select>
-    <div style="width:40%; margin-left:5px;">
+    @*<div style="width:40%; margin-left:5px;">
         <BlazoredTypeahead @bind-Values="@DietaryEnums" SearchMethod="@GetDieateryStyles" EnableDropDown="true" Disabled="@false" placeholder="search for a dietary requirement ...">
             <SelectedTemplate Context="numbers">
                 @numbers
@@ -44,7 +44,7 @@
                 @numbers
             </ResultTemplate>
         </BlazoredTypeahead>
-    </div>
+    </div>*@
 </div>
 
 @if (!homepage || showHelpText)
@@ -109,47 +109,47 @@
         <ErrorNotification ErrorMessage="An unexpected error occured while connecting to the database." Show="error"></ErrorNotification>
 @code {
 
-        string searchText { get; set; }
-        List<Recipe> recipes = new List<Recipe>();
+    string searchText { get; set; }
+    List<Recipe> recipes = new List<Recipe>();
 
-        [Parameter] public IList<string> DietaryEnums { get; set; }
+    [Parameter] public IList<string> DietaryEnums { get; set; }
 
-        SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
-        SearchEnginge.Order order { get{
-                return _oder;
-            }
-            set{
-                _oder = value;
-                ReOrderResults();
-            }
+    SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
+    SearchEnginge.Order order { get{
+            return _oder;
         }
-        SearchEnginge.SortBy _sortBy = SearchEnginge.SortBy.Default;
-        SearchEnginge.SortBy sortBy
+        set{
+            _oder = value;
+            ReOrderResults();
+        }
+    }
+    SearchEnginge.SortBy _sortBy = SearchEnginge.SortBy.Default;
+    SearchEnginge.SortBy sortBy
     {
-            get { return _sortBy; }
-            set { _sortBy = value;
-                ReOrderResults();
-            }
+        get { return _sortBy; }
+        set { _sortBy = value;
+            ReOrderResults();
         }
+    }
 
-        [Parameter]
-        public string searchRoute { get; set; }
+    [Parameter]
+    public string searchRoute { get; set; }
 
-        [Parameter]
-        public string orderByURL { get; set; }
+    [Parameter]
+    public string orderByURL { get; set; }
 
-        [Parameter]
-        public string sortByURL { get; set; }
+    [Parameter]
+    public string sortByURL { get; set; }
 
-        bool showHelpText = false;
-        bool homepage = true;
-        int offset = 0;
-        int resultsPerQuery = 20;
-        bool error = false;
+    bool showHelpText = false;
+    bool homepage = true;
+    int offset = 0;
+    int resultsPerQuery = 20;
+    bool error = false;
     bool firstLoad = true;
 
 
-    protected override async Task OnAfterRenderAsync(bool load)
+    protected override async Task OnInitializedAsync()
     {
         if (firstLoad)
         {
@@ -174,8 +174,9 @@
                 }
 
             }
+
+            await FindRecipes();
             firstLoad = false;
-            FindRecipes();
             this.StateHasChanged();
         }
     }
@@ -192,7 +193,7 @@
         return await Task.FromResult(vs);
     }
 
-    private async void FindRecipes()
+    private async Task FindRecipes()
     {
         try
         {
@@ -206,7 +207,7 @@
 
             else if (searchText.Length > 0)
             {
-                recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText,wordsAPIservice));
+                recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText,wordsAPIservice,offset ));
 
                 ReOrderResults();
             }

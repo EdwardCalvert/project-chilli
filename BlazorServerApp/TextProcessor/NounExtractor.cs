@@ -30,11 +30,10 @@ namespace BlazorServerApp.TextProcessor
             string processedDoc = wallOfText.Replace(".", ".  ").Replace("\t", " ");
             var doc = new Document(processedDoc, Language.English);
              nlp.ProcessSingle(doc);
-            //Console.WriteLine(doc.TokenizedValue());
             List<string> noungs = new();
             foreach (List<TokenData> tokenDatas in doc.TokensData)
             {
-                Console.WriteLine("---------------------------------------NEW SENTENCE");
+                //Console.WriteLine("---------------------------------------NEW SENTENCE");
 
                 foreach (TokenData data in tokenDatas)
                 {
