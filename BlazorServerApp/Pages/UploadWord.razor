@@ -14,12 +14,10 @@
 
     <p>
         <label>
-            Upload up to @maxAllowedFiles @(maxAllowedFiles == 1 ? "Word document" : "Word documents (.docx)") to a maximum file size of @maxFileSize bytes:
+            Upload up to @maxAllowedFiles @(maxAllowedFiles == 1 ? "Word document" : "Word documents (.docx)") to a maximum document size of @(maxFileSize/1000) Kilobytes:
             <InputFile OnChange="@LoadFiles" multiple />
         </label>
     </p>
-    <h2>Help</h2>
-    <p>At the time of writing, the maximum file size is 200KB, which is an attempt to prevent doccumetns with multiple recipes being uploaded in the same document(as the pattern recongition algorithms aren't designed with this in mind). If there is a genuinely valid recipe with this much data, try removing any images, as it seems unlikely that you would be making a recipe at school with  1,600 words (or if you do the maths(200KB-20)/2n = 10000 characters). <br /> <br />By uploading a doccument to this page, you are <b>not</b> actually <em>creating</em> a new recipe yet, rather <b><em>queuing</em></b> it for pattern recognition and you may have to wait  overnight for this to happen.<br /><br />The software also detects if a document has already been uploaded, so uploading a duplicate, but with a different file name also results in an error.  </p>
 
 
 
@@ -28,8 +26,23 @@
         <p>Uploading...</p>
     }
 
+
+
+
+
     <FileContentList Result="@resultStructure"></FileContentList>
+
+
+    @if (recipeProcessorService.FilesAreQueued())
+    {
+        <p>The bulk upload script will now appear, which will allow you to proof-read every recipe before it is uploaded.</p>
+        <btn class="btn btn-primary">Yup, I'm happy, show me the  bulk processor.</btn>
+    }
     <ErrorNotification Show="@error" ErrorMessage="@errorMessage"></ErrorNotification>
+
+    <h2>Help</h2>
+    <p>At the time of writing, the maximum file size is 200KB, which is an attempt to prevent doccumetns with multiple recipes being uploaded in the same document(as the pattern recongition algorithms aren't designed with this in mind). If there is a genuinely valid recipe with this much data, try removing any images, as it seems unlikely that you would be making a recipe at school with  1,600 words (or if you do the maths(200KB-20)/2n = 10000 characters). <br /> <br />By uploading a doccument to this page, you are <b>not</b> actually <em>creating</em> a new recipe yet, rather <b><em>queuing</em></b> it for pattern recognition and you may have to wait  overnight for this to happen.<br /><br />The software also detects if a document has already been uploaded, so uploading a duplicate, but with a different file name also results in an error.  </p>
+
     <p style="font-size:8px;">Please note: I am not expecting hackers, and so whatever vulnerability you think you have found will almost definately work. If it is your intention to find the limits of this software, why not submitt a pull request with your enhancement on the <a href="https://github.com/EdwardCalvert/prRecipieDatabase/pulls">github page</a></p>
 
 </AuthorizeView>

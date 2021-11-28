@@ -312,5 +312,20 @@ GROUP BY s.RecipeID
         {
             await _data.SaveData(sql, new { }, _config.GetConnectionString("recipeDatabase"));
         }
+
+        public async Task<User> GetUserFromDatabase(string userName)
+        {
+            List<User> users = await _data.LoadData<User, dynamic>("SELECT * FROM Users WHERE UserName = @userName", new { userName = userName }, _config.GetConnectionString("recipeDatabase"));
+            if(users.Count == 1)
+            {
+                return users[0];
+            }
+            return null;
+        }
+
+        public async Task SaveUser(User user)
+        {
+            await _data.SaveData(user.SqlInsertStatement(), user.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+        }
     }
 }

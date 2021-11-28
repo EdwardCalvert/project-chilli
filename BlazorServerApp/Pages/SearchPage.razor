@@ -10,8 +10,8 @@
 
 <h3>@(homepage? "Homepage": "Search page")</h3>
 <div style="display:flex;">
-    <input type="text" class="form-control" name="x" placeholder="Search term..." @bind="searchText">
-    <button class="btn btn-primary" @onclick="@ButtonClicked">🔍</button>
+    <input type="text" class="form-control" name="x" placeholder="Search term..." @bind="@searchText" @onkeyup="@Enter">
+    <button class="btn btn-primary" @onclick="@SearchButtonClicked" >🔍</button>
     @if (homepage)
     {
         <button class="btn btn-info" @onclick="@(()=>showHelpText=true)">help</button>
@@ -32,19 +32,6 @@
             <option value="@orderOption">@orderOption</option>
         }
     </select>
-    @*<div style="width:40%; margin-left:5px;">
-        <BlazoredTypeahead @bind-Values="@DietaryEnums" SearchMethod="@GetDieateryStyles" EnableDropDown="true" Disabled="@false" placeholder="search for a dietary requirement ...">
-            <SelectedTemplate Context="numbers">
-                @numbers
-            </SelectedTemplate>
-            <HelpTemplate>
-                Please enter a minimum of 2 characters to perform a search.
-            </HelpTemplate>
-            <ResultTemplate Context="numbers">
-                @numbers
-            </ResultTemplate>
-        </BlazoredTypeahead>
-    </div>*@
 </div>
 
 @if (!homepage || showHelpText)
@@ -112,7 +99,6 @@
     string searchText { get; set; }
     List<Recipe> recipes = new List<Recipe>();
 
-    [Parameter] public IList<string> DietaryEnums { get; set; }
 
     SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
     SearchEnginge.Order order { get{
@@ -219,9 +205,21 @@
         }
     }
 
-    private async void ButtonClicked()
+    private async void SearchButtonClicked()
     {
         await Task.Run(() => MovePage());
+
+    }
+
+    public void Enter(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter" || e.Code == "NumpadEnter")
+        {
+            SearchButtonClicked();
+        }
+        //else if(char.IsLetterOrDigit(e.Key))
+        //{
+            //searchText += e.Key;
 
     }
 

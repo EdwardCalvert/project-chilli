@@ -7,15 +7,23 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using BlazorServerApp.Models;
 namespace BlazorCookieAuth.Server.Pages
 {
     [AllowAnonymous]
     public class LoginModel : PageModel
     {
-        public string ReturnUrl { get; set; }
-        public async Task<IActionResult>
-            OnGetAsync(string paramUsername, string paramPassword,string paramUrl)
+
+        private IRecipeDataLoader _dataLoader;
+
+        public LoginModel(IRecipeDataLoader dataLoader)
         {
+            _dataLoader = dataLoader;
+        }
+        public string ReturnUrl { get; set; }
+        public async Task<IActionResult> OnGetAsync(string paramUsername, string paramPassword)
+        {
+
             string returnUrl = Url.Content("~/");
             try
             {
@@ -25,31 +33,44 @@ namespace BlazorCookieAuth.Server.Pages
                     CookieAuthenticationDefaults.AuthenticationScheme);
             }
             catch { }
-            // *** !!! This is where you would validate the user !!! ***
-            // In this example we just log the user in
-            // (Always log the user in for this demo)
-            var claims = new List<Claim>
+
+            try
+            {
+               User user = await _dataLoader.GetUserFromDatabase(paramUsername);
+
+                string sha512 = BlazorServerApp.Models.User.CreateSHAHash(paramPassword);
+                if (user != null && user.SHA512 == sha512)
+                {
+
+                    var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, paramUsername),
                 new Claim(ClaimTypes.Role, "Administrator"),
             };
-            var claimsIdentity = new ClaimsIdentity(
-                claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var authProperties = new AuthenticationProperties
-            {
-                IsPersistent = true,
-                RedirectUri = this.Request.Host.Value
-            };
-            try
-            {
-                await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                authProperties);
+                    var claimsIdentity = new ClaimsIdentity(
+                        claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        RedirectUri = this.Request.Host.Value
+                    };
+                    try
+                    {
+                        await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        authProperties);
+                    }
+                    catch (Exception ex)
+                    {
+                        string error = ex.Message;
+                    }
+                }
+                
             }
-            catch (Exception ex)
+            catch
             {
-                string error = ex.Message;
+
             }
             return LocalRedirect(returnUrl);
         }

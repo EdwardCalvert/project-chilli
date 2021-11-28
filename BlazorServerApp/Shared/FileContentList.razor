@@ -2,19 +2,12 @@
 @if (Result.GetCount(1) > 0)
 {
     <h3>This is the list of successfully uploaded files</h3>
-    @foreach (var file in Result.GetIBrowserFiles(1))
-    {
-        <ul>
-            <li>
-                <ul>
-                    <li>Name: @file.Name</li>
-                    <li>Last modified: @file.LastModified.ToString()</li>
-                    <li>Size (bytes): @file.Size</li>
-                    <li>Content type: @file.ContentType</li>
-                </ul>
-            </li>
-        </ul>
-    }
+    <ul>
+        @foreach (var file in Result.GetIBrowserFiles(1))
+        {
+            <li>@file.Name</li>
+        }
+    </ul>
 
 
 }
@@ -29,7 +22,7 @@
 
         @if (keyValuePair.Value != null && keyValuePair.Value.Count > 0 && keyValuePair.Key != 1 && keyValuePair.Key != 556)
         {
-<h4>Files that @ResultCode.RESULTCODES[keyValuePair.Key]  (@keyValuePair.Key)</h4>
+<h4>@ResultCode.RESULTCODES[keyValuePair.Key]  (@keyValuePair.Key)</h4>
             @foreach (var file in keyValuePair.Value)
             {
                 <ul>

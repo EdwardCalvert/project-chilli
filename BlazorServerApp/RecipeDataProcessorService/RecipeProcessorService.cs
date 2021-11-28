@@ -51,6 +51,11 @@ namespace BlazorServerApp.proccessService
             return resultCode;
         }
 
+        public bool FilesAreQueued()
+        {
+            return !_recipesToProcess.QueueIsEmpty();
+        }
+
         public int GetCurrentQueueCapacity()
         {
             return _recipesToProcess.GetCapacity();
@@ -90,6 +95,7 @@ namespace BlazorServerApp.proccessService
         public Task<ResultCode> QueueBrowserFilesForProcessing(ResultCode browserFiles);
 
         public int MaximumSingleFileSizeInBytes { get; }
+        public bool FilesAreQueued();
     }
 
     public class ResultCode

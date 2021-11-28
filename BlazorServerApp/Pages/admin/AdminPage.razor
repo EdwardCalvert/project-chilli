@@ -8,42 +8,49 @@
     <AuthorizeView Context="AnotherForm">
         <AuthorizeView Roles="Administrator">
             <h3>Welcome to the admin page!</h3>
-        <h4>Please use this page with caution, as you have the facility to delete tables from the database, which doesn't seem like a great idea!</h4>
-        <h3>Create and delete tables</h3>
-        <table class="table table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Table Name</th>
-                    <th>Button to intitalise process</th>
-                    <th>Number of records on table</th>
-                    <th>Create sample data</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (string tableName in tables)
-                {
+            <h4>Please use this page with caution, as you have the facility to delete tables from the database, which doesn't seem like a great idea!</h4>
+            <h3>Create and delete tables</h3>
+            <table class="table table-striped">
+                <thead class="thead-dark">
                     <tr>
-                        <td>@tableName</td>
-
-                        @if (dataLoader.DoTablesExist(tableName).Result)
-                        {
-                            <td><button class="btn btn-danger">@tableName Table exists. I would give you the option of deleting it,<br />but I haven't made that script yet! </button></td>
-
-                            <td>@dataLoader.SumRecords(tableName).Result</td>
-                            <td><button class="btn btn-primary">Add Data @Result</button></td>
-                        }
-                        else
-                        {
-                            <td><button class="btn btn-primary" @onclick="e=> dataLoader.RunSql(tableCreationCodes[tableName])">Create recipe table</button></td>
-                            <td>0</td>
-                            <td><button class="btn btn-danger">Can't add sample data! Table doesn't exist!</button></td>
-                        }
-
+                        <th>Table Name</th>
+                        <th>Button to intitalise process</th>
+                        <th>Number of records on table</th>
+                        <th>Create sample data</th>
                     </tr>
-                }
+                </thead>
+                <tbody>
+                    @foreach (string tableName in tables)
+                    {
+                        <tr>
+                            <td>@tableName</td>
 
-            </tbody>
-        </table>
+                            @if (dataLoader.DoTablesExist(tableName).Result)
+                            {
+                                <td><button class="btn btn-danger">@tableName Table exists. I would give you the option of deleting it,<br />but I haven't made that script yet! </button></td>
+
+                                <td>@dataLoader.SumRecords(tableName).Result</td>
+                                <td><button class="btn btn-primary">Add Data @Result</button></td>
+                            }
+                            else
+                            {
+                                <td><button class="btn btn-primary" @onclick="e=> dataLoader.RunSql(tableCreationCodes[tableName])">Create recipe table</button></td>
+                                <td>0</td>
+                                <td><button class="btn btn-danger">Can't add sample data! Table doesn't exist!</button></td>
+                            }
+
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+
+            <h2>Create a new user</h2>
+            <input type="text"
+                   placeholder="User Name" @bind="@username" />
+            <input type="text"
+                   placeholder="password" @bind="@password" />
+            <btn class=" btn btn-primary" @onclick="@CreateUser">Create User</btn>
         </AuthorizeView>
 
 
@@ -57,7 +64,12 @@
             <ErrorNotification ErrorMessage="@Message" />
         }
 
+<ErrorNotification ErrorMessage="@Message" Show="@error"></ErrorNotification>
+
         @code {
+            string username;
+            string password;
+
             private List<string> tables = new List<string>() { "Recipe", "Method", "Review", "Equipment", "EquipmentInRecipe" };
             private string Result { get; set; }
             bool error = false;
@@ -68,6 +80,28 @@
             string Message = "No file(s) selected";
             IReadOnlyList<IBrowserFile> selectedFiles;
             const int largestFileSize = 1873691000;
+
+            private void CreateUser()
+            {
+                User user = new User();
+                user.Role = "Administrator";
+                user.SHA512 = User.CreateSHAHash(password);
+                user.UserName = username;
+
+
+                try
+                {
+                    dataLoader.SaveUser(user);
+                    error = false;
+                    username = "";
+                    password = "";
+                }
+                catch
+                {
+                    error = true;
+                    Message = "An unhandled and unexpected result occured while connecting to the database";
+                }
+            }
 
 
 

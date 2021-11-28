@@ -35,6 +35,10 @@ namespace BlazorServerApp.Models
         public Task<List<uint>> GetSearchDatabaseTextFields(string searchText, int offset, ushort invertedTypeOfBitPattern);
         public Task<List<uint>> GetRecipeIDFromIngredientID(int quantity, string unit, uint userDefinedIngredientID);
         public Task<List<UserDefinedIngredientInRecipe>> GetIngredientsInRecipe(uint RecipeID);
-        
+
+        public  Task SaveUser(User user);
+        public  Task<User> GetUserFromDatabase(string userName);
+
+
     }
 }
