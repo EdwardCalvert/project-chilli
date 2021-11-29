@@ -16,7 +16,6 @@
                         <th>Table Name</th>
                         <th>Button to intitalise process</th>
                         <th>Number of records on table</th>
-                        <th>Create sample data</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,13 +29,11 @@
                                 <td><button class="btn btn-danger">@tableName Table exists. I would give you the option of deleting it,<br />but I haven't made that script yet! </button></td>
 
                                 <td>@dataLoader.SumRecords(tableName).Result</td>
-                                <td><button class="btn btn-primary">Add Data @Result</button></td>
                             }
                             else
                             {
                                 <td><button class="btn btn-primary" @onclick="e=> dataLoader.RunSql(tableCreationCodes[tableName])">Create recipe table</button></td>
                                 <td>0</td>
-                                <td><button class="btn btn-danger">Can't add sample data! Table doesn't exist!</button></td>
                             }
 
                         </tr>
@@ -44,13 +41,6 @@
 
                 </tbody>
             </table>
-
-            <h2>Create a new user</h2>
-            <input type="text"
-                   placeholder="User Name" @bind="@username" />
-            <input type="text"
-                   placeholder="password" @bind="@password" />
-            <btn class=" btn btn-primary" @onclick="@CreateUser">Create User</btn>
         </AuthorizeView>
 
 
@@ -81,30 +71,6 @@
             IReadOnlyList<IBrowserFile> selectedFiles;
             const int largestFileSize = 1873691000;
 
-            private void CreateUser()
-            {
-                User user = new User();
-                user.Role = "Administrator";
-                user.SHA512 = User.CreateSHAHash(password);
-                user.UserName = username;
-
-
-                try
-                {
-                    dataLoader.SaveUser(user);
-                    error = false;
-                    username = "";
-                    password = "";
-                }
-                catch
-                {
-                    error = true;
-                    Message = "An unhandled and unexpected result occured while connecting to the database";
-                }
-            }
-
-
-
             private readonly Dictionary<string, List<string>> sampleData = new Dictionary<string, List<string>>()
 {
         {"Recipe",new List<string>(){}}
@@ -115,72 +81,129 @@
             private readonly Dictionary<string, string> tableCreationCodes = new Dictionary<string, string>()
 {
         { "Recipe",@"CREATE TABLE `Recipe` (
-    `RecipeID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `Servings` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
-    `MealType` ENUM('Starter','Main','Dessert','Snack','Accompaniment','Cake','Biscuit','LightMeal') NOT NULL COLLATE 'latin1_swedish_ci',
-    `RecipeName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
-    `Kcal` DECIMAL(20,2) NULL DEFAULT NULL,
-    `Saturates` DECIMAL(20,2) NULL DEFAULT NULL,
-    `Carbohydrates` DECIMAL(20,2) NULL DEFAULT NULL,
-    `Sugar` DECIMAL(20,2) NULL DEFAULT NULL,
-    `Fibre` DECIMAL(20,2) NULL DEFAULT NULL,
-    `Protein` DECIMAL(20,2) NULL DEFAULT NULL,
-    `Salt` DECIMAL(20,2) NULL DEFAULT NULL,
-    `Fat` DECIMAL(20,2) NULL DEFAULT NULL,
-    `CookingTime` SMALLINT(5) NULL DEFAULT '0',
-    `PreperationTime` SMALLINT(5) NULL DEFAULT '0',
-    `DocxFilePath` MEDIUMTEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-    `Difficulty` ENUM('Easy','Medium','Hard') NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-    `PageVisits` INT(10) UNSIGNED NULL DEFAULT NULL,
-    `LastRequested` DATETIME NULL DEFAULT NULL,
-    `Description` TEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-    PRIMARY KEY (`RecipeID`) USING BTREE
+	`RecipeID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`Servings` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+	`MealType` VARCHAR(20) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
+	`RecipeName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`Kcal` DECIMAL(6,2) NULL DEFAULT NULL,
+	`Saturates` DECIMAL(6,2) NULL DEFAULT NULL,
+	`Carbohydrates` DECIMAL(6,2) NULL DEFAULT NULL,
+	`Sugar` DECIMAL(6,2) NULL DEFAULT NULL,
+	`Fibre` DECIMAL(6,2) NULL DEFAULT NULL,
+	`Protein` DECIMAL(6,2) NULL DEFAULT NULL,
+	`Salt` DECIMAL(6,2) NULL DEFAULT NULL,
+	`Fat` DECIMAL(6,2) NULL DEFAULT NULL,
+	`CookingTime` SMALLINT(5) NULL DEFAULT '0',
+	`PreperationTime` SMALLINT(5) NULL DEFAULT '0',
+	`Difficulty` VARCHAR(20) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`PageVisits` INT(10) UNSIGNED NULL DEFAULT NULL,
+	`LastRequested` DATETIME NULL DEFAULT NULL,
+	`Description` TEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`ManualUpload` TINYINT(1) NULL DEFAULT NULL,
+	PRIMARY KEY (`RecipeID`) USING BTREE,
+	FULLTEXT INDEX `Text Search` (`Description`, `RecipeName`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=11
-;" },{"Method",@"CREATE TABLE `Method` (
-    `StepNumber` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `RecipeID` INT(10) UNSIGNED NOT NULL,
-    `MethodText` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
-    PRIMARY KEY (`StepNumber`, `RecipeID`) USING BTREE,
-    INDEX `RecipeID` (`RecipeID`) USING BTREE,
-    CONSTRAINT `RecipeID` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB
-;"},{"Review",@"CREATE TABLE `Review` (
-    `ReviewID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `RecipeID` INT(10) UNSIGNED NOT NULL DEFAULT '1',
-    `ReviewersName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
-    `ReviewTitle` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
-    `ReviewText` MEDIUMTEXT NOT NULL COLLATE 'latin1_swedish_ci',
-    `StarCount` INT(10) UNSIGNED NOT NULL DEFAULT '1',
-    `DateSubmitted` DATETIME NOT NULL,
-    PRIMARY KEY (`ReviewID`) USING BTREE,
-    INDEX `ReviewFK` (`RecipeID`) USING BTREE,
-    CONSTRAINT `ReviewFK` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB
-AUTO_INCREMENT=112
+AUTO_INCREMENT=80
 ;
+" },{"Method",@"CREATE TABLE `Method` (
+	`StepNumber` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`RecipeID` INT(10) UNSIGNED NOT NULL,
+	`MethodText` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`StepNumber`, `RecipeID`) USING BTREE,
+	INDEX `RecipeID` (`RecipeID`) USING BTREE,
+	FULLTEXT INDEX `MethodText` (`MethodText`),
+	CONSTRAINT `RecipeID` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=107
+;
+"},{"Review",@"CREATE TABLE `Review` (
+	`ReviewID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`RecipeID` INT(10) UNSIGNED NOT NULL DEFAULT '1',
+	`ReviewersName` TINYTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`ReviewTitle` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`ReviewText` TEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`StarCount` INT(10) UNSIGNED NOT NULL DEFAULT '1',
+	`DateSubmitted` DATETIME NOT NULL,
+	PRIMARY KEY (`ReviewID`) USING BTREE,
+	INDEX `ReviewFK` (`RecipeID`) USING BTREE,
+	CONSTRAINT `ReviewFK` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=130
+;
+
 " },{"EquipmentInRecipe",@"CREATE TABLE `EquipmentInRecipe` (
-    `EquipmentID` INT(10) UNSIGNED NOT NULL,
-    `RecipeID` INT(10) UNSIGNED NOT NULL,
-    PRIMARY KEY (`EquipmentID`, `RecipeID`) USING BTREE,
-    INDEX `FK_RecipeID_on_EquipmentInRecipe` (`RecipeID`) USING BTREE,
-    CONSTRAINT `FK_EquipmentID_on_EquipmentInRecipe` FOREIGN KEY (`EquipmentID`) REFERENCES `RecipeDatabase`.`Equipment` (`EquipmentID`) ON UPDATE NO ACTION ON DELETE CASCADE,
-    CONSTRAINT `FK_RecipeID_on_EquipmentInRecipe` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
+	`EquipmentID` INT(10) UNSIGNED NOT NULL,
+	`RecipeID` INT(10) UNSIGNED NOT NULL,
+	PRIMARY KEY (`EquipmentID`, `RecipeID`) USING BTREE,
+	INDEX `FK_RecipeID_on_EquipmentInRecipe` (`RecipeID`) USING BTREE,
+	CONSTRAINT `FK_EquipmentID_on_EquipmentInRecipe` FOREIGN KEY (`EquipmentID`) REFERENCES `RecipeDatabase`.`Equipment` (`EquipmentID`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `FK_RecipeID_on_EquipmentInRecipe` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
+
 "},{"Equipment",@"CREATE TABLE `Equipment` (
-    `EquipmentID` INT(10) UNSIGNED NOT NULL,
-    `EquipmentName` TEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-    `TypeOf` ENUM('Food Preparation Equipment','Serving Equipment','Cooking Equipment','Storage Equipment','Miscellaneous Equipment') NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-    PRIMARY KEY (`EquipmentID`) USING BTREE
+	`EquipmentID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`EquipmentName` TINYTEXT NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`EquipmentID`) USING BTREE,
+	FULLTEXT INDEX `EquipmentName` (`EquipmentName`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=328
+;
+"},{"SearchQuery",@"CREATE TABLE `SearchQuery` (
+	`SearchTerm` VARCHAR(100) NOT NULL COLLATE 'latin1_swedish_ci',
+	`ResultAsJSON` VARCHAR(5000) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`SearchTerm`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+"},{"StopWords",@"CREATE TABLE `StopWords` (
+	`Value` VARCHAR(10) NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`Value`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+"},{"UserDefinedIngredients",@"CREATE TABLE `UserDefinedIngredients` (
+	`IngredientID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`IngredientName` VARCHAR(255) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
+	`TypeOf` INT(10) NULL DEFAULT NULL,
+	PRIMARY KEY (`IngredientID`) USING BTREE,
+	FULLTEXT INDEX `IngredientName` (`IngredientName`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=93
+;
+"},{"UserDefinedIngredientsInRecipe",@"CREATE TABLE `UserDefinedIngredientsInRecipe` (
+	`IngredientID` INT(10) UNSIGNED NOT NULL,
+	`RecipeID` INT(10) UNSIGNED NOT NULL,
+	`Quantity` DECIMAL(20,6) NOT NULL,
+	`Unit` VARCHAR(25) NOT NULL COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`IngredientID`, `RecipeID`) USING BTREE,
+	INDEX `FK_RecipeID_on_IngredientsInRecipe` (`RecipeID`) USING BTREE,
+	CONSTRAINT `FK_UserDefinedIngredientsInRecipe_Recipe` FOREIGN KEY (`RecipeID`) REFERENCES `RecipeDatabase`.`Recipe` (`RecipeID`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	CONSTRAINT `FK_UserDefinedIngredientsInRecipe_UserDefinedIngredients` FOREIGN KEY (`IngredientID`) REFERENCES `RecipeDatabase`.`UserDefinedIngredients` (`IngredientID`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+ROW_FORMAT=DYNAMIC
+;
+"},{"Users",@"CREATE TABLE `Users` (
+	`UserName` VARCHAR(200) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
+	`SHA512` VARCHAR(128) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
+	`Role` VARCHAR(128) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
+	PRIMARY KEY (`UserName`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB

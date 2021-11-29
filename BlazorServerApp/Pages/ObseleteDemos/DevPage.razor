@@ -1,71 +1,121 @@
 ﻿@using System.Text.RegularExpressions
 @using BlazorServerApp.WordsAPI
-@using Newtonsoft.Json 
+@using Newtonsoft.Json
 @inject IRecipeDataLoader dataLoader
 @inject IConfiguration config
 @inject IHttpClientFactory httpClientFactory
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Mvc.Rendering
 
 @page "/dev"
 
-<textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput"></textarea>
-<btn class="btn btn-primary" @onclick="@FetchDefinition"></btn>
 
-<select style="margin-left: 5px; margin-left: 5px;" @bind="@binary">
-    @foreach (var orderOption in Enum.GetValues(typeof(Binary)))
-    {
-        <option value="@orderOption">@orderOption</option>
-    }
-    <value></value>
-</select>
-@if (type != null)
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Recipe Name</th>
+            <th>Number of views</th>
+            <th>Last viewed</th>
+            <th>Description</th>
+            <th>Recipe ID</th>
+            <th>Manual upload?</th>
+            <th>Delete</th>
+            <th>View</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Recipe recipe in recipes)
+        {
+        <tr>
+            <td>@recipe.RecipeName</td>
+            <td>@recipe.PageVisits</td>
+
+            <td>@recipe.LastRequested</td>
+            <td>@recipe.ShowShortDescription(100)</td>
+            <td>@recipe.RecipeID</td>
+            <td>@recipe.ManualUpload</td>
+            <td><btn class="btn btn-danger" @onclick="@(()=>DeleteRecipe(recipe))">Delete</btn></td>
+            <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID">View</a></td>
+        </tr>
+        }
+
+    </tbody>
+</table>
+
+    @code
 {
-    @foreach (string s in type.typeOf)
-    {
-        <p>@s</p>
-    }
-    @if (type.typeOf.Contains("meat"))
-    {
-        <p>Meat!</p>
-    }
+        private void DeleteRecipe(Recipe recipe)
+        {
+            recipes.Remove(recipe);
+            dataLoader.DeleteRecipeAndRelatedValues(recipe.RecipeID);
+        }
+
+        public List<Recipe> recipes { get; set; }
+
+
 }
 
+<textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput"></textarea>
+    <btn class="btn btn-primary" @onclick="@FetchDefinition"></btn>
 
-<p>@(binary&Binary.One )</p>
-
-@code{
-
-    Binary _binary = Binary.Zero;
-    Binary binary { get { return _binary; } set { _binary = value; } }
-
-    string _textAre = "";
-    string textArea { get { return _textAre; } set { _textAre = value; } }
-    TypeOf type;
-    WordsAPIService wordsAPIService;
-    [Flags]
-    private enum Binary
+    <select style="margin-left: 5px; margin-left: 5px;" @bind="@binary">
+        @foreach (var orderOption in Enum.GetValues(typeof(Binary)))
+        {
+            <option value="@orderOption">@orderOption</option>
+        }
+        <value></value>
+    </select>
+    @if (type != null)
     {
-        Zero = 0,
-        One = 1,
-        Two = 2,
-        Four = 4,
+        @foreach (string s in type.typeOf)
+        {
+            <p>@s</p>
+        }
+        @if (type.typeOf.Contains("meat"))
+        {
+            <p>Meat!</p>
+        }
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        wordsAPIService = new WordsAPIService(httpClientFactory, config, dataLoader);
+
+    <p>@(binary&Binary.One )</p>
+
+    @code{
+
+        Binary _binary = Binary.Zero;
+        Binary binary { get { return _binary; } set { _binary = value; } }
+
+        string _textAre = "";
+        string textArea { get { return _textAre; } set { _textAre = value; } }
+        TypeOf type;
+        WordsAPIService wordsAPIService;
+        [Flags]
+        private enum Binary
+        {
+            Zero = 0,
+            One = 1,
+            Two = 2,
+            Four = 4,
+        }
+
+
+        protected override async Task OnInitializedAsync()
+        {
+            wordsAPIService = new WordsAPIService(httpClientFactory, config, dataLoader);
+            recipes = await dataLoader.BulkImportRecipes(0);
+        }
+
+        public async Task FetchDefinition()
+        {
+
+            type = await wordsAPIService.CallCachedAPI(textArea);
+
+        }
+        List<Recipe> results = new();
+
+        public async void Search()
+        {
+            //results = await SearchEnginge.SearchForRecipes(dataLoader, "cheese", SearchEnginge.SortBy.CookingTime, SearchEnginge.Order.Descending);
+        }
+
     }
-
-    public async Task FetchDefinition()
-    {
-
-        type = await wordsAPIService.CallCachedAPI(textArea);
-
-    }
-    List<Recipe> results = new();
-
-    public async void Search()
-    {
-        //results = await SearchEnginge.SearchForRecipes(dataLoader, "cheese", SearchEnginge.SortBy.CookingTime, SearchEnginge.Order.Descending);
-    }
-
-}

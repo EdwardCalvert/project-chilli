@@ -54,9 +54,19 @@ namespace BlazorServerApp.proccessService
             }
         }
 
+        public T PeekItem()
+        {
+            return _queueItems[_front];
+        }
+
         public int GetCapacity()
         {
             return _maximumQueueSize- _itemsInQueue;
+        }
+
+        public int Count()
+        {
+            return _itemsInQueue;
         }
         public bool HasCapacity()
         {

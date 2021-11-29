@@ -1,0 +1,115 @@
+﻿@inject IRecipeDataLoader dataLoader
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
+@page "/admin/usermanager"
+<AuthorizeView Roles="Administrator">
+    <h3>UserManager</h3>
+    <h2>Create a new Administrator</h2>
+    <div class="container">
+        <input type="text"
+               placeholder="User Name" @bind="@username" />
+        <input type="text"
+               placeholder="password" @bind="@password" />
+        <btn class=" btn btn-primary" @onclick="@CreateUser">Create User</btn>
+    </div>
+
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>User Name</th>
+                <th>User Role</th>
+                @*<th>Reset password</th>*@
+                <th>Delete User</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (User user in users)
+            {
+                string temporraryPassword = "";
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Role</td>
+                    @*<td><input @bind-value="@temporraryPassword"/><btn class="btn btn-primary" @onclick="@(()=> UpdatePassword(user,temporraryPassword))">Change </btn></td>*@
+                    @if (user.UserName != currentLoggedInUser) // prevent them deleting themsleves!
+                    {
+                    <td><btn class="btn btn-danger" @onclick="@(() => DeleteUser(user))">Delete</btn></td>
+                    }
+                    else
+                    {
+                        <td>Can't do that!</td>
+                    }
+                </tr>
+            }
+
+        </tbody>
+    </table>
+    @if (error)
+    {
+        <p>Error occured</p>
+    }
+    <p></p>
+
+    <ErrorNotification ErrorMessage="@Message" Show="@error"></ErrorNotification>
+</AuthorizeView>
+<AuthorizeView>
+    <NotAuthorized>
+        <h1>You will need to login to view this page</h1>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    string username;
+    string password;
+    bool error = false;
+    string Message;
+    string currentLoggedInUser ;
+    List<User> users = new List<User>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentLoggedInUser = httpContextAccessor.HttpContext.User.Identity.Name;
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await dataLoader.GetAllUsers();
+    }
+
+    private async void DeleteUser(User user)
+    {
+        await dataLoader.DeleteUser(user.UserName);
+        users.Remove(user);
+    }
+    private async void UpdatePassword(User user, string newPassword)
+    {
+        user.SHA512 = User.CreateSHAHash(newPassword);
+        await dataLoader.UpdatePassword(user);
+    }
+
+    private async Task CreateUser()
+    {
+        try
+        {
+            User existingUser = await dataLoader.GetUserFromDatabase(username);
+            if (existingUser == null)
+            {
+                User user = new User();
+                user.Role = "Administrator";
+                user.SHA512 = User.CreateSHAHash(password);
+                user.UserName = username;
+                await dataLoader.SaveUser(user);
+                error = false;
+                username = "";
+                password = "";
+                StateHasChanged();
+            }
+        }
+        catch
+        {
+            error = true;
+            Message = "An unhandled and unexpected result occured while connecting to the database";
+            StateHasChanged();
+        }
+        LoadUsers();
+    }
+}

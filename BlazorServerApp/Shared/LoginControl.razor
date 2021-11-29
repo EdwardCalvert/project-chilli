@@ -1,5 +1,8 @@
-﻿@page "/loginControl"
+﻿
 @using System.Web;
+@inject IRecipeDataLoader _dataLoader
+@inject NavigationManager navMangaer
+
 
     <AuthorizeView>
         <Authorized>
@@ -9,6 +12,9 @@
                target="_top">Logout</a>
         </Authorized>
         <NotAuthorized>
+            @if (error) { 
+            <p class="alert-danger"> Unable to sign you in.</p>
+            }
             <input type="text"
                    placeholder="User Name"
                    @bind="@Username" />
@@ -16,19 +22,39 @@
             <input type="password"
                    placeholder="Password"
                    @bind="@Password" />
-            <a style="margin-left:5px;" class="btn btn-primary"
-               href="/login?paramUsername=@encode(@Username)&paramPassword=@encode(@Password)"
-               target="_top">Login</a>
+            <btn style="margin-left:5px;" class="btn btn-primary" @onclick="@Authenticate">Login</btn>
         </NotAuthorized>
     </AuthorizeView>
+<ErrorNotification Show="@error" ErrorMessage="Unable to log you in."> </ErrorNotification>
     @code {
         string Username = "";
         string Password = "";
+        bool error = false;
 
         private string encode(string param)
         {
             return HttpUtility.UrlEncode(param);
         }
 
+
+        private async Task Authenticate()
+        {
+            User user = await _dataLoader.GetUserFromDatabase(Username);
+
+            string sha512 = BlazorServerApp.Models.User.CreateSHAHash(Password);
+            if (user != null && user.SHA512 == sha512)
+            {
+                error = false;
+                navMangaer.NavigateTo($"/Login?paramUsername={@encode(@Username)}&paramPassword={@encode(@Password)}",true);
+                
+            }
+            else
+            {
+                error = true;
+                this.StateHasChanged();
+            }
+        }
+
+        //Validate password before even leaving this page. if the password is invalid, then disaplay the error here, and don't redirect!
     }
 

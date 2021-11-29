@@ -1,5 +1,4 @@
-﻿using BlazorServerApp.Extensions;
-using DataLibrary;
+﻿using DataLibrary;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -8,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace BlazorServerApp.Models
 {
-   
-
     public class RecipeDataLoader : ComponentBase, IRecipeDataLoader
     {
         private IDataAccess _data { get; set; }
@@ -23,18 +20,18 @@ namespace BlazorServerApp.Models
 
         public async Task<bool> ContainsStopWord(string searchTerm)
         {
-           List<int> resutl = await _data.LoadData<int, dynamic>("SELECT COUNT(*) FROM StopWords WHERE VALUE = @searchTem;", new { searchTem = searchTerm }, _config.GetConnectionString("recipeDatabase"));
+            List<int> resutl = await _data.LoadData<int, dynamic>("SELECT COUNT(*) FROM StopWords WHERE VALUE = @searchTem;", new { searchTem = searchTerm }, _config.GetConnectionString("recipeDatabase"));
             return resutl[0] == 1;
         }
 
         public async Task InsertSearchQuery(SearchQuery search)
         {
-            await _data.SaveData(search.SqlInsertStatement(),search.SqlAnonymousType(),_config.GetConnectionString("recipeDatabase"));
+            await _data.SaveData(search.SqlInsertStatement(), search.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task<List<SearchQuery>> FindWordsAPISearch(string search)
         {
-            return await _data.LoadData<SearchQuery,dynamic>("SELECT * FROM SearchQuery WHERE SearchTerm = @searchTerm", new { searchTerm = search }, _config.GetConnectionString("recipeDatabase"));
+            return await _data.LoadData<SearchQuery, dynamic>("SELECT * FROM SearchQuery WHERE SearchTerm = @searchTerm", new { searchTerm = search }, _config.GetConnectionString("recipeDatabase"));
         }
 
         private async Task DeleteMethod(uint RecipeID)
@@ -114,7 +111,7 @@ namespace BlazorServerApp.Models
 
         public async Task<uint> InsertEquipment(Equipment equipment)
         {
-            List<uint> autoIncrementResult  = await _data.LoadData<uint,dynamic>(equipment.SqlInsertStatement() + "SELECT LAST_INSERT_ID();", equipment.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+            List<uint> autoIncrementResult = await _data.LoadData<uint, dynamic>(equipment.SqlInsertStatement() + "SELECT LAST_INSERT_ID();", equipment.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
             return autoIncrementResult[0];
         }
 
@@ -123,9 +120,9 @@ namespace BlazorServerApp.Models
             return await _data.LoadData<UserDefinedIngredientInRecipe, dynamic>($"SELECT * FROM UserDefinedIngredientsInRecipe WHERE RecipeID =@recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
         }
 
-        public async Task<List<uint>> GetRecipeIDFromIngredientID(int quantity, string unit,uint userDefinedIngredientID)
+        public async Task<List<uint>> GetRecipeIDFromIngredientID(int quantity, string unit, uint userDefinedIngredientID)
         {
-            return await _data.LoadData<uint, dynamic>($"SELECT RecipeID FROM UserDefinedIngredientsInRecipe WHERE  Quanity=@quantity AND Unit=@unit AND IngredientID = @ingredientID", new { Quantity = quantity,Unit = unit,IngredientID = userDefinedIngredientID }, _config.GetConnectionString("recipeDatabase"));
+            return await _data.LoadData<uint, dynamic>($"SELECT RecipeID FROM UserDefinedIngredientsInRecipe WHERE  Quanity=@quantity AND Unit=@unit AND IngredientID = @ingredientID", new { Quantity = quantity, Unit = unit, IngredientID = userDefinedIngredientID }, _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task SaveNewReview(Review review)
@@ -161,12 +158,14 @@ namespace BlazorServerApp.Models
                 await _data.SaveData($"UPDATE RecipeDatabase.Recipe SET PageVisits=@PageVisits,  LastRequested=@LastRequested  WHERE RecipeID=@RecipeID; ", new { PageVisits = pageVisits, LastRequested = MySQLTimeFormat(DateTime.Now), RecipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
             }
         }
+
         public async Task<bool> DoTablesExist(string tableName)
         {
             List<string> returnData = new List<string>();
             returnData = await _data.LoadData<string, dynamic>($"SHOW TABLES LIKE @TableName;", new { TableName = tableName }, _config.GetConnectionString("recipeDatabase"));
             return returnData.Count != 0;
         }
+
         public async Task<int> SumRecords(string tableName)
         {
             List<int> sum = await _data.LoadData<int, dynamic>($"SELECT count( * ) as  total_record FROM {tableName};", new { tableName = tableName }, _config.GetConnectionString("recipeDatabase"));
@@ -176,6 +175,7 @@ namespace BlazorServerApp.Models
             }
             return 0;
         }
+
         public async Task<uint> InsertRecipeAndRelatedFields(Recipe displayModel)
         {
             List<uint> autoIncrementResult = await _data.LoadData<uint, dynamic>(displayModel.SqlInsertStatement() + "SELECT LAST_INSERT_ID();", displayModel.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
@@ -184,7 +184,7 @@ namespace BlazorServerApp.Models
             await InsertRelatedFields(displayModel);
             return RecipeId;
         }
-        
+
         public async Task InsertRelatedFields(Recipe displayModel)
         {
             foreach (Method model in displayModel.Method)
@@ -224,8 +224,6 @@ namespace BlazorServerApp.Models
             List<uint> autoIncrementResult = await _data.LoadData<uint, dynamic>(model.SqlInsertStatement() + "SELECT LAST_INSERT_ID();", model.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
             return autoIncrementResult[0];
         }
-
-      
 
         public async Task<IEnumerable<Equipment>> FindEquipmentLike(string text)
         {
@@ -267,45 +265,47 @@ namespace BlazorServerApp.Models
             return null;
         }
 
-        public async Task<List<uint>> GetSearchDatabaseTextFields(string searchText,int offset)
+        public async Task<List<uint>> GetSearchDatabaseTextFields(string searchText, int offset)
         {
-            return await _data.LoadData<uint, dynamic>(FullTextSearchWithoutLimit +QueryLimit + Terminator, new { searchText = searchText ,offset = offset}, _config.GetConnectionString("recipeDatabase"));
+            return await _data.LoadData<uint, dynamic>(FullTextSearchWithoutLimit + QueryLimit + Terminator, new { searchText = searchText, offset = offset }, _config.GetConnectionString("recipeDatabase"));
         }
 
         private const string FullTextSearchWithoutLimit = @"SELECT  RecipeID FROM Method
-WHERE MATCH(MethodText) AGAINST(@searchText IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION) > 2
+WHERE MATCH(MethodText) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 1
 UNION DISTINCT
 SELECT RecipeID FROM Recipe
-WHERE MATCH(RecipeName, Description) AGAINST(@searchText IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION) > 2
+WHERE MATCH(RecipeName) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
+UNION DISTINCT
+SELECT RecipeID FROM Recipe
+WHERE MATCH(Description) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 1
 UNION DISTINCT
 SELECT RecipeID FROM UserDefinedIngredientsInRecipe
 INNER JOIN(
 SELECT IngredientID FROM UserDefinedIngredients
-WHERE MATCH(IngredientName) AGAINST (@searchText IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION)> 2
+WHERE MATCH(IngredientName) AGAINST (@searchText IN NATURAL LANGUAGE MODE)> 1
 ) AS T2 ON UserDefinedIngredientsInRecipe.IngredientID = T2.IngredientID
 UNION DISTINCT
 SELECT RecipeID FROM EquipmentInRecipe
 INNER JOIN(
 SELECT EquipmentID
 FROM Equipment
-WHERE MATCH(EquipmentName) AGAINST (@searchText IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION)> 2
-) AS T2 ON EquipmentInRecipe.EquipmentID = T2.EquipmentID";
+WHERE MATCH(EquipmentName) AGAINST (@searchText IN NATURAL LANGUAGE MODE)> 1
+) AS T2 ON EquipmentInRecipe.EquipmentID = T2.EquipmentID"; //Removed natural expansion  WITH QUERY EXPANSION
 
         private const string QueryLimit = " LIMIT 20 OFFSET 0";
+
         private const string BitwiseDieaterySearch = @"SELECT s.RecipeID
 FROM   UserDefinedIngredientsInRecipe s
 WHERE  s.IngredientID IN (SELECT IngredientID FROM UserDefinedIngredients WHERE TypeOf & @bitPattern = 0) AND s.RecipeID IN (" + FullTextSearchWithoutLimit + @")
-GROUP BY s.RecipeID 
-" +QueryLimit;
+GROUP BY s.RecipeID
+" + QueryLimit;
 
         private const string Terminator = ";";
 
-
-        public async Task<List<uint>> GetSearchDatabaseTextFields(string searchText, int offset,ushort  invertedTypeOfBitPattern)
+        public async Task<List<uint>> GetSearchDatabaseTextFields(string searchText, int offset, ushort invertedTypeOfBitPattern)
         {
             Console.WriteLine(invertedTypeOfBitPattern);
-            return await _data.LoadData<uint, dynamic>(BitwiseDieaterySearch + Terminator, new { searchText = searchText, offset = offset, bitPattern = invertedTypeOfBitPattern}, _config.GetConnectionString("recipeDatabase"));
-
+            return await _data.LoadData<uint, dynamic>(BitwiseDieaterySearch + Terminator, new { searchText = searchText, offset = offset, bitPattern = invertedTypeOfBitPattern }, _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task RunSql(string sql)
@@ -316,7 +316,7 @@ GROUP BY s.RecipeID
         public async Task<User> GetUserFromDatabase(string userName)
         {
             List<User> users = await _data.LoadData<User, dynamic>("SELECT * FROM Users WHERE UserName = @userName", new { userName = userName }, _config.GetConnectionString("recipeDatabase"));
-            if(users.Count == 1)
+            if (users.Count == 1)
             {
                 return users[0];
             }
@@ -326,6 +326,26 @@ GROUP BY s.RecipeID
         public async Task SaveUser(User user)
         {
             await _data.SaveData(user.SqlInsertStatement(), user.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<List<User>> GetAllUsers()
+        {
+            return await _data.LoadData<User, dynamic>("SELECT * FROM Users LIMIT 300", new { }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<List<Recipe>> BulkImportRecipes(int offset)
+        {
+            return await _data.LoadData<Recipe, dynamic>("SELECT * FROM Recipe LIMIT 300 OFFSET @offset ;", new { offset = offset }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task DeleteUser(string username)
+        {
+            await _data.SaveData("DELETE FROM Users WHERE UserName = @username", new { username = username }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task UpdatePassword(User user)
+        {
+            await _data.SaveData(user.SqlUpdateStatement(), user.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
         }
     }
 }

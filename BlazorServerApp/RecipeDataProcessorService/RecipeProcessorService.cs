@@ -18,14 +18,12 @@ namespace BlazorServerApp.proccessService
         {
             _fileManager = fileManger;
             _recipeDataLoader = recipeDataLoader;
-            _timer = new Timer(60000) { AutoReset = true };
-            _timer.Enabled = true;
-            _timer.Elapsed += TimerElapsed;
+            //_timer = new Timer(60000) { AutoReset = true };
+            //_timer.Enabled = true;
+            //_timer.Elapsed += TimerElapsed;
         }
 
-        /// <summary>
-        /// Dictionary of result codes, for understanding processing
-        /// </summary>
+        
 
         public int MaximumSingleFileSizeInBytes { get; } = 200000;
 
@@ -81,10 +79,20 @@ namespace BlazorServerApp.proccessService
             }
         }
 
+        public int GetNumberOfItemsInQueue()
+        {
+            return _recipesToProcess.Count();
+        }
+
         private async void TimerElapsed(object sender, ElapsedEventArgs e)
         {
             Console.WriteLine("RecipeProcessorService timer elapsed");
             await SortOutFiles();
+        }
+
+        public string PeekNextDocument()
+        {
+            return _recipesToProcess.PeekItem();
         }
     }
 
@@ -96,10 +104,15 @@ namespace BlazorServerApp.proccessService
 
         public int MaximumSingleFileSizeInBytes { get; }
         public bool FilesAreQueued();
+        public string PeekNextDocument();
+        public int GetNumberOfItemsInQueue();
     }
 
     public class ResultCode
     {
+        /// <summary>
+        /// Dictionary of result codes, for understanding processing
+        /// </summary>
         public static Dictionary<int, string> RESULTCODES { get; } = new Dictionary<int, string>()
         {
             {1,"Successfully proccessed" },

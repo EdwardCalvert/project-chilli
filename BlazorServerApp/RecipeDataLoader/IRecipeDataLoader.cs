@@ -38,7 +38,10 @@ namespace BlazorServerApp.Models
 
         public  Task SaveUser(User user);
         public  Task<User> GetUserFromDatabase(string userName);
-
+        public  Task<List<Recipe>> BulkImportRecipes(int offset);
+        public Task<List<User>> GetAllUsers();
+        public  Task DeleteUser(string username);
+        public Task UpdatePassword(User user);
 
     }
 }

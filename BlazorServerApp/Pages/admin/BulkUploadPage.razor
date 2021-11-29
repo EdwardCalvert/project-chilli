@@ -1,0 +1,23 @@
+﻿@page "/BulkUpload"
+@inject IRecipeProcessorService recipeProcessorService
+@using BlazorServerApp.proccessService
+
+<h3>BulkUploadPage</h3>
+
+@if (recipeProcessorService.FilesAreQueued()) { 
+    <p>@recipeProcessorService.PeekNextDocument()</p>
+}
+else
+{
+    <p>No recipes are queued for approval. Enjoy your day.</p>
+}
+
+<ProgressBar Percent="@recipeProcessorService.GetNumberOfItemsInQueue()"></ProgressBar>
+
+@code {
+    
+    public void FindNextRecipeForProcessing()
+        {
+
+        }
+}

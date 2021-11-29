@@ -25,17 +25,14 @@ namespace BlazorCookieAuth.Server.Pages
         {
 
             string returnUrl = Url.Content("~/");
+
             try
             {
                 // Clear the existing external cookie
                 await HttpContext
                     .SignOutAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme);
-            }
-            catch { }
-
-            try
-            {
+            
                User user = await _dataLoader.GetUserFromDatabase(paramUsername);
 
                 string sha512 = BlazorServerApp.Models.User.CreateSHAHash(paramPassword);
@@ -54,17 +51,11 @@ namespace BlazorCookieAuth.Server.Pages
                         IsPersistent = true,
                         RedirectUri = this.Request.Host.Value
                     };
-                    try
-                    {
-                        await HttpContext.SignInAsync(
+ await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity),
                         authProperties);
-                    }
-                    catch (Exception ex)
-                    {
-                        string error = ex.Message;
-                    }
+                   
                 }
                 
             }

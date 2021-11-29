@@ -11,6 +11,7 @@ namespace BlazorServerApp.Models
         public string Role { get; set; }
         public string SHA512 { get; set; }
 
+
         public string SqlInsertStatement()
         {
             return "INSERT INTO Users (UserName,SHA512,Role) VALUES(@UserName,@SHA512,@Role); ";
@@ -30,6 +31,11 @@ namespace BlazorServerApp.Models
             sha512.Clear();
 
             return Convert.ToBase64String(EncryptedSHA512);
+        }
+
+        public string SqlUpdateStatement()
+        {
+            return "UPDATE Users SET Role=@role, SHA512 = @SHA512 WHERE UserName = @UserName";
         }
     }
 }

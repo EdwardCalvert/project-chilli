@@ -15,7 +15,8 @@
 }
 else
 {
-<textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput" readonly="@PreventTextboxEdit"></textarea> }
+<textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput" readonly="@PreventTextboxEdit"></textarea> 
+}
 }
 
 <ErrorNotification ErrorMessage="@ErrorMessage" Show="@error" />
@@ -36,7 +37,7 @@ else
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipeDescriptionLabel">Recipe Description*</label></div>
-                        <div class="FieldData"><InputTextArea style="width: 100%;" id="recipeDescriptionInput" @bind-Value="RecipeModel.Description"  rows="@lines"/></div>
+                        <div class="FieldData"><InputTextArea style="width: 100%;" id="recipeDescriptionInput" @bind-Value="RecipeModel.Description" rows="@lines" /></div>
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipeIngredientsLabel">Ingredients* </label></div>
@@ -51,10 +52,10 @@ else
                                         <InputSelect id="@("recipieIngredientsQuanity" + i)" @bind-Value="copyOfIngredient.Unit" style="padding-left: 5px; margin-right: 5px;">
                                             <option></option>
                                             @foreach (var value in Recipe.SUPPORTEDUNITS)
-                                            {
+                                                {
 
                                                 <option>@value</option>
-                                            }
+                                                }
                                         </InputSelect>
 
                                         <BlazorServerApp.Blazored_Typeahead.BlazoredTypeahead SearchMethod="dataLoader.FindIngredients"
@@ -221,9 +222,13 @@ else
                         <button type="submit" class="btn btn-primary">Submit</button>
 
                     }
-                    else
+                    else if (mode == MODES.Edit)
                     {
                         <button type="submit" class="btn btn-primary">Submit &amp; view</button>
+                    }
+                    else if (mode == MODES.BulkUpload)
+                    {
+                        <button type="submit" class="btn btn-primary">Submit &amp; process next </button>
                     }
 
 
@@ -248,7 +253,7 @@ else
     string ErrorMessage = "";
 
     string _textAre = "";
-    string textArea { get { return _textAre; } set { _textAre = value; ProcessRecipeFromText(); } }
+    string textArea { get { return _textAre; } set { _textAre = value;  ProcessRecipeFromText(); } }
 
     Equipment addEquipmentModel { get; set; } = new();
 
@@ -261,6 +266,7 @@ else
     {
         Edit,
         Create,
+        BulkUpload
     }
 
     private async Task HandleEquipmentSubmit()
