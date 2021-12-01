@@ -1,9 +1,6 @@
-﻿using BlazorServerApp.Models;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlazorServerApp.Models
 {
@@ -13,7 +10,6 @@ AttributeTargets.Field, AllowMultiple = true)]
     {
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-
             if (ValidIngredientsInRecipe.CustomValidation(value, validationContext))
             {
                 return ValidationResult.Success;
@@ -34,13 +30,10 @@ AttributeTargets.Field, AllowMultiple = true)]
                 {
                     return false;
                 }
-
             }
             return true;
         }
     }
-
-
 
     public sealed class ValidMethod : ValidationAttribute
     {
@@ -66,7 +59,6 @@ AttributeTargets.Field, AllowMultiple = true)]
                 {
                     return false;
                 }
-
             }
             return true;
         }
@@ -76,7 +68,6 @@ AttributeTargets.Field, AllowMultiple = true)]
     {
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-
             if (ValidMethodText.ValidateMethodText((Method)validationContext.ObjectInstance))
             {
                 return ValidationResult.Success;
@@ -87,15 +78,12 @@ AttributeTargets.Field, AllowMultiple = true)]
             }
         }
 
-
         public static bool ValidateMethodText(Method model)
         {
             //var model = (string ) validationContext.ObjectInstance;
             return true;
         }
-
     }
-
 
     [AttributeUsage(AttributeTargets.Property |
 AttributeTargets.Field, AllowMultiple = true)]
@@ -104,14 +92,12 @@ AttributeTargets.Field, AllowMultiple = true)]
         public override bool IsValid(object value)
         {
             return ValidMealType.ValidIngredient(value);
-
         }
 
         public static bool ValidIngredient(object value)
         {
             return Recipe.mealType.Contains(value);
         }
-
     }
 
     public class ValidRecipeID : ValidationAttribute

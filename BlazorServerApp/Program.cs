@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace BlazorServerApp
 {
@@ -10,14 +11,13 @@ namespace BlazorServerApp
 
             CreateHostBuilder(args).Build().Run();
 
-
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>().UseUrls(urls: new String[] { "https://*:5001" }); //  "http://*:5000"
                 });
     }
 }

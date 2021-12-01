@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace BlazorServerApp.Models
+﻿namespace BlazorServerApp.Models
 {
     public class Method
     {
@@ -15,7 +10,6 @@ namespace BlazorServerApp.Models
 
         public Method()
         {
-
         }
 
         public string SqlInsertStatement()
@@ -35,7 +29,7 @@ namespace BlazorServerApp.Models
 
         public dynamic SqlDeleteAnonymousType()
         {
-            return new { stepNumber = StepNumber, recipeID = RecipeID};
+            return new { stepNumber = StepNumber, recipeID = RecipeID };
         }
     }
 }

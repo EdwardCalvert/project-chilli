@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data;
+﻿using Dapper;
 using MySql.Data.MySqlClient;
-using Dapper;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DataLibrary
 {
@@ -19,7 +17,6 @@ namespace DataLibrary
 
                 return rows.ToList();
             }
-
         }
 
         public Task SaveData<T>(string sql, T Parameters, string connectionString)
@@ -27,9 +24,7 @@ namespace DataLibrary
             using (IDbConnection connection = new MySqlConnection(connectionString))
             {
                 return connection.ExecuteAsync(sql, Parameters);
-
             }
-
         }
     }
 }

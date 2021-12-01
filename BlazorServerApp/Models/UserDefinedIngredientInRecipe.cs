@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
 namespace BlazorServerApp.Models
@@ -10,8 +7,10 @@ namespace BlazorServerApp.Models
     {
         public uint? IngredientID { get; set; }
         public uint RecipeID { get; set; }
+
         [Required, Range(0.01, 1000)]
         public double Quantity { get; set; }
+
         [Required, ValidUnit]
         public string Unit { get; set; }
 

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BlazorServerApp.WordsAPI;
+﻿using BlazorServerApp.WordsAPI;
 
 namespace BlazorServerApp.Models
 {
     public class UserDefinedIngredient
     {
-         public uint? IngredientID { get; set; }
+        public uint? IngredientID { get; set; }
         public string IngredientName { get; set; }
 
         public Type TypeOf { get; set; }
@@ -17,15 +13,14 @@ namespace BlazorServerApp.Models
         {
             None = 0,
             Poultry = 1,
-            Meat = 1<<1,
-            Fish = 1 <<2,
-            Fruit = 1<<3,
-            Vegetables  = 1<<4,
-            Nuts = 1<<5,
-            Milk = 1<<6,
-            Egg = 1<<7,
-            Dairy = 1<<8,
-
+            Meat = 1 << 1,
+            Fish = 1 << 2,
+            Fruit = 1 << 3,
+            Vegetables = 1 << 4,
+            Nuts = 1 << 5,
+            Milk = 1 << 6,
+            Egg = 1 << 7,
+            Dairy = 1 << 8,
         }
 
         public const Type Veganism = Type.Vegetables | Type.Fruit | Type.Nuts;
@@ -33,16 +28,15 @@ namespace BlazorServerApp.Models
 
         public static Type GetTypeEnum(TypeOf typeOf)
         {
-            
-            if (typeOf != null) {
+            if (typeOf != null)
+            {
                 Type type = Type.None;
                 foreach (string s in typeOf.typeOf)
                 {
                     type |= GetTypeEnum(s);
                 }
                 return type;
-
-             }
+            }
             else
             {
                 return Type.None;
@@ -87,7 +81,6 @@ namespace BlazorServerApp.Models
             return type;
         }
 
-
         public string SqlInsertStatement()
         {
             return "INSERT INTO UserDefinedIngredients(IngredientName,TypeOf) VALUES(@ingredientName,@TypeOf);";
@@ -95,7 +88,7 @@ namespace BlazorServerApp.Models
 
         public dynamic SqlAnonymousType()
         {
-            return new { ingredientName = IngredientName,TypeOf = TypeOf};
+            return new { ingredientName = IngredientName, TypeOf = TypeOf };
         }
     }
 }

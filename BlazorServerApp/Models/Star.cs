@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlazorServerApp.Models
 {
@@ -21,6 +19,7 @@ namespace BlazorServerApp.Models
         {
             return _starCount;
         }
+
         public string GetStarsForUI()
         {
             return Stars[_starCount];
@@ -34,12 +33,9 @@ namespace BlazorServerApp.Models
 
         public static Star CreateStar(int starCount)
         {
-
             Validate(starCount);
             return new Star(starCount);
-
         }
-
 
         private static int ReturnAverageRating(List<Star> stars)
         {

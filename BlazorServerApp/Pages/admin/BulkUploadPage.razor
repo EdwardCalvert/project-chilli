@@ -1,23 +1,80 @@
-﻿@page "/BulkUpload"
+﻿@page "/admin/BulkUpload"
 @inject IRecipeProcessorService recipeProcessorService
+@inject ITextProcessor textProcessor
 @using BlazorServerApp.proccessService
 
-<h3>BulkUploadPage</h3>
+<AuthorizeView Roles="Administrator">
+    <h3>BulkUploadPage</h3>
 
-@if (recipeProcessorService.FilesAreQueued()) { 
-    <p>@recipeProcessorService.PeekNextDocument()</p>
-}
-else
-{
-    <p>No recipes are queued for approval. Enjoy your day.</p>
-}
+    @if (recipeProcessorService.FilesAreQueued())
+    {
+        @if (undergoingProccessing && recipeModel != null)
+        {
+            <LoadingElement></LoadingElement>
+        }
+        else
+        {
+        <RecipeForm RecipeModel="@recipeModel" mode="RecipeForm.MODES.BulkUpload" OnClick="SubmitRecipe"/>
+        }
+        @*<ProgressBar Percent="@(((recipeProcessorService.GetNumberOfItemsInQueue()-numberOfItemsInitiallyInQueue)/numberOfItemsInitiallyInQueue)*100)"></ProgressBar>*@
+        <btn class="btn btn-danger" @onclick="(()=>DeleteRecipe())">Delete</btn>
+    }
+    else
+    {
+        <p>No recipes are queued for approval. Enjoy your day.</p>
+    }
 
-<ProgressBar Percent="@recipeProcessorService.GetNumberOfItemsInQueue()"></ProgressBar>
+
+</AuthorizeView>
+<AuthorizeView>
+    <NotAuthorized>
+        <h1>Sorry, you'll have to login in to view this page.</h1>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-    
-    public void FindNextRecipeForProcessing()
+    int numberOfItemsInitiallyInQueue;
+    string documentTextPreview;
+    string currentMD5Hash;
+    bool undergoingProccessing = false;
+    Recipe recipeModel = new();
+
+    private void SubmitRecipe()
+        {
+        Console.WriteLine("Button clicked");
+        }
+
+    protected override async Task OnInitializedAsync()
+    {
+        numberOfItemsInitiallyInQueue = recipeProcessorService.GetNumberOfItemsInQueue();
+        await FindNextRecipeForProcessing();
+    }
+    public async Task FindNextRecipeForProcessing()
+    {
+        currentMD5Hash = recipeProcessorService.PeekNextDocument();
+        if (currentMD5Hash !=null)
         {
 
+            documentTextPreview = await recipeProcessorService.DocxToText(currentMD5Hash);
+
+            undergoingProccessing = true;
+            this.StateHasChanged();
+            Task.Delay(1);
+
+            recipeModel = await textProcessor.CreateRecipe(await recipeProcessorService.DocxToText(currentMD5Hash));
+
+            undergoingProccessing = false;
+            await Task.Delay(1);      // changes are flushed again
+            this.StateHasChanged();
+
         }
+    }
+
+    public async void DeleteRecipe()
+    {
+        await recipeProcessorService.DeleteFile(currentMD5Hash);
+        recipeProcessorService.Dequeue();
+        await FindNextRecipeForProcessing();
+        StateHasChanged();
+    }
 }

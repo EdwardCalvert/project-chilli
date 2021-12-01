@@ -1,6 +1,5 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
-
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -9,9 +8,9 @@ a, .btn-link {
     color: #0366d6;
 }
 
-.TextBox{
-    width:200px;
-    max-width:400px
+.TextBox {
+    width: 200px;
+    max-width: 400px
 }
 
 .FoodLabelTable {
@@ -28,15 +27,15 @@ a, .btn-link {
 .FoodLabelNutrientTitle {
     margin-bottom: 0;
 }
-.FoodLabelNutrientValue{
 
+.FoodLabelNutrientValue {
 }
 
-.FoodLabelServingTitle{
-    text-align:left;
+.FoodLabelServingTitle {
+    text-align: left;
 }
 
-.FoodLabel{
+.FoodLabel {
     display: flex;
 }
 
@@ -72,43 +71,45 @@ a, .btn-link {
     max-width: max-content;
 }
 
-.IngredientsTitle{
-
-}
-.IngredientsList{
-
-}
-.MethodList{
-
+.IngredientsTitle {
 }
 
-.EquipmentList{
-
+.IngredientsList {
 }
+
+.MethodList {
+}
+
+.EquipmentList {
+}
+
 .No-Decoration, .No-Decoration:hover {
     text-decoration: none;
     border: none;
 }
 
-.ColourBlack{
+.ColourBlack {
     color: black;
 }
 
-.InputField40Percent{
+.InputField40Percent {
     width: 40vw;
     max-width: 400px;
 }
 
-.TimeInputField, .QuantityInputField{
+.TimeInputField, .QuantityInputField {
     width: 100px;
 }
+
 .InputLableContainer {
     padding-right: 5px;
 }
-.InputFieldContainer{
+
+.InputFieldContainer {
     padding-right: 5px;
     padding-bottom: 5px;
 }
+
 .ReviewCard {
     background-color: #f1f1f1;
     border: 20px solid #f1f1f1 !important;
@@ -179,7 +180,6 @@ input:checked + .slider {
         border-radius: 50%;
     }
 
-
 .RecipeCard {
     background-color: #f1f1f1;
     border: 1px solid #f1f1f1 !important;
@@ -192,6 +192,7 @@ input:checked + .slider {
         animation-duration: .5s;
         animation-fill-mode: forwards;
     }
+
 @keyframes EventCardHover {
     from {
     }
@@ -201,6 +202,7 @@ input:checked + .slider {
         box-shadow: 0 0 20px 0 rgba(0,0,0,0.2);
     }
 }
+
 .RecipeCard div {
     padding-bottom: 10px;
 }
@@ -210,15 +212,18 @@ input:checked + .slider {
     text-align: left;
     font-weight: 700;
 }
+
 .FormViewFieldLineSpacer {
     width: 100%;
     height: 10px;
 }
+
 .FieldLine {
     margin-right: -15px;
     margin-bottom: 3px;
     padding-right: 15px;
 }
+
 .FieldData {
     position: relative;
     min-height: 1px;
@@ -229,11 +234,12 @@ input:checked + .slider {
     border-spacing: 2px;
     display: flex;
     padding-top: 5px;
-
 }
+
     .FieldData ::after, ::before {
         box-sizing: border-box;
     }
+
 .FieldLine ::after ::before {
     box-sizing: border-box;
 }
@@ -257,7 +263,6 @@ input:checked + .slider {
     padding-left: 2px;
     padding-right: 2px;
     border-radius: 3px 0px 0px 3px;
-    
 }
 
 .wordblock__word-shrinked {
@@ -274,17 +279,16 @@ input:checked + .slider {
         transform: scaleX(0.0);
     }
 }
+
 @keyframes growing {
     0% {
         transform: scaleX(0.0);
-        
     }
 
     100% {
         transform: scaleX(1);
     }
 }
-
 
 .wordblock__x {
     width: 4em;

@@ -4,23 +4,22 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Timers;
+using BlazorServerApp.DocxReader;
 
 namespace BlazorServerApp.proccessService
 {
     public class RecipeProcessorService : IRecipeProcessorService
     {
-        private readonly Timer _timer;
         private readonly CircularQueue<string> _recipesToProcess = new CircularQueue<string>(500);
         private readonly IFileManger _fileManager;
         private readonly IRecipeDataLoader _recipeDataLoader;
+        private IDocxReader _docxReader;
 
-        public RecipeProcessorService(IFileManger fileManger, IRecipeDataLoader recipeDataLoader)
+        public RecipeProcessorService(IFileManger fileManger, IRecipeDataLoader recipeDataLoader,IDocxReader docxReader)
         {
             _fileManager = fileManger;
             _recipeDataLoader = recipeDataLoader;
-            //_timer = new Timer(60000) { AutoReset = true };
-            //_timer.Enabled = true;
-            //_timer.Elapsed += TimerElapsed;
+            _docxReader = docxReader;
         }
 
         
@@ -84,15 +83,29 @@ namespace BlazorServerApp.proccessService
             return _recipesToProcess.Count();
         }
 
-        private async void TimerElapsed(object sender, ElapsedEventArgs e)
-        {
-            Console.WriteLine("RecipeProcessorService timer elapsed");
-            await SortOutFiles();
-        }
-
         public string PeekNextDocument()
         {
-            return _recipesToProcess.PeekItem();
+            string nextItem = _recipesToProcess.PeekItem();
+            if (nextItem == default(string))
+            {
+                return null;
+            }
+            return nextItem;
+        }
+
+        public async Task<string> DocxToText(string MD5Hash)
+        {
+            return await _docxReader.GetTextAsync(_fileManager.GetFilePath(MD5Hash));
+        }
+
+        public async Task DeleteFile(string MD5Hash)
+        {
+            await Task.Run(()=>_fileManager.DeleteFile(MD5Hash));
+        }
+
+        public void Dequeue()
+        {
+            _recipesToProcess.DequeueItem();
         }
     }
 
@@ -106,6 +119,9 @@ namespace BlazorServerApp.proccessService
         public bool FilesAreQueued();
         public string PeekNextDocument();
         public int GetNumberOfItemsInQueue();
+        public Task<string> DocxToText(string MD5Hash);
+        public Task DeleteFile(string MD5Hash);
+        public void Dequeue();
     }
 
     public class ResultCode

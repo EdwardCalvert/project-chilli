@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
 namespace BlazorServerApp.Models
@@ -12,6 +10,7 @@ namespace BlazorServerApp.Models
         [StringLength(50, ErrorMessage = "Review title is too long.")]
         [MinLength(2, ErrorMessage = "Review title is too short")]
         public string ReviewTitle { get; set; }
+
         public string ReviewText { get; set; }
 
         [Required]
@@ -37,19 +36,16 @@ namespace BlazorServerApp.Models
         public dynamic SQLAnonymousType()
         {
             return new { recipeID = RecipeID, reviewersName = ReviewersName, reviewTitle = ReviewTitle, reviewText = ReviewText, starCount = Star.GetNumberOfStars(), dateSubmitted = RecipeDataLoader.MySQLTimeFormat(DateSubmitted) };
-
         }
-
 
         public static string ReturnStars(List<Review> reviewModels)
         {
             List<Star> stars = new(reviewModels.Count);
-            foreach(Review model in reviewModels)
+            foreach (Review model in reviewModels)
             {
                 stars.Add(model.Star);
             }
             return Star.ReturnAverageStarRating(stars);
         }
     }
-
 }

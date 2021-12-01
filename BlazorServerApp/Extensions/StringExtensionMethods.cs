@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlazorServerApp.Extensions
 {
@@ -16,6 +14,7 @@ namespace BlazorServerApp.Extensions
             int len = end - start;               // Calculate length
             return source.Substring(start, len); // Return Substring of length
         }
+
         public static string SentenceCase(this string text)
         {
             return Split(RemoveSpace(text.ToLower()));
@@ -24,7 +23,6 @@ namespace BlazorServerApp.Extensions
         public static string RemoveSpace(string fullString)
         {
             return fullString.Trim();
-
         }
 
         public static string Split(string fullString)

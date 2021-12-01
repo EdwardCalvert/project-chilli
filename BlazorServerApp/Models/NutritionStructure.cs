@@ -1,8 +1,5 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections;
 
 namespace BlazorServerApp.Models
 {
@@ -15,7 +12,6 @@ namespace BlazorServerApp.Models
         public double Fibre { get; set; }
         public double Carbohydrates { get; set; }
         public double Salt { get; set; }
-
 
         public NutritionStructure(double kcal, double fat, double saturates, double sugar, double fibre, double carbohydrates, double salt)
         {
@@ -32,7 +28,7 @@ namespace BlazorServerApp.Models
 
         public bool IsEmpty()
         {
-            return Kcal == 0 && Fat == 0 && Saturates ==0 && Sugar == 0 && Fibre ==0 && Carbohydrates == 0 && Salt ==0;
+            return Kcal == 0 && Fat == 0 && Saturates == 0 && Sugar == 0 && Fibre == 0 && Carbohydrates == 0 && Salt == 0;
         }
 
         public IEnumerator GetEnumerator()
@@ -42,6 +38,7 @@ namespace BlazorServerApp.Models
                 yield return PropertyName;
             }
         }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -52,10 +49,7 @@ namespace BlazorServerApp.Models
     {
         public RecomendedIntake(double kcal, double fat, double saturates, double sugar, double fibre, double carbohydrates, double salt) : base(kcal, fat, saturates, sugar, fibre, carbohydrates, salt)
         {
-
         }
-
-
     }
 
     public class DisplayNutritionModel : NutritionStructure
@@ -79,18 +73,18 @@ namespace BlazorServerApp.Models
 
         public int GetPercentage(string propertyName)
         {
-            return (int)((GetProperty(propertyName)/GetRecomendedIntake(propertyName) )*100);
+            return (int)((GetProperty(propertyName) / GetRecomendedIntake(propertyName)) * 100);
         }
 
         public string Colour(int percent)
         {
-            if(percent<0 )
+            if (percent < 0)
             {
                 return "";
             }
             else
             {
-                if(percent>25)
+                if (percent > 25)
                 {
                     return "Red";
                 }

@@ -5,21 +5,27 @@ using System.Xml;
 
 namespace BlazorServerApp.DocxReader
 {
-    class docxReader
+    public interface IDocxReader
+    {
+        public Task<string> GetTextAsync(string path);
+    }
+
+    class docxReader:IDocxReader
     {
 
 
         public string doccumentText = "";
 
-        public string getTextAsync(string path)
+        public async Task<string> GetTextAsync(string path)
         {
+            doccumentText = ""; // Clear text.
             using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(path, true))
             {
                 var text = wordDoc.MainDocumentPart.Document.InnerXml;
 
                 XmlDocument xml = new();
                 xml.LoadXml(text);
-                Traverse(xml.DocumentElement);
+                await Task.Run(()=>Traverse(xml.DocumentElement));
 
                 return doccumentText;
 
@@ -37,7 +43,11 @@ namespace BlazorServerApp.DocxReader
             {
                 doccumentText += "\t";
             }
-            if (node is XmlElement)
+            if(node.Name == "w:drawing")//<w:drawing> // do nothing. as this would cause co-ordinates to appear!
+            {
+                //doccumentText += "\t";
+            }
+            else if (node is XmlElement) 
             {
 
                 if (node.HasChildNodes)

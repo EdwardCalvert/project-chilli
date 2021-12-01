@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BlazorServerApp.TextProcessor
 {
-    public class TextProcessor
+    public class TextProcessor: ITextProcessor
     {
         INounExtractor _nounExtractor;
         IWordsAPIService _wordsAPIService;
@@ -95,30 +95,38 @@ namespace BlazorServerApp.TextProcessor
             return Math.Max(res, num);
         }
 
-        private static double ConvertTextFractionToDouble(string input)
+        private static double ConvertComplexFractionToDouble(string input)
         {
-            string[] fraction = input.Split("\\");
+            input = input.Trim();
+            string[] wholeNumber = input.Split(" ");
+            return TextProcessor.extractMaximumNumber(wholeNumber[0]) + ConvertSimpleFractionToDouble(input);
+        }
+        private static double ConvertSimpleFractionToDouble(string input)
+        {
+            input = input.Trim();
+            string[] fraction = input.Split("/");
             int numerator = TextProcessor.extractMaximumNumber(fraction[0]);
             int denominator = TextProcessor.extractMaximumNumber(fraction[1]);
-            return numerator / denominator;
+            return  (numerator / denominator);
         }
+
 
         private static double ExtractDouble(string input)
         {
-            if (Regex.IsMatch(input, "[0-9]{1,2} [0-9]\\/[0-9]"))// Matches fractions in the form 1 1/2 etc
+            if (Regex.IsMatch(input, "[0-9]{1,2} [0-9]{1,2}/[0-9]"))// Matches fractions in the form 1 1/2 etc
             {
                 //then return.
                 //split(" ") then find the largest number in [0]
                 //at index two split("/"), find the largest number in each section.
                 string[] splitInputOnSpace = input.Split(" ");
                 int number = TextProcessor.extractMaximumNumber(splitInputOnSpace[0]);
-                return number + ConvertTextFractionToDouble(splitInputOnSpace[1]);
+                return number + ConvertComplexFractionToDouble(splitInputOnSpace[1]);
             }
-            else if (Regex.IsMatch(input, "[0-9]\\/[0-9]")) // matches fractions like 1/2 1/4 etc
+            else if (Regex.IsMatch(input, "[0-9]{1,2}/[0-9]")) // matches fractions like 1/2 1/4 etc
             {
-                return ConvertTextFractionToDouble(input);
+                return ConvertComplexFractionToDouble(input);
             }
-            else if (Regex.IsMatch(input, "[0-9]{1,3}\\.[0-9]{1,2}}")) // Matches decimals like 1.3 etc
+            else if (Regex.IsMatch(input, "[0-9]{1,3}\\.[0-9]{1,2}")) // Matches decimals like 1.3 etc
             {
                 return double.Parse(input);
             }
@@ -418,7 +426,7 @@ namespace BlazorServerApp.TextProcessor
             {
                 bool insertMade = false;
                 TypeOf typeOf = await _wordsAPIService.CallCachedAPI(noun);
-                if (typeOf != null && (typeOf.typeOf.Contains("equipment") || typeOf.typeOf.Contains("kitchen appliance") || typeOf.typeOf.Contains("utensil")))
+                if (typeOf != null && (typeOf.typeOf.Contains("equipment") || typeOf.typeOf.Contains("kitchen appliance") || typeOf.typeOf.Contains("utensil") || typeOf.typeOf.Contains("electronic equipment") || typeOf.typeOf.Contains("mixer")))
                 {
                     IEnumerable<Equipment> equipment = await _dataLoader.FindEquipmentLike(noun);
                     if (equipment.Any())
@@ -495,5 +503,11 @@ namespace BlazorServerApp.TextProcessor
                 return  ingredientId;
             }
         }
+
+       
+    }
+    public interface ITextProcessor
+    {
+        public Task<Recipe> CreateRecipe(string inputText);
     }
 }

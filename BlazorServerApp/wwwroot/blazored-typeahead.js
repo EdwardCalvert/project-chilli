@@ -20,7 +20,6 @@ window.blazoredTypeahead = {
         }
     },
     onOutsideClickClear: function (element) {
-
         if (element == null) {
             return;
         }
@@ -42,7 +41,6 @@ window.blazoredTypeahead = {
         onOutsideClickFunctions[bId] = null;
     },
     onOutsideClick: function (searchTextElement, dotnetRef, methodName, clearOnFire) {
-
         if (searchTextElement == null) {
             return;
         }
@@ -58,7 +56,7 @@ window.blazoredTypeahead = {
 
         blazoredTypeahead.onOutsideClickClear(searchTextElement); //clean up just in case
 
-        var func = function(e) {
+        var func = function (e) {
             var parent = e.target;
             while (parent != null) {
                 if (parent.classList != null && parent.classList.contains('blazored-typeahead')) {

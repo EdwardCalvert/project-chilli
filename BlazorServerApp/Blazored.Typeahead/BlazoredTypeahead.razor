@@ -146,36 +146,36 @@
     }
     else if (ShouldShowSuggestions())
     {
-<div class="blazored-typeahead__results">
-    @if (HeaderTemplate != null)
-    {
-        <div class="blazored-typeahead__results-header">
-            @HeaderTemplate
-        </div>
-    }
+        <div class="blazored-typeahead__results">
+            @if (HeaderTemplate != null)
+            {
+                <div class="blazored-typeahead__results-header">
+                    @HeaderTemplate
+                </div>
+            }
 
-    @for (var i = 0; i < Suggestions.Length; i++)
-    {
-        var item = Suggestions[i];
+            @for (var i = 0; i < Suggestions.Length; i++)
+            {
+                var item = Suggestions[i];
 
-        <div @key="item"
-             class="blazored-typeahead__result @GetSelectedSuggestionClass(item, i)"
-             @onclick="@(_ => SelectResult(item))">
-            @ResultTemplate(item)
-        </div>
-    }
-    <div class="blazored-typeahead__result @GetSelectedSuggestionClass(Suggestions.Length)"
-         @onclick="@SelectNotFoundPlaceholder">
-        @NotFoundTemplate(SearchText)
-    </div>
+                <div @key="item"
+                     class="blazored-typeahead__result @GetSelectedSuggestionClass(item, i)"
+                     @onclick="@(_ => SelectResult(item))">
+                    @ResultTemplate(item)
+                </div>
+            }
+            <div class="blazored-typeahead__result @GetSelectedSuggestionClass(Suggestions.Length)"
+                 @onclick="@SelectNotFoundPlaceholder">
+                @NotFoundTemplate(SearchText)
+            </div>
 
-    @*@if (FooterTemplate != null)
-    {
-        <div class="blazored-typeahead__results-footer">
-            @FooterTemplate
+            @*@if (FooterTemplate != null)
+                {
+                    <div class="blazored-typeahead__results-footer">
+                        @FooterTemplate
+                    </div>
+                }*@
         </div>
-    }*@
-</div>
     }
     else if (ShowNotFound())
     {
@@ -200,7 +200,7 @@
                 {
                     <div class="blazored-typeahead__notfound">
                         @NotFoundTemplate(SearchText)
-                    </div>    
+                    </div>
                 }
             }
             else

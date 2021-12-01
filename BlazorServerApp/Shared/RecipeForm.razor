@@ -245,6 +245,9 @@ else
     [Parameter]
     public MODES mode { get; set; }
 
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+
     private bool PreventTextboxEdit = false;
 
     private int lines = 2;
@@ -302,6 +305,10 @@ else
                 await dataLoader.UpdateRecipe(RecipeModel);
                 NavManager.NavigateTo($"/Recipe/{RecipeModel.RecipeID}");
             }
+            else if( mode == MODES.BulkUpload)
+                {
+                 await OnClick.InvokeAsync();
+                }
         }
         catch (Exception e)
         {
@@ -342,7 +349,7 @@ else
             RecipeModel = new();
             RecipeModel.InsertEmptyIngredient(3);
             RecipeModel.InsertEmptyMethod(5);
-            
+
         }
         else
         {
@@ -382,9 +389,9 @@ else
             try
             {
                 if(textProcessor == null)
-                    {
-                        textProcessor = new TextProcessor(new NounExtractor(), wordsAPI, dataLoader);
-                    }
+                {
+                    textProcessor = new TextProcessor(new NounExtractor(), wordsAPI, dataLoader);
+                }
                 runningPatternRecognition = true;
                 await Task.Delay(1);      // flushing changes. The trick!!
                 RecipeModel = await textProcessor.CreateRecipe(textArea);         // non-async code

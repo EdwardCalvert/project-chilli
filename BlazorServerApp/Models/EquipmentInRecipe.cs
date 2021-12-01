@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace BlazorServerApp.Models
+﻿namespace BlazorServerApp.Models
 {
     public class EquipmentInRecipe
     {
@@ -17,8 +12,7 @@ namespace BlazorServerApp.Models
 
         public dynamic SqlAnonymousType()
         {
-            return new { equipmentID = EquipmentID, recipeID = RecipeID};
+            return new { equipmentID = EquipmentID, recipeID = RecipeID };
         }
-
     }
 }

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlazorServerApp.Models
 {
@@ -10,7 +7,6 @@ namespace BlazorServerApp.Models
         public string UserName { get; set; }
         public string Role { get; set; }
         public string SHA512 { get; set; }
-
 
         public string SqlInsertStatement()
         {

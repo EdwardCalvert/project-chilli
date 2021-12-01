@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
 
 namespace BlazorServerApp.Models
 {
@@ -13,7 +9,7 @@ namespace BlazorServerApp.Models
     /// </summary>
     public class Recipe
     {
-        public const int INGREDIENTSCAPACITY= 30;
+        public const int INGREDIENTSCAPACITY = 30;
         public const int EQUIPMENTCAPACITY = 30;
         public const int METHODCAPACITY = 30;
 
@@ -56,11 +52,11 @@ namespace BlazorServerApp.Models
             "Biscuit",
             "Light Meal",
         };
+
         [Required, ValidIngredientsInRecipe]
         public List<UserDefinedIngredientInRecipe> Ingredients { get; set; } = new List<UserDefinedIngredientInRecipe>();
-        
-        public bool ManualUpload { get; set; }
 
+        public bool ManualUpload { get; set; }
 
         public DateTime LastRequested { get; set; }
 
@@ -92,6 +88,7 @@ namespace BlazorServerApp.Models
         public double Carbohydrates { get; set; }
         public double Salt { get; set; }
         public double Protein { get; set; }
+
         public static Dictionary<string, int> DifficultyEnum = new Dictionary<string, int>()
         {
             { "Easy",1},
@@ -99,9 +96,8 @@ namespace BlazorServerApp.Models
             {"Hard",3 },
         };
 
-
         public static readonly List<string> DIFICULTY = new List<string>(Recipe.DifficultyEnum.Keys);
-        
+
         public static RecomendedIntake RecomendedIntake = new RecomendedIntake(2000, 70, 20, 260, 90, 50, 6);
 
         [Required]
@@ -113,17 +109,15 @@ namespace BlazorServerApp.Models
 
         public uint PageVisits { get; set; }
 
-
         public string SqlInsertStatement()
         {
             return $"INSERT INTO Recipe(Servings, MealType, RecipeName, Kcal, Saturates, Carbohydrates, Sugar, Fibre, Protein, Salt, Fat, CookingTime, PreperationTime, Difficulty, PageVisits,LastRequested, Description, ManualUpload)" +
                 $"VALUES( @servings, @mealType, @recipeName, @kcal, @saturates, @carbohydrates, @sugar, @fibre, @protein, @salt, @fat, @cookingTime, @preperationTime, @difficulty, @pageVisits, @lastRequested, @description,@manualUpload); ";
-
         }
 
         public dynamic SqlAnonymousType()
         {
-            return new { servings = Servings, mealType = MealType, recipeName = RecipeName, kcal = Kcal, saturates = Saturates, carbohydrates = Carbohydrates, sugar = Sugar, fibre = Fibre, protein = Protein, salt = Salt, fat = Fat, cookingTime = CookingTime, preperationTime = PreperationTime, difficulty = Difficulty, pageVisits = PageVisits, lastRequested = DateTime.Now, description = Description,manualUpload = ManualUpload };
+            return new { servings = Servings, mealType = MealType, recipeName = RecipeName, kcal = Kcal, saturates = Saturates, carbohydrates = Carbohydrates, sugar = Sugar, fibre = Fibre, protein = Protein, salt = Salt, fat = Fat, cookingTime = CookingTime, preperationTime = PreperationTime, difficulty = Difficulty, pageVisits = PageVisits, lastRequested = DateTime.Now, description = Description, manualUpload = ManualUpload };
         }
 
         public dynamic SqlAnonymousType(uint RecipeID)
@@ -134,12 +128,11 @@ namespace BlazorServerApp.Models
         public string SqlUpdateStatement()
         {
             return $"UPDATE Recipe SET Servings = @servings, MealType =  @mealType, RecipeName = @recipeName, Kcal = @kcal, Saturates = @saturates, Carbohydrates = @carbohydrates, Sugar = @sugar, Fibre = @fibre, Protein = @protein, Salt = @salt, Fat = @fat, CookingTime = @cookingTime, PreperationTime = @preperationTime, Difficulty = @difficulty, PageVisits = @pageVisits,LastRequested = @lastRequested, Description = @description WHERE RecipeID = @recipeID; ";
-
         }
 
         public void InsertEmptyIngredient(int quantity)
         {
-            for(int i =0; i<quantity; i++)
+            for (int i = 0; i < quantity; i++)
             {
                 InsertEmptyIngredient();
             }
@@ -149,7 +142,6 @@ namespace BlazorServerApp.Models
         {
             Ingredients.Add(new UserDefinedIngredientInRecipe());
         }
-
 
         public void InsertEmptyMethod()
         {
@@ -196,6 +188,4 @@ namespace BlazorServerApp.Models
             }
         }
     }
-
-  
 }

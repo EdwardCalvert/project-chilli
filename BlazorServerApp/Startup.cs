@@ -1,6 +1,8 @@
 using BlazorServerApp.Models;
 using BlazorServerApp.proccessService;
 using BlazorServerApp.WordsAPI;
+using BlazorServerApp.DocxReader;
+using BlazorServerApp.TextProcessor;
 using DataLibrary;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Net.Http;
+
 
 namespace BlazorServerApp
 {
@@ -42,11 +45,14 @@ namespace BlazorServerApp
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<IDataAccess, MySqlDataAccess>(); //Inject the mysql data access- could be changed to any data layer implementing IDataAcess. This launches it in memory- the overhead is worth it as data layer is vital.
+            services.AddSingleton<IDocxReader, docxReader>();
+            
             services.AddSingleton<IRecipeDataLoader, RecipeDataLoader>();
             services.AddSingleton<IFileManger, FileManager>();
             services.AddSingleton<IRecipeProcessorService, RecipeProcessorService>();
             services.AddSingleton<IWordsAPIService, WordsAPIService>();
-
+            services.AddTransient<INounExtractor, NounExtractor>();
+            services.AddTransient<ITextProcessor, TextProcessor.TextProcessor>();
             services.AddHttpClient();
             // ******
             // BLAZOR COOKIE Auth Code (begin)
@@ -61,7 +67,7 @@ namespace BlazorServerApp
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IRecipeProcessorService recipeProcessorService)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -71,7 +77,7 @@ namespace BlazorServerApp
             {
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                //app.UseHsts();
             }
 
             app.UseHttpsRedirection();
@@ -80,7 +86,6 @@ namespace BlazorServerApp
             app.UseRouting();
 
             // BLAZOR COOKIE Auth Code (begin)
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseAuthentication();

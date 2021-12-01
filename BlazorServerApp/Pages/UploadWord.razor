@@ -36,7 +36,7 @@
     @if (recipeProcessorService.FilesAreQueued())
     {
         <p>The bulk upload script will now appear, which will allow you to proof-read every recipe before it is uploaded.</p>
-        <btn class="btn btn-primary">Yup, I'm happy, show me the  bulk processor.</btn>
+        <a class="btn btn-primary" href="/admin/BulkUpload">Yup, I'm happy, show me the  bulk processor.</a>
     }
     <ErrorNotification Show="@error" ErrorMessage="@errorMessage"></ErrorNotification>
 

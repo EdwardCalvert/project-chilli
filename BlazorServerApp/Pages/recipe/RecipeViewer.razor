@@ -34,15 +34,15 @@ else if (model != null)
 
     if (model.Servings != 0)
     {
-        <p style="margin-bottom:0;">Serves: @model.Servings people;</p>
+        <p style="margin-bottom:0;">Serves: @model.Servings @(model.Servings == 1? "person" : "people")</p>
     }
     if(model.PreperationTime != 0)
                 {
-<p style="margin-bottom:0;">Preparation time: @model.PreperationTime mins</p>
+<p style="margin-bottom:0;">Preparation time: @model.PreperationTime @(model.PreperationTime == 1? "min" :"mins")</p>
     }
     if (model.CookingTime != 0)
     {
-        <p style="margin-bottom:0;">Cooking time: @model.CookingTime mins</p>
+        <p style="margin-bottom:0;">Cooking time: @model.CookingTime @(model.CookingTime == 1? "min" : "mins")</p>
     }
     if(model.CookingTime !=0 && model.PreperationTime != 0)
     {

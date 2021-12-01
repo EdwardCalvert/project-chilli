@@ -56,7 +56,14 @@ namespace BlazorServerApp.proccessService
 
         public T PeekItem()
         {
-            return _queueItems[_front];
+            if (!QueueIsEmpty())
+            {
+                return _queueItems[_front];
+            }
+            else
+            {
+                return default(T);
+            }
         }
 
         public int GetCapacity()

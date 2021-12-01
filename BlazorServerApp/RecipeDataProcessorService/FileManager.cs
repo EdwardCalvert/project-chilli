@@ -13,7 +13,6 @@ namespace BlazorServerApp.proccessService
 {
     public class FileManager :IFileManger
     {
-        private const string rootPath = "wwwroot\\FileManager";
         private IWebHostEnvironment _environment;
         private IDataAccess _dataAccess;
 
@@ -22,9 +21,9 @@ namespace BlazorServerApp.proccessService
         {
             _environment = Environment;
             _dataAccess = dataAccess;
-            if(!Directory.Exists(rootPath))
+            if(!Directory.Exists(Path.Combine(_environment.ContentRootPath, "wwwroot", "unsafe_uploads")))
             {
-                Directory.CreateDirectory(rootPath);
+                Directory.CreateDirectory(Path.Combine(_environment.ContentRootPath, "wwwroot", "unsafe_uploads"));
             }
         }
 
@@ -39,8 +38,7 @@ namespace BlazorServerApp.proccessService
                 }
                 CustomMD5 customMD5 = new CustomMD5();
                 string md5AsHex = customMD5.Run(fileAsString);
-                var path = Path.Combine(_environment.ContentRootPath, "wwwroot", "unsafe_uploads",
-                        md5AsHex);
+                var path = AbsolutFilePathFromHash(md5AsHex);
                 if (Directory.Exists(path))
                 {
                     return (898,""); 
@@ -58,10 +56,35 @@ namespace BlazorServerApp.proccessService
             }
             }
 
+        private string AbsolutFilePathFromHash(string MD5Hash)
+        {
+            return Path.Combine(_environment.ContentRootPath, "wwwroot", "unsafe_uploads", MD5Hash);
+        }
 
+        public string GetFilePath(string MD5Hash) 
+        {
+            string[] files = Directory.GetFiles(AbsolutFilePathFromHash(MD5Hash));
+            if(files.Length == 1)
+            {
+                return files[0];
+            }
+            else
+            {
+                throw new Exception("Catastrophic error: File folder integrity lost");
+            }
+        }
 
-        public string GetFilePath(string MD5Hash) {
-            return "";
+        public void DeleteFile(string MD5Hash)
+        {
+            string path = AbsolutFilePathFromHash(MD5Hash);
+            if (Directory.Exists(path))
+            {
+                foreach(string filePath in Directory.GetFiles(path))
+                {
+                    File.Delete(filePath);
+                }
+                Directory.Delete(path);
+            }
         }
 
 
@@ -77,5 +100,6 @@ namespace BlazorServerApp.proccessService
         public Task<(int,string)> InsertFile(IBrowserFile browserFiles, int maxFileSizeInBytes);
         public const long MAXFILESIZE = 1024 * 15;
         public const int MAXALLOWEDFILES = 3;
+        public void DeleteFile(string MD5Hash);
     }
 }
