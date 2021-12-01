@@ -1,6 +1,7 @@
 ﻿using BlazorServerApp.Models;
 using BlazorServerApp.WordsAPI;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -8,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace BlazorServerApp.TextProcessor
 {
-    public class TextProcessor: ITextProcessor
+    public class TextProcessor : ITextProcessor
     {
-        INounExtractor _nounExtractor;
-        IWordsAPIService _wordsAPIService;
-        IRecipeDataLoader _dataLoader;
+        private INounExtractor _nounExtractor;
+        private IWordsAPIService _wordsAPIService;
+        private IRecipeDataLoader _dataLoader;
 
-        public TextProcessor(INounExtractor nounExtractor,IWordsAPIService wordsAPIService,IRecipeDataLoader dataLoader)
+        public TextProcessor(INounExtractor nounExtractor, IWordsAPIService wordsAPIService, IRecipeDataLoader dataLoader)
         {
             _nounExtractor = nounExtractor;
             _dataLoader = dataLoader;
@@ -95,21 +96,35 @@ namespace BlazorServerApp.TextProcessor
             return Math.Max(res, num);
         }
 
+        private static int FindFirstInteger(string input)
+        {
+            int number = 0;
+
+            for (int i = 0; i < input.Length; i++) // loop over the complete input
+            {
+                if (Char.IsDigit(input[i])) //check if the current char is digit
+                    number = number * 10 + (input[i] - '0');
+                else
+                    return number; //Stop the loop after the first character
+            }
+            return -1;
+        }
+
         private static double ConvertComplexFractionToDouble(string input)
         {
             input = input.Trim();
             string[] wholeNumber = input.Split(" ");
             return TextProcessor.extractMaximumNumber(wholeNumber[0]) + ConvertSimpleFractionToDouble(input);
         }
+
         private static double ConvertSimpleFractionToDouble(string input)
         {
             input = input.Trim();
             string[] fraction = input.Split("/");
             int numerator = TextProcessor.extractMaximumNumber(fraction[0]);
             int denominator = TextProcessor.extractMaximumNumber(fraction[1]);
-            return  (numerator / denominator);
+            return (numerator / denominator);
         }
-
 
         private static double ExtractDouble(string input)
         {
@@ -145,11 +160,11 @@ namespace BlazorServerApp.TextProcessor
             }
             else //I really have no idea what input they attempted, so I will just choose the largest number.
             {
-                return TextProcessor.extractMaximumNumber(input);
+                return TextProcessor.FindFirstInteger(input);
             }
         }
 
-        private async  Task<string> RemoveUneccessaryLinesFromDescription(string description)
+        private async Task<string> RemoveUneccessaryLinesFromDescription(string description)
         {
             string previousLine = "";
             string newDescription = "";
@@ -183,16 +198,29 @@ namespace BlazorServerApp.TextProcessor
                             previousLine = loopLine;
                         }
                     }
-
                 }
-
             }
             return newDescription;
         }
 
         public static readonly Dictionary<string, double> doubleEquivalent = new()
         {
-            {"½",0.5 },{"⅓",0.33 },{"⅔",0.66},{"¼",0.25},{"⅕",0.2 },{"⅗",0.6 },{"⅘",0.8 },{"⅙",0.16 },{"⅚",0.83 },{"⅐",0.14},{"⅛",0.125 },{"⅜",0.325 },{"⅝",0.625 },{"⅞",0.875 },{"⅑",0.11},{"⅒",0.10},
+            { "½", 0.5 },
+            { "⅓", 0.33 },
+            { "⅔", 0.66 },
+            { "¼", 0.25 },
+            { "⅕", 0.2 },
+            { "⅗", 0.6 },
+            { "⅘", 0.8 },
+            { "⅙", 0.16 },
+            { "⅚", 0.83 },
+            { "⅐", 0.14 },
+            { "⅛", 0.125 },
+            { "⅜", 0.325 },
+            { "⅝", 0.625 },
+            { "⅞", 0.875 },
+            { "⅑", 0.11 },
+            { "⅒", 0.10 },
         };
 
         public static string ConvertStringToSUPPORTEDUNITS(string unit)
@@ -239,26 +267,25 @@ namespace BlazorServerApp.TextProcessor
             {"lb." ,"Pound"},
             {"ml","Mililetres" },
             {"qt.","Quart" },
-
         };
 
         public const string SPOONS = "((rounded|heaped|level) )?((tea|desert|table)? ?(spoonful|spoon|tbsp|tsp))s?";
         public const string UNITS = "(((fluid ounce|ounce|oz|kilograms|cup|gram|pint|pound|quart|kg|g|ml|fl\\.|gal\\.|lb\\.|pt|qt\\.)s?)|(" + SPOONS + "))"; //sort by length- ie teaspoons before teaspoon
         public const string NUMBERSWITHFRACTIONS = "([0-9]|½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒)";
         public const string TIMEWORDS = "(minutes|minute|mins|min|hours|hour|seconds|second|days|day)";
-        public const string INGREDIENTSWITHCOUNTREGEX = BULLETPOINT+"[0-9]{0,3} ?" + NUMBERSWITHFRACTIONS + "(\\.|\\/| |-)?[0-9]{0,6} ?" + UNITS + " [^\\.\\;\n\t]{3,200}";
+        public const string INGREDIENTSWITHCOUNTREGEX = BULLETPOINT + "[0-9]{0,3} ?" + NUMBERSWITHFRACTIONS + "(\\.|\\/| |-)?[0-9]{0,6} ?" + UNITS + " [^\\.\\;\n\t]{3,200}";
         public const string INGREDIENTSWITHOUTUNITREGEX = BULLETPOINT + "[1-9][0-9]? ((?!" + TIMEWORDS + ")[A-z]| |,|\\([^\r\t\\(\\)\n]{2,100}\\)|-){3,150}[a-z]";
         public const string UNITSFROMTEXT = "(?<=" + NUMBERSWITHFRACTIONS + ") ?" + UNITS + " ";
         public const string BULLETPOINT = "(•\t)?";
         public const string METHODREGEX = "[1-9][0-9]{0,3}\\.(\t| )[^\t\n\r]{10,500}";
         public const string SERVINGREGEX = "((serves|makes) ?[1-9][0-9]? ?(to|-)? ?[1-9]?[0-9]?)|([1-9][0-9]? ?(to|-)? ?[1-9]?[0-9]? ?(servings|serving|portions|portion))";
-        
+
         public const string TIMEREGEX = "([1-9][0-9]?( (to|-|—) ))?[1-9][0-9]? " + TIMEWORDS;
 
         public static int GetServingCount(string inputText)
         {
             //https://regexr.com/69vg0
-            MatchCollection servingRegularExpression = Regex.Matches(inputText,SERVINGREGEX , RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
+            MatchCollection servingRegularExpression = Regex.Matches(inputText, SERVINGREGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
             if (servingRegularExpression.Count == 1)
             {
                 return extractMaximumNumber(servingRegularExpression[0].Value);
@@ -280,13 +307,16 @@ namespace BlazorServerApp.TextProcessor
             return methods;
         }
 
-        public async Task<List<UserDefinedIngredientInRecipe>> GetIngredientsWithUnits(string inputText,bool insertIngredientOnEmptyResult)
+        public async Task<List<UserDefinedIngredientInRecipe>> GetIngredientsWithUnits(string inputText, bool insertIngredientOnEmptyResult)
         {
             List<UserDefinedIngredientInRecipe> userDefinedIngredientInRecipes = new();
             //Go to https://regexr.com/69vn4 for a break down.
             MatchCollection ingredientsWithUnitsRegex = Regex.Matches(inputText, INGREDIENTSWITHCOUNTREGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
-            foreach (Match match in ingredientsWithUnitsRegex)
+
+            var bag = new ConcurrentBag<object>();
+            var tasks = ingredientsWithUnitsRegex.Select(async match =>
             {
+                // some pre stuff
                 string unit = "";
                 string ingredientName = match.Value;
 
@@ -303,17 +333,55 @@ namespace BlazorServerApp.TextProcessor
                 double quantity = TextProcessor.ExtractDouble(match.Value);
                 ingredientName = ingredientName.Replace(quantity.ToString(), "").Trim();
 
-                uint? ingredientID = await GetIngredientID( ingredientName, insertIngredientOnEmptyResult);
+                uint? ingredientID = await GetIngredientID(ingredientName, insertIngredientOnEmptyResult);
                 if (ingredientID != null)
                 {
                     UserDefinedIngredientInRecipe userDefinedIngredientInRecipe = new UserDefinedIngredientInRecipe();
                     userDefinedIngredientInRecipe.IngredientID = ingredientID;
                     userDefinedIngredientInRecipe.Quantity = quantity;
                     userDefinedIngredientInRecipe.Unit = unit;
-                    userDefinedIngredientInRecipes.Add(userDefinedIngredientInRecipe);
+                    //userDefinedIngredientInRecipes.Add(userDefinedIngredientInRecipe);
+                    bag.Add(userDefinedIngredientInRecipe);
                 }
+                
+                // some post stuff
+            });
+            await Task.WhenAll(tasks);
+
+            //foreach (Match match in ingredientsWithUnitsRegex)
+            //{
+            //    string unit = "";
+            //    string ingredientName = match.Value;
+
+            //    MatchCollection units = Regex.Matches(match.Value, UNITSFROMTEXT, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            //    if (units.Count == 1)
+            //    {
+            //        unit = TextProcessor.ConvertStringToSUPPORTEDUNITS(units[0].Value);
+            //    }
+            //    else
+            //    {
+            //        unit = "x";
+            //    }
+            //    ingredientName = Regex.Replace(ingredientName, UNITSFROMTEXT, "");
+            //    double quantity = TextProcessor.ExtractDouble(match.Value);
+            //    ingredientName = ingredientName.Replace(quantity.ToString(), "").Trim();
+
+            //    uint? ingredientID = await GetIngredientID(ingredientName, insertIngredientOnEmptyResult);
+            //    if (ingredientID != null)
+            //    {
+            //        UserDefinedIngredientInRecipe userDefinedIngredientInRecipe = new UserDefinedIngredientInRecipe();
+            //        userDefinedIngredientInRecipe.IngredientID = ingredientID;
+            //        userDefinedIngredientInRecipe.Quantity = quantity;
+            //        userDefinedIngredientInRecipe.Unit = unit;
+            //        userDefinedIngredientInRecipes.Add(userDefinedIngredientInRecipe);
+            //    }
+            //}
+            List<UserDefinedIngredientInRecipe> bagResults  = new List<UserDefinedIngredientInRecipe>();
+            foreach(UserDefinedIngredientInRecipe item in bag)
+            {
+                bagResults.Add(item);
             }
-            return userDefinedIngredientInRecipes;
+            return bagResults; //userDefinedIngredientInRecipes;
         }
 
         public static string GetDifficulty(List<Method> methods)
@@ -332,15 +400,14 @@ namespace BlazorServerApp.TextProcessor
             }
         }
 
-
         /// <summary>
-        /// Method that extracts ingredients from a recipe, without a unit. It has a habit of picking up any text that is followed by  a number, so make sure to give it clean text. 
+        /// Method that extracts ingredients from a recipe, without a unit. It has a habit of picking up any text that is followed by  a number, so make sure to give it clean text.
         /// </summary>
         /// <param name="textAreaWithoutTimes"></param>
         /// <param name="dataLoader"></param>
         /// <param name="wordsAPIService"></param>
         /// <returns></returns>
-        public async Task<List<UserDefinedIngredientInRecipe>> GetIngredientsWithoutUnit(string textAreaWithoutTimes,bool insertIngredientOnEmptyResult)
+        public async Task<List<UserDefinedIngredientInRecipe>> GetIngredientsWithoutUnit(string textAreaWithoutTimes, bool insertIngredientOnEmptyResult)
         {
             List<UserDefinedIngredientInRecipe> ingredientInRecipes = new();
             // + UNITS + "|"
@@ -350,23 +417,30 @@ namespace BlazorServerApp.TextProcessor
                 UserDefinedIngredientInRecipe userDefinedIngredientInRecipe = new();
                 userDefinedIngredientInRecipe.Quantity = TextProcessor.extractMaximumNumber(match.Value);
                 userDefinedIngredientInRecipe.Unit = "x";
-                userDefinedIngredientInRecipe.IngredientID = await GetIngredientID( match.Value.Replace(userDefinedIngredientInRecipe.Quantity.ToString(), "").Trim(), insertIngredientOnEmptyResult);
+                userDefinedIngredientInRecipe.IngredientID = await GetIngredientID(match.Value.Replace(userDefinedIngredientInRecipe.Quantity.ToString(), "").Trim(), insertIngredientOnEmptyResult);
                 ingredientInRecipes.Add(userDefinedIngredientInRecipe);
             }
             return ingredientInRecipes;
         }
 
-        public async  Task<string> CreateDescription(string inputText)
+        public async Task<string> CreateDescription(string inputText)
         {
             //Remove all occurances of a time related numeric value.
             //This prevents the ingredietns without units from picking them up.
-            inputText = Regex.Replace(inputText,SERVINGREGEX,"", RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
+            inputText = Regex.Replace(inputText, SERVINGREGEX, "", RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
             inputText = Regex.Replace(inputText, INGREDIENTSWITHCOUNTREGEX, "", RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
             inputText = Regex.Replace(inputText, METHODREGEX, "", RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
-             inputText = Regex.Replace(inputText, SERVINGREGEX, "", RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
-            return await RemoveUneccessaryLinesFromDescription( inputText);
-
-
+            inputText = Regex.Replace(inputText, SERVINGREGEX, "", RegexOptions.Compiled | RegexOptions.IgnoreCase, new TimeSpan(10000000));
+            return await RemoveUneccessaryLinesFromDescription(inputText);
+        }
+        public string GetTitle(string input)
+        {
+            foreach(string line in input.Split("\n"))
+            {
+                if (line != null)
+                    return line;
+            }
+            return input.Split("\n")[0];
         }
 
         public async Task<Recipe> CreateRecipe(string inputText)
@@ -377,23 +451,19 @@ namespace BlazorServerApp.TextProcessor
             }
             string description;
             Recipe newRecipe = new Recipe();
-            newRecipe.RecipeName = inputText.Split("\n")[0];
+            newRecipe.RecipeName = GetTitle(inputText);
             description = inputText;
             //see https://regexr.com/69vg0
-
-            
 
             newRecipe.Servings = await Task.Run(() => GetServingCount(inputText));
 
             newRecipe.Method = await Task.Run(() => GetMethods(inputText));
 
-            newRecipe.Ingredients.AddRange(await Task.Run(() => GetIngredientsWithUnits(inputText,true)));
+            newRecipe.Ingredients.AddRange(await Task.Run(() => GetIngredientsWithUnits(inputText, true)));
 
-            
+            newRecipe.Description = await Task.Run(() => CreateDescription(inputText));
 
-            newRecipe.Description = await Task.Run(() =>  CreateDescription(inputText));
-
-            newRecipe.Ingredients.AddRange(await Task.Run(()=>GetIngredientsWithoutUnit(newRecipe.Description,true)));
+            newRecipe.Ingredients.AddRange(await Task.Run(() => GetIngredientsWithoutUnit(newRecipe.Description, true)));
 
             newRecipe.Difficulty = await Task.Run(() => GetDifficulty(newRecipe.Method));
 
@@ -418,16 +488,28 @@ namespace BlazorServerApp.TextProcessor
             return false;
         }
 
-        public  async Task<List<Equipment>> GetEquipmentID(string descriptonToSearch)
+        public async Task<List<Equipment>> GetEquipmentID(string descriptonToSearch)
         {
             List<Equipment> EquipmentIDs = new();
             List<string> nouns = await _nounExtractor.ExtractNouns(descriptonToSearch);
-            foreach (string noun in nouns)
+
+            var bag = new ConcurrentBag<object>();
+            var tasks = nouns.Select(async noun =>
             {
+                // some pre stuff
+                TypeOf response = await _wordsAPIService.CallCachedAPI(noun);
+                bag.Add(response);
+                // some post stuff
+            });
+            await Task.WhenAll(tasks);
+            var count = bag.Count;
+            foreach (TypeOf typeOf in bag.ToArray())
+            {
+                
                 bool insertMade = false;
-                TypeOf typeOf = await _wordsAPIService.CallCachedAPI(noun);
                 if (typeOf != null && (typeOf.typeOf.Contains("equipment") || typeOf.typeOf.Contains("kitchen appliance") || typeOf.typeOf.Contains("utensil") || typeOf.typeOf.Contains("electronic equipment") || typeOf.typeOf.Contains("mixer")))
                 {
+                    string noun = typeOf.word;
                     IEnumerable<Equipment> equipment = await _dataLoader.FindEquipmentLike(noun);
                     if (equipment.Any())
                     {
@@ -454,6 +536,38 @@ namespace BlazorServerApp.TextProcessor
                     }
                 }
             }
+            //foreach (string noun in nouns)
+            //{
+            //    bool insertMade = false;
+            //    TypeOf typeOf = await _wordsAPIService.CallCachedAPI(noun);
+            //    if (typeOf != null && (typeOf.typeOf.Contains("equipment") || typeOf.typeOf.Contains("kitchen appliance") || typeOf.typeOf.Contains("utensil") || typeOf.typeOf.Contains("electronic equipment") || typeOf.typeOf.Contains("mixer")))
+            //    {
+            //        IEnumerable<Equipment> equipment = await _dataLoader.FindEquipmentLike(noun);
+            //        if (equipment.Any())
+            //        {
+            //            foreach (Equipment equipment1 in equipment)
+            //                if (TextProcessor.LevenshteinDistance(noun, equipment1.EquipmentName) <= TextProcessor.CalculateLevenshteinThreshold(noun) && !insertMade)
+            //                {
+            //                    if (!DoesEquipmentAreadyHaveID(EquipmentIDs, equipment1.EquipmentName))
+            //                    {
+            //                        EquipmentIDs.Add(equipment1);
+            //                        insertMade = true;
+            //                    }
+            //                    else
+            //                    {
+            //                        insertMade = true;
+            //                    }
+            //                }
+            //        }
+            //        if (!insertMade)
+            //        {
+            //            Equipment equipment1 = new Equipment();
+            //            equipment1.EquipmentName = noun;
+            //            equipment1.EquipmentID = await _dataLoader.InsertEquipment(equipment1);
+            //            EquipmentIDs.Add(equipment1);
+            //        }
+            //    }
+            //}
             return EquipmentIDs;
         }
 
@@ -461,14 +575,13 @@ namespace BlazorServerApp.TextProcessor
         {
             //Find any existing ingredients
             IEnumerable<UserDefinedIngredient> ingredientsInDB = await _dataLoader.FindIngredients(ingredientName);
-            
+
             if (ingredientsInDB.Any())
             {
                 foreach (UserDefinedIngredient userDefinedIngredient in ingredientsInDB)
                 {
                     if (TextProcessor.LevenshteinDistance(ingredientName, userDefinedIngredient.IngredientName) <= TextProcessor.CalculateLevenshteinThreshold(ingredientName)) // i.e. only find a ingredient that is very similar to the cureent ingedient. The threshold is designed to prevent erreoneous results at the low end e.g. eggs => egg etc, but having a small ammount of flexibility at the top end.
                     {
-                        
                         return userDefinedIngredient.IngredientID;
                     }
                 }
@@ -476,9 +589,9 @@ namespace BlazorServerApp.TextProcessor
             return null;
         }
 
-        public  async Task<uint?> GetIngredientID( string ingredientName, bool insertIngredientOnEmptyResult)
+        public async Task<uint?> GetIngredientID(string ingredientName, bool insertIngredientOnEmptyResult)
         {
-            ingredientName = ingredientName.Replace("•	","");
+            ingredientName = ingredientName.Replace("•	", "");
             uint? ingredientId = await FindIngredientInDatabase(ingredientName);
             if (ingredientId == null && insertIngredientOnEmptyResult)
             {
@@ -487,10 +600,20 @@ namespace BlazorServerApp.TextProcessor
                 List<string> nouns = ingredientName.Split(" ").ToList();// await _nounExtractor.ExtractNouns(ingredientName);
                 if (nouns != null)
                 {
-                    foreach (string noun in nouns)
+
+                    var bag = new ConcurrentBag<object>();
+                    var tasks = nouns.Select(async noun =>
                     {
-                        TypeOf typeOf = await _wordsAPIService.CallCachedAPI(noun);
-                        type |= UserDefinedIngredient.GetTypeEnum(typeOf);
+                        // some pre stuff
+                        TypeOf response = await _wordsAPIService.CallCachedAPI(noun);
+                        bag.Add(response);
+                        // some post stuff
+                    });
+                    await Task.WhenAll(tasks);
+                    var count = bag.Count;
+                    foreach(TypeOf item in bag.ToArray())
+                    {
+                        type |= UserDefinedIngredient.GetTypeEnum(item);
                     }
                 }
                 UserDefinedIngredient userDefined = new();
@@ -500,12 +623,11 @@ namespace BlazorServerApp.TextProcessor
             }
             else
             {
-                return  ingredientId;
+                return ingredientId;
             }
         }
-
-       
     }
+
     public interface ITextProcessor
     {
         public Task<Recipe> CreateRecipe(string inputText);
