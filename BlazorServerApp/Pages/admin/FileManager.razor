@@ -1,7 +1,8 @@
 ﻿@page "/admin/files"
 @inject IRecipeDataLoader dataLoader
 @inject IFileManger fileManager
-@using BlazorServerApp.proccessService
+@inject IJSRuntime JSRuntime
+
 <AuthorizeView Roles="Administrator">
     <h3>FileManager</h3>
     <p>Use this page to find all recipes stored on disk</p>
@@ -13,30 +14,41 @@
                 <th>Recipe ID</th>
                 <th>Delete</th>
                 <th>View</th>
-                <th>Download</th>
                 <th>Edit</th>
+                <th>Download</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (FileManagerModel file in files)
+            @foreach (FileInfo file in files)
             {
-            <tr>
-                <td>@fileManager.GetFileName(file.FileID)</td>
-                <td>@file.DateUploaded</td>
-                <td>@file.RecipeID</td>
-                <td><btn class="btn btn-danger" @onclick="@(()=>DeleteRecipe(file))">Delete</btn></td>
-                <td><a class="btn btn-primary" href="/Recipe/@file.RecipeID">View recipe</a></td>
-                <td><a class="btn btn-primary" href="/Recipe/@file.RecipeID">Download .docx</a></td>
-                <td><a class="btn btn-primary" href="/Recipe/@file.RecipeID/Edit">Edit</a></td>
-            </tr>
+                <tr>
+                    <td>@file.Name</td>
+                    <td>@file.LastWriteTime.ToShortDateString()</td>
+                    @if (fileManagerDictionary.ContainsKey(file.Directory.Name))
+                    {
+                        FileManagerModel model = fileManagerDictionary[file.Directory.Name];
+                        <td>@model.RecipeID</td>
+                        <td><btn class="btn btn-danger" @onclick="(()=>DeleteLinkedFile(file,model))">Delete + recipe</btn></td>
+                        <td><a href="/Recipe/@model.RecipeID" class="btn btn-primary">View</a></td>
+                        <td><a href="/Recipe/@model.RecipeID/Edit" class="btn btn-primary">Edit</a></td>
+
+                    }
+                    else
+                    {
+
+                        <td>-</td>
+                        <td><btn class="btn btn-danger" @onclick="(()=>DeleteUnlinkedFile(file))">Delete</btn></td>
+                        <td>-</td>
+                        <td>-</td>
+
+                    }
+                    <td><btn class="btn btn-primary" @onclick="(()=>DowloadFile(file.FullName))"> Download</btn></td>
+                </tr>
             }
 
         </tbody>
     </table>
-    @if (files.Count % resultsPerQuery == 0)
-    {
-        <btn class="btn btn-primary" @onclick="@GrabMoreRecipes">Load more recipes</btn>
-    }
+
 
     <ErrorNotification ErrorMessage="An unhandled database exception has occured" Show="@error"></ErrorNotification>
 </AuthorizeView>
@@ -50,20 +62,35 @@
     int resultsPerQuery = 300;
     int offset = 0;
     bool error = false;
-    private void DeleteRecipe(FileManagerModel file)
+    Dictionary<string, FileManagerModel> fileManagerDictionary = new();
+    private void DeleteUnlinkedFile(FileInfo file)
     {
+        File.Delete(file.FullName);
+        Directory.Delete(file.DirectoryName);
         files.Remove(file);
+    }
+    private void DeleteLinkedFile(FileInfo fileInfo, FileManagerModel file)
+    {
+
         dataLoader.DeleteRecipeAndRelatedValues(file.RecipeID);
         fileManager.DeleteFile(file.FileID);
+        files.Remove(fileInfo);
+    }
+    private async void DowloadFile(string directoryName)
+    {
+        string url = fileManager.GetURLFromAbsolutePath(directoryName);
+        await JSRuntime.InvokeAsync<object>("open", url, "_blank");
     }
 
-    public List<FileManagerModel> files { get; set; }
+    public List<FileInfo> files { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            files = await dataLoader.BulkImportFiles(offset);
+            files = await fileManager.GetAllFilesStoredOnDisk();
             error = false;
+            await GetFileDetails();
         }
         catch
         {
@@ -71,18 +98,16 @@
         }
     }
 
-    private async Task GrabMoreRecipes()
+    private async Task GetFileDetails()
     {
-        try
+        foreach (FileInfo fileInfo in files)
         {
-            List<FileManagerModel> results = await dataLoader.BulkImportFiles(offset);
-            offset += results.Count;
-            files.AddRange(results);
-            error = false;
-        }
-        catch
-        {
-            error = true;
+            string MD5Hash = fileInfo.Directory.Name;
+            FileManagerModel fileManagerModel = await dataLoader.GetFile(MD5Hash);
+            if (fileManagerModel != null)
+            {
+                fileManagerDictionary.Add(MD5Hash, fileManagerModel);
+            }
         }
     }
 

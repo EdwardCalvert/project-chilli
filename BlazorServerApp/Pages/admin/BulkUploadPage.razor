@@ -15,7 +15,17 @@
         }
         else
         {
-        <RecipeForm RecipeModel="@recipeModel" mode="RecipeForm.MODES.BulkUpload" OnClick="SubmitRecipe"/>
+<div class="row">
+    <div class="col-8">
+        <RecipeForm RecipeModel="@recipeModel" mode="RecipeForm.MODES.BulkUpload" OnClick="SubmitRecipe" />
+    </div>
+    <div class="co-4">
+        @foreach(string line in documentTextPreview.Split("\n"))
+                        {
+                            <p>@line</p>
+                        }
+    </div>
+</div>
         }
         @*<ProgressBar Percent="@(((recipeProcessorService.GetNumberOfItemsInQueue()-numberOfItemsInitiallyInQueue)/numberOfItemsInitiallyInQueue)*100)"></ProgressBar>*@
         <btn class="btn btn-danger" @onclick="(()=>DeleteRecipe())">Delete</btn>
@@ -35,7 +45,7 @@
 
 @code {
     int numberOfItemsInitiallyInQueue;
-    string documentTextPreview;
+    string documentTextPreview="";
     string currentMD5Hash;
     bool undergoingProccessing = false;
     Recipe recipeModel = new();
@@ -69,7 +79,7 @@
             this.StateHasChanged();
             await Task.Delay(1);
 
-            recipeModel = await textProcessor.CreateRecipe(await recipeProcessorService.DocxToText(currentMD5Hash));
+            recipeModel = await textProcessor.CreateRecipe(documentTextPreview);
 
             undergoingProccessing = false;
             await Task.Delay(1);      // changes are flushed again

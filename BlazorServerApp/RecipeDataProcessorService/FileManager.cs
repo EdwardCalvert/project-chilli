@@ -80,12 +80,33 @@ namespace BlazorServerApp.proccessService
             }
         }
 
+        public async Task<List<FileInfo>> GetAllFilesStoredOnDisk()
+        {
+            List<FileInfo> files = new List<FileInfo>();
+            foreach(string path in Directory.GetDirectories(AbsoluteRoot()))
+            {
+                string[] file = Directory.GetFiles(path);
+                if(file.Length == 1)
+                {
+                    FileInfo fileInfo = new FileInfo(file[0]);
+                    files.Add(fileInfo);
+                }
+            }
+            return files;
+        }
+
+        public string GetURLFromAbsolutePath(string absoulutePath)
+        {
+            Uri uri1 = new Uri(AbsoluteRoot());
+            Uri uri2 = new Uri(absoulutePath);
+            return uri1.MakeRelativeUri(uri2).ToString();
+        }
+
         public string GetFileName(string MD5Hash)
         {
             string absoulutePath = GetFilePath(MD5Hash);
-            Uri uri1 = new Uri(AbsolutFilePathFromHash(MD5Hash) + "\\");
-            Uri uri2 = new Uri(absoulutePath);
-            return uri1.MakeRelativeUri(uri2).ToString();
+            FileInfo info = new FileInfo(absoulutePath);
+            return info.Name;
         }
 
         public async Task<string> GetURL(uint recipeID)
@@ -94,13 +115,11 @@ namespace BlazorServerApp.proccessService
             if (fileManagerModel != null)
             {
                 string absoulutePath = GetFilePath(fileManagerModel.FileID);
-                Console.WriteLine(absoulutePath);
-                Uri uri1 = new Uri(AbsoluteRoot());
-                Uri uri2 = new Uri(absoulutePath);
-                return uri1.MakeRelativeUri(uri2).ToString();
+                return GetURLFromAbsolutePath(absoulutePath);
             }
             return null;
         }
+        
         public void DeleteFile(string MD5Hash)
         {
             string path = AbsolutFilePathFromHash(MD5Hash);
@@ -136,5 +155,7 @@ namespace BlazorServerApp.proccessService
         public Task CreateFileToRecipeRelationship(uint RecipeID, string MD5Hash);
         public Task<string> GetURL(uint recipeID);
         public string GetFileName(string MD5Hash);
+        public  Task<List<FileInfo>> GetAllFilesStoredOnDisk();
+        public string GetURLFromAbsolutePath(string absoulutePath);
     }
 }

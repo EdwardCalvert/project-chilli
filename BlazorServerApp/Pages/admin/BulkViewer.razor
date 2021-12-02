@@ -1,91 +1,136 @@
 ﻿@page "/admin/bulkview"
+@inject IFileManger fileManager
 @inject IRecipeDataLoader dataLoader
-    <AuthorizeView Roles="Administrator">
-        <h3>BulkViewer</h3>
-        <p>Use this to view all the recipes in the databse. No warning will appear before you can delete a recipe, so proceceed with caution!</p>
-        <table class="table table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Recipe Name</th>
-                    <th>Number of views</th>
-                    <th>Last viewed</th>
-                    <th>Description</th>
-                    <th>Recipe ID</th>
-                    <th>Manual upload?</th>
-                    <th>Delete</th>
-                    <th>View</th>
-                    <th>Edit</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (Recipe recipe in recipes)
+@inject IJSRuntime JSRuntime
+<AuthorizeView Roles="Administrator">
+    <h3>BulkViewer</h3>
+    <p>Use this to view all the recipes in the databse. No warning will appear before you can delete a recipe, so proceceed with caution!</p>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Recipe Name</th>
+                <th>Number of views</th>
+                <th>Description</th>
+                <th>Recipe ID</th>
+                <th>Manual upload?</th>
+                <th>Delete</th>
+                <th>View</th>
+                <th>Edit</th>
+                <th>File</th>
+                <th>Download</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Recipe recipe in recipes)
+            {
+            <tr>
+                <td>@recipe.RecipeName</td>
+                <td>@recipe.PageVisits</td>
+
+                <td>@recipe.ShowShortDescription(100)</td>
+                <td>@recipe.RecipeID</td>
+                <td>@recipe.ManualUpload</td>
+
+
+                @if (files.ContainsKey(recipe.RecipeID))
                 {
-                    <tr>
-                        <td>@recipe.RecipeName</td>
-                        <td>@recipe.PageVisits</td>
-
-                        <td>@recipe.LastRequested</td>
-                        <td>@recipe.ShowShortDescription(100)</td>
-                        <td>@recipe.RecipeID</td>
-                        <td>@recipe.ManualUpload</td>
-                        <td><btn class="btn btn-danger" @onclick="@(()=>DeleteRecipe(recipe))">Delete</btn></td>
-                        <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID">View</a></td>
-                        <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID/Edit">Edit</a></td>
-                    </tr>
+                    <td>@System.Web.HttpUtility.UrlDecode(fileManager.GetFileName(files[recipe.RecipeID].FileID))</td>
+                    <td><btn class="btn btn-primary" @onclick="@(()=>DownloadRecipe(recipe.RecipeID))">Download</btn></td>
+                    <td><btn class="btn btn-danger" @onclick="@(()=>DeleteRecipe(recipe,files[recipe.RecipeID].FileID))">Delete + .docx</btn></td>
                 }
+                else
+                {
+                    <td>-</td>
+                    <td>-</td>
+                    <td><btn class="btn btn-danger" @onclick="@(()=>DeleteRecipe(recipe))">Delete</btn></td>
+                }
+                <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID">View</a></td>
+                <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID/Edit">Edit</a></td>
 
-            </tbody>
-        </table>
-        @if (recipes.Count % resultsPerQuery == 0)
-        {
-            <btn class="btn btn-primary" @onclick="@GrabMoreRecipes">Load more recipes</btn>
-        }
+            </tr>
+            }
 
-        <ErrorNotification ErrorMessage="An unhandled database exception has occured" Show="@error"></ErrorNotification>
-    </AuthorizeView>
+        </tbody>
+    </table>
+    @if (recipes.Count % resultsPerQuery == 0)
+    {
+        <btn class="btn btn-primary" @onclick="@GrabMoreRecipes">Load more recipes</btn>
+    }
+
+    <ErrorNotification ErrorMessage="An unhandled database exception has occured" Show="@error"></ErrorNotification>
+</AuthorizeView>
 <AuthorizeView>
     <NotAuthorized>
         <h1>You will need to sign in to veiw this page.</h1>
     </NotAuthorized>
 </AuthorizeView>
-    @code
+@code
 {
-        int resultsPerQuery = 300;
-        int offset = 0;
-        bool error = false;
-        private void DeleteRecipe(Recipe recipe)
-        {
-            recipes.Remove(recipe);
-            dataLoader.DeleteRecipeAndRelatedValues(recipe.RecipeID);
-        }
+    int resultsPerQuery = 300;
+    int offset = 0;
+    bool error = false;
+    Dictionary<uint, FileManagerModel> files = new();
 
-        public List<Recipe> recipes { get; set; }
-        protected override async Task OnInitializedAsync()
-        {
-            try
-            {
-                recipes = await dataLoader.BulkImportRecipes(offset);
-                error = false;
-            }
-            catch
-            {
-                error = true;
-            }
-        }
+    private async void DownloadRecipe(uint recipeID)
+    {
+        await JSRuntime.InvokeAsync<object>("open", await fileManager.GetURL(recipeID),"_blank");
+    }
 
-        private async Task GrabMoreRecipes()
-        {
-            try
-            {
-                List<Recipe> recipes = await dataLoader.BulkImportRecipes(offset);
-                offset += recipes.Count;
-                recipes.AddRange(recipes);
-                error = false;
-            }
-            catch
-            {
-                error = true;
-            }
-        }
+    private void DeleteRecipe(Recipe recipe)
+    {
+        recipes.Remove(recipe);
+        dataLoader.DeleteRecipeAndRelatedValues(recipe.RecipeID);
 
     }
+    private void DeleteRecipe(Recipe recipe, string MD5)
+    {
+        recipes.Remove(recipe);
+        fileManager.DeleteFile(MD5);
+        dataLoader.DeleteRecipeAndRelatedValues(recipe.RecipeID);
+
+    }
+
+    public List<Recipe> recipes { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            recipes = await dataLoader.BulkImportRecipes(offset);
+            error = false;
+            await GetRelatedFiles();
+        }
+        catch
+        {
+            error = true;
+        }
+    }
+
+
+
+    private async Task GetRelatedFiles()
+    {
+        foreach (Recipe recipe in recipes)
+        {
+            FileManagerModel model = await dataLoader.GetFile(recipe.RecipeID);
+            if (model != null) {
+                files.Add(recipe.RecipeID,model );
+            }
+        }
+    }
+
+    private async Task GrabMoreRecipes()
+    {
+        try
+        {
+            List<Recipe> recipes = await dataLoader.BulkImportRecipes(offset);
+            offset += recipes.Count;
+            recipes.AddRange(recipes);
+            error = false;
+        }
+        catch
+        {
+            error = true;
+        }
+    }
+
+}
