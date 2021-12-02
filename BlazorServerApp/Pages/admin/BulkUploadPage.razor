@@ -1,6 +1,7 @@
 ﻿@page "/admin/BulkUpload"
 @inject IRecipeProcessorService recipeProcessorService
 @inject ITextProcessor textProcessor
+@inject IRecipeDataLoader dataLoader
 @using BlazorServerApp.proccessService
 
 <AuthorizeView Roles="Administrator">
@@ -39,10 +40,13 @@
     bool undergoingProccessing = false;
     Recipe recipeModel = new();
 
-    private void SubmitRecipe()
-        {
+    private async Task SubmitRecipe()
+    {
+        await recipeProcessorService.InsertRecipeAndFileToDB(recipeModel, currentMD5Hash);
+
+        FindNextRecipeForProcessing();
         Console.WriteLine("Button clicked");
-        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -51,6 +55,10 @@
     }
     public async Task FindNextRecipeForProcessing()
     {
+        if(currentMD5Hash != null)
+        {
+            recipeProcessorService.Dequeue();
+        }
         currentMD5Hash = recipeProcessorService.PeekNextDocument();
         if (currentMD5Hash !=null)
         {
@@ -59,7 +67,7 @@
 
             undergoingProccessing = true;
             this.StateHasChanged();
-            Task.Delay(1);
+            await Task.Delay(1);
 
             recipeModel = await textProcessor.CreateRecipe(await recipeProcessorService.DocxToText(currentMD5Hash));
 

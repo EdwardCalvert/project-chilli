@@ -107,6 +107,12 @@ namespace BlazorServerApp.proccessService
         {
             _recipesToProcess.DequeueItem();
         }
+
+        public async Task InsertRecipeAndFileToDB(Recipe recipe, string MD5)
+        {
+            uint recipeID = await _recipeDataLoader.InsertRecipeAndRelatedFields(recipe);
+            await _fileManager.CreateFileToRecipeRelationship(recipeID, MD5);
+        }
     }
 
     public interface IRecipeProcessorService
@@ -122,6 +128,7 @@ namespace BlazorServerApp.proccessService
         public Task<string> DocxToText(string MD5Hash);
         public Task DeleteFile(string MD5Hash);
         public void Dequeue();
+        public  Task InsertRecipeAndFileToDB(Recipe recipe, string MD5);
     }
 
     public class ResultCode

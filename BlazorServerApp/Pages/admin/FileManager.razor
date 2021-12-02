@@ -1,0 +1,89 @@
+﻿@page "/admin/files"
+@inject IRecipeDataLoader dataLoader
+@inject IFileManger fileManager
+@using BlazorServerApp.proccessService
+<AuthorizeView Roles="Administrator">
+    <h3>FileManager</h3>
+    <p>Use this page to find all recipes stored on disk</p>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>File Name</th>
+                <th>UploadDate</th>
+                <th>Recipe ID</th>
+                <th>Delete</th>
+                <th>View</th>
+                <th>Download</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (FileManagerModel file in files)
+            {
+            <tr>
+                <td>@fileManager.GetFileName(file.FileID)</td>
+                <td>@file.DateUploaded</td>
+                <td>@file.RecipeID</td>
+                <td><btn class="btn btn-danger" @onclick="@(()=>DeleteRecipe(file))">Delete</btn></td>
+                <td><a class="btn btn-primary" href="/Recipe/@file.RecipeID">View recipe</a></td>
+                <td><a class="btn btn-primary" href="/Recipe/@file.RecipeID">Download .docx</a></td>
+                <td><a class="btn btn-primary" href="/Recipe/@file.RecipeID/Edit">Edit</a></td>
+            </tr>
+            }
+
+        </tbody>
+    </table>
+    @if (files.Count % resultsPerQuery == 0)
+    {
+        <btn class="btn btn-primary" @onclick="@GrabMoreRecipes">Load more recipes</btn>
+    }
+
+    <ErrorNotification ErrorMessage="An unhandled database exception has occured" Show="@error"></ErrorNotification>
+</AuthorizeView>
+<AuthorizeView>
+    <NotAuthorized>
+        <h1>You will need to sign in to veiw this page.</h1>
+    </NotAuthorized>
+</AuthorizeView>
+@code
+{
+    int resultsPerQuery = 300;
+    int offset = 0;
+    bool error = false;
+    private void DeleteRecipe(FileManagerModel file)
+    {
+        files.Remove(file);
+        dataLoader.DeleteRecipeAndRelatedValues(file.RecipeID);
+        fileManager.DeleteFile(file.FileID);
+    }
+
+    public List<FileManagerModel> files { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            files = await dataLoader.BulkImportFiles(offset);
+            error = false;
+        }
+        catch
+        {
+            error = true;
+        }
+    }
+
+    private async Task GrabMoreRecipes()
+    {
+        try
+        {
+            List<FileManagerModel> results = await dataLoader.BulkImportFiles(offset);
+            offset += results.Count;
+            files.AddRange(results);
+            error = false;
+        }
+        catch
+        {
+            error = true;
+        }
+    }
+
+}

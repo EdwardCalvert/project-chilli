@@ -55,6 +55,11 @@ namespace BlazorServerApp.Models
             await DeleteEquipment(RecipeID);
             await DeleteIngredientInRecipe(RecipeID);
             await DeleteOnlyRecipe(RecipeID);
+            await DeleteOnlyFile(RecipeID);
+        }
+        private async Task DeleteOnlyFile(uint RecipeID)
+        {
+            await _data.SaveData("DELETE FROM FileManager WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
         }
 
         private async Task DeleteOnlyRecipe(uint RecipeID)
@@ -347,5 +352,46 @@ GROUP BY s.RecipeID
         {
             await _data.SaveData(user.SqlUpdateStatement(), user.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
         }
+
+        public async Task InsertFile(FileManagerModel fileManagerModel)
+        {
+            await _data.SaveData(fileManagerModel.SqlInsertStatement(), fileManagerModel.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<FileManagerModel> GetFile(string MD5)
+        {
+            List<FileManagerModel> results = await _data.LoadData<FileManagerModel, dynamic>("SELECT * FROM FileManager WHERE FileID=@fileID", new { fileID = MD5 }, _config.GetConnectionString("recipeDatabase"));
+            return OneOrNull<FileManagerModel>(results);
+        }
+
+        public async Task<FileManagerModel> GetFile(uint RecipeID)
+        {
+            List<FileManagerModel> results = await _data.LoadData<FileManagerModel, dynamic>("SELECT * FROM FileManager WHERE RecipeID=@recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+
+            return OneOrNull<FileManagerModel>(results);
+        }
+
+        public async Task<List<FileManagerModel>> BulkImportFiles(int offset)
+        {
+            return await _data.LoadData<FileManagerModel, dynamic>("SELECT * FROM FileManager LIMIT 300 OFFSET @offset ;", new { offset = offset }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        /// <summary>
+        /// Method that returns the first item in a list- intended for queries where you know there will only be one result. 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        static T OneOrNull<T>(List<T> list)
+        {
+            if( list != null &&list.Count == 1)
+            {
+                return list[0];
+            }
+            else
+            {
+                return default;
+            }
+        } 
     }
 }

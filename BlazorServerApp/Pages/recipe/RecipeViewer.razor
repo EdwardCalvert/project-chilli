@@ -1,7 +1,12 @@
 ﻿@page "/Recipe/{RecipeIDRequest:long}"
 @inject IRecipeDataLoader dataLoader
 @inject NavigationManager NavManager
+@inject IFileManger fileManager
+@using BlazorServerApp.proccessService
 @using BlazorServerApp.Extensions
+
+
+
 
 @if (!recipeFound)
 {
@@ -13,19 +18,26 @@ else if (!validIdentifier)
     <ErrorNotification ErrorMessage="Sorry, the ID you provided was not recognised as valid!" />
 }
 
+
 else if (model != null)
 {
     <h2>@model.RecipeName</h2>
-    <h5>@model.MealType</h5>
+    <h5>@model.MealType</h5>     
+    if (DownloadPath != null)
+    {
+    <a href="@DownloadPath" target="=_top" class="btn btn-primary" style="margin:5px;">Download as .Docx</a>
+    }
     <AuthorizeView Roles="Administrator">
-        @if (model != null) // THis should  check if there is a document affiliated.
-        {
-        <div>
-            <a href="@model" class="btn btn-primary">Download</a>
-            <a href="/Recipe/@RecipeID/Edit" class="btn btn-primary">Edit Recipe</a>
-            <a @onclick="@(() =>DeleteRecipe())" class="btn btn-danger">⚠ Delete Recipe</a>
+        <div style="margin: 5px;background-color: rgba(0,0,0,.03);">
+            <p>Admin features</p>
+            @if (model != null) // THis should  check if there is a document affiliated.
+            {
+                <div>
+                    <a href="/Recipe/@RecipeID/Edit" class="btn btn-primary">Edit Recipe</a>
+                    <a @onclick="@(() =>DeleteRecipe())" class="btn btn-danger">⚠ Delete Recipe</a>
+                </div>
+            }
         </div>
-        }
     </AuthorizeView>
 
 
@@ -36,129 +48,131 @@ else if (model != null)
     {
         <p style="margin-bottom:0;">Serves: @model.Servings @(model.Servings == 1? "person" : "people")</p>
     }
-    if(model.PreperationTime != 0)
-                {
-<p style="margin-bottom:0;">Preparation time: @model.PreperationTime @(model.PreperationTime == 1? "min" :"mins")</p>
+    if (model.PreperationTime != 0)
+    {
+        <p style="margin-bottom:0;">Preparation time: @model.PreperationTime @(model.PreperationTime == 1? "min" :"mins")</p>
     }
     if (model.CookingTime != 0)
     {
         <p style="margin-bottom:0;">Cooking time: @model.CookingTime @(model.CookingTime == 1? "min" : "mins")</p>
     }
-    if(model.CookingTime !=0 && model.PreperationTime != 0)
+    if (model.CookingTime != 0 && model.PreperationTime != 0)
     {
-<p style="margin-bottom:0;">Total time: @(model.PreperationTime + model.CookingTime) mins</p>
+        <p style="margin-bottom:0;">Total time: @(model.PreperationTime + model.CookingTime) mins</p>
     }
-if(model.Difficulty != null)
-                {
-<p style="margin-bottom:0;">Difficulty: @model.Difficulty</p>
-                }
+    if (model.Difficulty != null)
+    {
+        <p style="margin-bottom:0;">Difficulty: @model.Difficulty</p>
+    }
 
-        <div>
-            @if (model.Description != null)
-            {
-                <hr />
-                <h3>Description</h3>
-                foreach (string line in model.Description.Split("\n"))
-                {
-                    <p style="margin-bottom:0;">@line</p>
-                }
-            }
-            @if (model.Ingredients != null && model.Ingredients.Count > 0)
-            {
-                <h3>Ingredients</h3>
-                <hr />
-                <div class="IngredientsList">
-                    <ul>
-                        @foreach (UserDefinedIngredientInRecipe ingredient in model.Ingredients)
-                        {
-                            <li><em>@ingredient.Quantity@ingredient.Unit</em> @( dataLoader.GetIngredientName((uint)ingredient.IngredientID).Result) </li>
-                        }
-                    </ul>
-                </div>
-            }
-            @if (model.Equipment != null && model.Equipment.Count() > 0)
-            {
-                <hr />
-                <h3>Equipment</h3>
-                <div class="EquipmentList">
-                    <ul>
-                        @foreach (Equipment equipmentModel in model.Equipment)
-                        {
-                            <li>@equipmentModel.EquipmentName </li>
-                        }
-                    </ul>
-                </div>}
-            @if (model.Method != null && model.Method.Count > 0)
-            {
-                <hr />
-                <h3>Method</h3>
-                <div class="MethodList">
-                    <ol>
-                        @foreach (Method step in model.Method)
-                        {
-                            <li>@step.MethodText</li>
-                        }
-                    </ol>
-                </div>
-            }
-
-            <ReviewSection RecipeID="@RecipeID" />
-
-        </div>
-        @*if (model.DocxFilePath != null)
-            {
-                <div><a href="@model.DocxFilePath" class="btn btn-primary">Download</a></div>
-            }*@
-
-        }
-        else
+    <div>
+        @if (model.Description != null)
         {
-        <LoadingElement />
+            <hr />
+            <h3>Description</h3>
+            foreach (string line in model.Description.Split("\n"))
+            {
+                <p style="margin-bottom:0;">@line</p>
+            }
+        }
+        @if (model.Ingredients != null && model.Ingredients.Count > 0)
+        {
+            <h3>Ingredients</h3>
+            <hr />
+            <div class="IngredientsList">
+                <ul>
+                    @foreach (UserDefinedIngredientInRecipe ingredient in model.Ingredients)
+                    {
+                        <li><em>@ingredient.Quantity@ingredient.Unit</em> @( dataLoader.GetIngredientName((uint)ingredient.IngredientID).Result) </li>
+                    }
+                </ul>
+            </div>
+        }
+        @if (model.Equipment != null && model.Equipment.Count() > 0)
+        {
+            <hr />
+            <h3>Equipment</h3>
+            <div class="EquipmentList">
+                <ul>
+                    @foreach (Equipment equipmentModel in model.Equipment)
+                    {
+                        <li>@equipmentModel.EquipmentName </li>
+                    }
+                </ul>
+            </div>}
+        @if (model.Method != null && model.Method.Count > 0)
+        {
+            <hr />
+            <h3>Method</h3>
+            <div class="MethodList">
+                <ol>
+                    @foreach (Method step in model.Method)
+                    {
+                        <li>@step.MethodText</li>
+                    }
+                </ol>
+            </div>
         }
 
-        @code{
-            [Parameter]
-            public long RecipeIDRequest { get; set; }
+        <ReviewSection RecipeID="@RecipeID" />
+
+    </div>
+    @*if (model.DocxFilePath != null)
+        {
+            <div><a href="@model.DocxFilePath" class="btn btn-primary">Download</a></div>
+        }*@
+
+}
+else
+{
+    <LoadingElement />
+}
+
+@code{
+    [Parameter]
+    public long RecipeIDRequest { get; set; }
 
     private bool pageRequested = false;
-        private bool validIdentifier;
+    private bool validIdentifier;
 
-        private uint RecipeID;
+    private uint RecipeID;
 
-        private bool recipeFound = false;
+    private bool recipeFound = false;
+    string DownloadPath;
+
+    Recipe model;
 
 
-        Recipe model;
 
+    private async Task DeleteRecipe()
+    {
+        await dataLoader.DeleteRecipeAndRelatedValues(RecipeID);
+        NavManager.NavigateTo($"/");
+    }
 
-
-        private async Task DeleteRecipe()
+    protected override async Task OnInitializedAsync()
+    {
+        uint Result;
+        validIdentifier = uint.TryParse(RecipeIDRequest.ToString(), out Result);
+        if (validIdentifier)
         {
-            await dataLoader.DeleteRecipeAndRelatedValues(RecipeID);
-            NavManager.NavigateTo($"/");
-        }
+            RecipeID = Result;
+            model = await dataLoader.GetRecipeAndTree(RecipeID);
 
-        protected override async Task OnInitializedAsync()
-        {
-            uint Result;
-            validIdentifier = uint.TryParse(RecipeIDRequest.ToString(), out Result);
-            if (validIdentifier)
+
+            if (model != null)
             {
-                RecipeID = Result;
-                model = await dataLoader.GetRecipeAndTree(RecipeID);
-
-
-                if (model != null)
+                DownloadPath = await fileManager.GetURL(RecipeID);
+                recipeFound = true;
+                if (!pageRequested)
                 {
-                    recipeFound = true;
-                    if (!pageRequested)
-                    {
 
-                        await dataLoader.IncrementViews(RecipeID);
-                        pageRequested = true;
-                    }
-
+                    await dataLoader.IncrementViews(RecipeID);
+                    pageRequested = true;
                 }
+
             }
+
         }
-        }
+    }
+}

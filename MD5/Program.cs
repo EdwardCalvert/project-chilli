@@ -19,9 +19,10 @@ namespace MD5
                 {
                     s.Append(b.ToString("x2").ToLower());
                 }
+                Console.WriteLine($"System says {s.ToString()}");
                 //line =  "system says" + s.ToString();
-                Console.WriteLine(line);
-                Console.WriteLine("I say:");
+                //Console.WriteLine(line);
+                Console.Write("I say:");
                 CustomMD5 customMD5 = new CustomMD5();
                 Console.WriteLine(customMD5.Run(line));
             }

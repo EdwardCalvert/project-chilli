@@ -445,6 +445,7 @@ namespace BlazorServerApp.TextProcessor
 
         public async Task<Recipe> CreateRecipe(string inputText)
         {
+            Console.WriteLine("Processing started");
             if (inputText.Length < 50)
             {
                 throw new Exception("A Recipe must contain more than 50 characters.");
@@ -459,20 +460,35 @@ namespace BlazorServerApp.TextProcessor
 
             newRecipe.Method = await Task.Run(() => GetMethods(inputText));
 
-            newRecipe.Ingredients.AddRange(await Task.Run(() => GetIngredientsWithUnits(inputText, true)));
-
             newRecipe.Description = await Task.Run(() => CreateDescription(inputText));
 
-            newRecipe.Ingredients.AddRange(await Task.Run(() => GetIngredientsWithoutUnit(newRecipe.Description, true)));
-
             newRecipe.Difficulty = await Task.Run(() => GetDifficulty(newRecipe.Method));
+            //Old method signature
+            //newRecipe.Ingredients.AddRange(await Task.Run(() => GetIngredientsWithoutUnit(newRecipe.Description, true)));
+            Task<List<UserDefinedIngredientInRecipe>> getIngredientsWithUnits =  Task.Run(() => GetIngredientsWithUnits(inputText, true));
+            Task<List<UserDefinedIngredientInRecipe>> getIngredientsWithoutUnits = Task.Run(() => GetIngredientsWithoutUnit(newRecipe.Description, true));
+
+            
+
+            
+
+            
 
             string possibleNouns = newRecipe.Description;
             foreach (Method s in newRecipe.Method)
             {
                 possibleNouns += s.MethodText + "\n ";
             }
+
+            //Dependent on description and method being complete!
             newRecipe.Equipment = await Task.Run(() => GetEquipmentID(possibleNouns));
+            await Task.Delay(10);
+            getIngredientsWithoutUnits.Wait();
+            getIngredientsWithUnits.Wait();
+            newRecipe.Ingredients.AddRange(getIngredientsWithoutUnits.Result);
+            newRecipe.Ingredients.AddRange(getIngredientsWithUnits.Result);
+            Console.WriteLine("Processing finished");
+
             return newRecipe;
         }
 

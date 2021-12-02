@@ -42,6 +42,10 @@ namespace BlazorServerApp.Models
         public Task<List<User>> GetAllUsers();
         public  Task DeleteUser(string username);
         public Task UpdatePassword(User user);
+        public  Task InsertFile(FileManagerModel fileManagerModel);
+        public  Task<FileManagerModel> GetFile(string MD5);
+        public  Task<FileManagerModel> GetFile(uint RecipeID);
+        public  Task<List<FileManagerModel>> BulkImportFiles(int offset);
 
     }
 }

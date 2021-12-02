@@ -8,8 +8,6 @@ namespace BlazorServerApp.WordsAPI
     public class TypeOf
     {
         
-
-        public string success { get; set; }
     public string word { get; set; }
         public string[] typeOf { get; set; }
     }
