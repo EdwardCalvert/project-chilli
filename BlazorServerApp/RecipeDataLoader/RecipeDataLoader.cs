@@ -49,6 +49,17 @@ namespace BlazorServerApp.Models
             await _data.SaveData("DELETE FROM UserDefinedIngredientsInRecipe WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
         }
 
+        public async Task<uint?> DeleteOnlyFile(string MD5Hash)
+        {
+            List<uint> result = await _data.LoadData<uint, dynamic>("SELECT RecipeID FROM FileManager WHERE FileID=@fileID", new { fileID = MD5Hash }, _config.GetConnectionString("recipeDatabase"));
+            if(result != null && result.Count == 1)
+            {
+                await DeleteOnlyFile(result[0]);
+                return result[0];
+            }
+            return null;
+        }
+
         public async Task DeleteRecipeAndRelatedValues(uint RecipeID)
         {
             await DeleteMethod(RecipeID);
@@ -386,6 +397,8 @@ GROUP BY s.RecipeID
         {
             return await _data.LoadData<FileManagerModel, dynamic>("SELECT * FROM FileManager LIMIT 300 OFFSET @offset ;", new { offset = offset }, _config.GetConnectionString("recipeDatabase"));
         }
+
+
 
         /// <summary>
         /// Method that returns the first item in a list- intended for queries where you know there will only be one result. 

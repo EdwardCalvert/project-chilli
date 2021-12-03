@@ -69,15 +69,20 @@ namespace BlazorServerApp.proccessService
 
         public string GetFilePath(string MD5Hash)
         {
-            string[] files = Directory.GetFiles(AbsolutFilePathFromHash(MD5Hash));
-            if (files.Length == 1)
+            string path = AbsolutFilePathFromHash(MD5Hash);
+            if (Directory.Exists(path))
             {
-                return files[0];
+                string[] files = Directory.GetFiles(path);
+                if (files.Length == 1)
+                {
+                    return files[0];
+                }
+                else
+                {
+                    throw new Exception("Catastrophic error: File folder integrity lost");
+                }
             }
-            else
-            {
-                throw new Exception("Catastrophic error: File folder integrity lost");
-            }
+            throw new Exception("It is likely that you deleted a file that was queued for processing");
         }
 
         public async Task<List<FileInfo>> GetAllFilesStoredOnDisk()

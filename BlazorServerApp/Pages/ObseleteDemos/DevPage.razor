@@ -1,13 +1,25 @@
 ﻿@using System.Text.RegularExpressions
 @using BlazorServerApp.WordsAPI
 @using Newtonsoft.Json
+@using BlazorServerApp.STMPMailer
 @inject IRecipeDataLoader dataLoader
 @inject IConfiguration config
 @inject IHttpClientFactory httpClientFactory
+@inject IEmailSender sender
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Mvc.Rendering
 
-@page "/dev"
+@*@page "/dev"
+
+<btn @onclick="@OnClick"> helllooo</btn>
+@code{
+    private void OnClick() {
+        EmailMessage emailMessage = new EmailMessage();
+        emailMessage.Subject = "Password Reset";
+        emailMessage.Content = @$"Hello Admin, a user named bob is attempting to reset their password, please can you help?";
+        sender.SendEmail(emailMessage);
+    }
+}
 
 
 <table class="table table-striped">
@@ -116,6 +128,6 @@
         public async void Search()
         {
             //results = await SearchEnginge.SearchForRecipes(dataLoader, "cheese", SearchEnginge.SortBy.CookingTime, SearchEnginge.Order.Descending);
-        }
+        }*@
 
     }

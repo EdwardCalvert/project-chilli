@@ -1,5 +1,4 @@
-﻿
-@page "/upload/word"
+﻿@page "/upload/word"
 @using System
 @using System.IO
 @using Microsoft.AspNetCore.Hosting
@@ -82,7 +81,7 @@
                     filesAreSmallEnough = false;
                 }
             }
-            if (filesAreSmallEnough && recipeProcessorService.GetCurrentQueueCapacity() > resultStructure.GetCount(556) && resultStructure.GetCount(556) > 0)
+            if (recipeProcessorService.GetCurrentQueueCapacity() > resultStructure.GetCount(556) && resultStructure.GetCount(556) > 0)
             {
                 resultStructure = await recipeProcessorService.QueueBrowserFilesForProcessing(resultStructure);
                 error = false;

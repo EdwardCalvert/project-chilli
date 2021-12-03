@@ -13,6 +13,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Net.Http;
 using BlazorServerApp.RecipeDataProcessorService;
+using System;
+using Microsoft.Extensions.Options;
+using BlazorServerApp.STMPMailer;
 
 namespace BlazorServerApp
 {
@@ -41,7 +44,8 @@ namespace BlazorServerApp
                 .AddCookie();
             // BLAZOR COOKIE Auth Code (end)
             // ******
-
+            
+            services.AddConfiguration<EmailSettings>(Configuration, "EmailSettings");
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<IDataAccess, MySqlDataAccess>(); //Inject the mysql data access- could be changed to any data layer implementing IDataAcess. This launches it in memory- the overhead is worth it as data layer is vital.
@@ -54,6 +58,7 @@ namespace BlazorServerApp
             services.AddTransient<INounExtractor, NounExtractor>();
             services.AddTransient<ITextProcessor, TextProcessor.TextProcessor>();
             services.AddSingleton<IDietaryProcessor, DietaryProcessor>();
+            services.AddTransient<IEmailSender, EmailSender>();
             services.AddHttpClient();
             // ******
             // BLAZOR COOKIE Auth Code (begin)
@@ -100,6 +105,25 @@ namespace BlazorServerApp
             });
 
 
+        }
+    }
+
+    public static class ConfigurationExtension
+    {
+        public static void AddConfiguration<T>(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            string configurationTag = null)
+            where T : class
+        {
+            if (string.IsNullOrEmpty(configurationTag))
+            {
+                configurationTag = typeof(T).Name;
+            }
+
+            var instance = Activator.CreateInstance<T>();
+            new ConfigureFromConfigurationOptions<T>(configuration.GetSection(configurationTag)).Configure(instance);
+            services.AddSingleton(instance);
         }
     }
 }

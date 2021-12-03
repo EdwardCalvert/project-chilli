@@ -10,7 +10,8 @@ namespace BlazorServerApp.proccessService
 {
     public class RecipeProcessorService : IRecipeProcessorService
     {
-        private readonly CircularQueue<string> _recipesToProcess = new CircularQueue<string>(500);
+        public const int maxiumumCapacity = 500;
+        private  CircularQueue<string> _recipesToProcess = new CircularQueue<string>(maxiumumCapacity);
         private readonly IFileManger _fileManager;
         private readonly IRecipeDataLoader _recipeDataLoader;
         private IDocxReader _docxReader;
@@ -113,6 +114,27 @@ namespace BlazorServerApp.proccessService
             uint recipeID = await _recipeDataLoader.InsertRecipeAndRelatedFields(recipe);
             await _fileManager.CreateFileToRecipeRelationship(recipeID, MD5);
         }
+
+
+        /// <summary>
+        /// Used incase of catasrophic errors, to prevent the bulk uploader from ever being locked out.
+        /// </summary>
+        public async void Clear()
+        {
+            while (!_recipesToProcess.QueueIsEmpty())
+            {
+                string MD5 = _recipesToProcess.DequeueItem();
+                _fileManager.DeleteFile(MD5);
+                uint? recipeID = await _recipeDataLoader.DeleteOnlyFile(MD5); // This seems like a very edge case, but you never know!
+                if(recipeID != null)
+                {
+                    await _recipeDataLoader.DeleteRecipeAndRelatedValues((uint)recipeID);
+                }
+            }
+
+            _recipesToProcess = new CircularQueue<string>(maxiumumCapacity);
+
+        }
     }
 
     public interface IRecipeProcessorService
@@ -129,6 +151,7 @@ namespace BlazorServerApp.proccessService
         public Task DeleteFile(string MD5Hash);
         public void Dequeue();
         public  Task InsertRecipeAndFileToDB(Recipe recipe, string MD5);
+        public void Clear();
     }
 
     public class ResultCode
@@ -143,7 +166,7 @@ namespace BlazorServerApp.proccessService
             {-1,"Unknown exception occured while processing" },
             {898,"A file with the same conent exists on the server (may have a different file name)" },
             {556,"Files deemed acceptible for hashing" },
-            {302, "One of the files you uploaded exceeded the maximum file size" },
+            {302, "A file you uploaded exceeded the maximum file size" },
             {675, "Invalid file type- only word documents are expected" },
         };
 
@@ -208,7 +231,7 @@ namespace BlazorServerApp.proccessService
                 Dictionary<int, List<IBrowserFile>>.KeyCollection keys = _dictionary.Keys;
                 foreach (int code in keys)
                 {
-                    if (code != 1 || code != 556)
+                    if (code != 1 && code != 556 )
                     {
                         return true;
                     }

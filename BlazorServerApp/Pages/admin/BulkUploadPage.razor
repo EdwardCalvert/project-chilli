@@ -30,6 +30,7 @@
             }
             @*<ProgressBar Percent="@(((recipeProcessorService.GetNumberOfItemsInQueue()-numberOfItemsInitiallyInQueue)/numberOfItemsInitiallyInQueue)*100)"></ProgressBar>*@
             <btn class="btn btn-danger" @onclick="(()=>DeleteRecipe())">Delete</btn>
+            <btn class="btn btn-danger" @onclick="(()=>ClearQueue())">Delete all files queued for processing</btn>
         }
         else
         {
@@ -38,6 +39,7 @@
 
 
     </div>
+    <ErrorNotification ErrorMessage="@errorMessage" Show="@error"></ErrorNotification>
 </AuthorizeView>
 <AuthorizeView>
     <NotAuthorized>
@@ -50,20 +52,43 @@
     string documentTextPreview="";
     string currentMD5Hash;
     bool undergoingProccessing = false;
+    bool error = false;
+    string errorMessage = "";
     Recipe recipeModel = new();
+
+    private void ClearQueue()
+        {
+            recipeProcessorService.Clear();
+        }
 
     private async Task SubmitRecipe()
     {
-        await recipeProcessorService.InsertRecipeAndFileToDB(recipeModel, currentMD5Hash);
+        try
+        {
+            await recipeProcessorService.InsertRecipeAndFileToDB(recipeModel, currentMD5Hash);
 
-        FindNextRecipeForProcessing();
-        Console.WriteLine("Button clicked");
+            FindNextRecipeForProcessing();
+            error = false;
+        }
+        catch(Exception e)
+        {
+            errorMessage = e.Message;
+            error = true;
+        }
     }
 
     protected override async Task OnInitializedAsync()
     {
+            try { 
         numberOfItemsInitiallyInQueue = recipeProcessorService.GetNumberOfItemsInQueue();
         await FindNextRecipeForProcessing();
+        }
+        catch(Exception e)
+        {
+            errorMessage = e.Message + " Click the 'clear queue button' to prevent a deadlock";
+            error = true;
+            
+        }
     }
     public async Task FindNextRecipeForProcessing()
     {
@@ -91,10 +116,17 @@
     }
 
     public async void DeleteRecipe()
-    {
+        {
+            try { 
         await recipeProcessorService.DeleteFile(currentMD5Hash);
         recipeProcessorService.Dequeue();
         await FindNextRecipeForProcessing();
         StateHasChanged();
+        }
+        catch(Exception e)
+        {
+            errorMessage = e.Message;
+            error = true;
+        }
     }
 }
