@@ -3,15 +3,17 @@
 @page "/"
 @inject IRecipeDataLoader dataLoader
 @inject NavigationManager NavManager
-@inject IWordsAPIService wordsAPIservice 
+@inject IWordsAPIService wordsAPIservice
 @using System.Web;
 @using BlazorServerApp.Extensions
 @using BlazorServerApp.WordsAPI
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Mvc.Rendering
 
 <h3>@(homepage? "Homepage": "Search page")</h3>
 <div style="display:flex;">
     <input type="text" class="form-control" name="x" placeholder="Search term..." @bind="@searchText" @onkeyup="@Enter">
-    <button class="btn btn-primary" @onclick="@SearchButtonClicked" >🔍</button>
+    <button class="btn btn-primary" @onclick="@SearchButtonClicked">🔍</button>
     @if (homepage)
     {
         <button class="btn btn-info" @onclick="@(()=>showHelpText=true)">help</button>
@@ -33,67 +35,90 @@
         }
     </select>
 </div>
-
-@if (!homepage || showHelpText)
-{
+<div style="display:flex;margin:5px;">
     
-        <br />
-        <p>Things you can search for...</p>
-        <ul>
-            <li>Ingredient, using keyword <b>ingredient</b></li>
-            <li>Equipment, using keyword <b>ingredient</b></li>
-            <li></li>
-        </ul>
-        }
-        <div class="row">
-            @if (recipes.Count > 0)
-            {
-                @foreach (Recipe model in recipes)
-                {
-                    <div class="col-12 col-lg-6">
+    @foreach (var item in list)
+    {
+    <p style="margin-bottom: 0px;"><input type="checkbox" @bind="item.Selected" @onclick="(()=>handleClick(item))" />&nbsp;@item.Text&nbsp;&nbsp;</p>
+    }
+</div>
 
-                        <div class="RecipeCard">
-                            <a href="/Recipe/@model.RecipeID" class="No-Decoration ">
-                                <div class="card m-3">
-                                    <div class="card-header No-Decoration ColourBlack">
-                                        <h1>@model.RecipeName.SentenceCase()  </h1><ReviewSummary DisplayReviewModel="@model.Reviews" />
+@foreach (var item in list.Where(x => x.Selected))
+{
+    <p>  @item.Text is Selected</p>
+}
+@code {
+    MultiSelectList list = new MultiSelectList(Enum.GetValues(typeof(UserDefinedIngredient.Type)));
 
-                                    </div>
-                                    <div class="card-body No-Decoration ColourBlack">
-                                        <p>Cooking time: @model.CookingTime minutes </p>
+    private void handleClick(SelectListItem item)
+    {
+        //Do something crazy
+        Console.WriteLine(item);
+        Console.WriteLine(!item.Selected);
+    }
 
-                                        <p>Preperation time: @model.PreperationTime mintues</p>
+}
 
-                                        
+@if (showHelpText)
+{
 
-                                        <FoodLabel nutritionLabel="model.DisplayNutritionModel" StyleParameters="font-size: 9px; overflow-wrap: anywhere;" ShowTitle="false" />
-                                        @if (model.Description != null)
-                                        {
-                                            <p>Descritption: @model.ShowShortDescription()</p>
-                                        }
-                                    </div>
-                                    <div class="card-footer No-Decoration ColourBlack"><p>Difficulty: @(model.Difficulty == null? "unknown":model.Difficulty);     Serves: @(model.Servings == 0?"unkown":model.Servings)</p></div>
-                                </div>
-                            </a>
+    <br />
+    <p>Things you can search for...</p>
+    <ul>
+        <li>Ingredient, using keyword <b>ingredient</b></li>
+        <li>Equipment, using keyword <b>ingredient</b></li>
+        <li></li>
+    </ul>
+}
+<div class="row">
+    @if (recipes.Count > 0)
+    {
+        @foreach (Recipe model in recipes)
+        {
+            <div class="col-12 col-lg-6">
+
+                <div class="RecipeCard">
+                    <a href="/Recipe/@model.RecipeID" class="No-Decoration ">
+                        <div class="card m-3">
+                            <div class="card-header No-Decoration ColourBlack">
+                                <h1>@model.RecipeName.SentenceCase()  </h1><ReviewSummary DisplayReviewModel="@model.Reviews" />
+
+                            </div>
+                            <div class="card-body No-Decoration ColourBlack">
+                                <p>Cooking time: @model.CookingTime minutes </p>
+
+                                <p>Preperation time: @model.PreperationTime mintues</p>
+
+
+
+                                <FoodLabel nutritionLabel="model.DisplayNutritionModel" StyleParameters="font-size: 9px; overflow-wrap: anywhere;" ShowTitle="false" />
+                                @if (model.Description != null)
+                                {
+                                    <p>Descritption: @model.ShowShortDescription()</p>
+                                }
+                            </div>
+                            <div class="card-footer No-Decoration ColourBlack"><p>Difficulty: @(model.Difficulty == null? "unknown":model.Difficulty);     Serves: @(model.Servings == 0?"unkown":model.Servings)</p></div>
                         </div>
+                    </a>
+                </div>
 
-                    </div>
+            </div>
 
-                }
+        }
 
-                @if (recipes.Count % resultsPerQuery == 0)
-                {
-                    <btn class="btn btn-primary" @onclick="@LoadMoreRecipesOnRequest">Load more recipes</btn>
-                }
-            }
+        @if (recipes.Count % resultsPerQuery == 0)
+        {
+            <btn class="btn btn-primary" @onclick="@LoadMoreRecipesOnRequest">Load more recipes</btn>
+        }
+    }
 
-            else
-            {
-                <p>Sorry- no recipes were found.</p>
-            }
-        </div>
+    else
+    {
+        <p>Sorry- no recipes were found.</p>
+    }
+</div>
 
-        <ErrorNotification ErrorMessage="An unexpected error occured while connecting to the database." Show="error"></ErrorNotification>
+<ErrorNotification ErrorMessage="An unexpected error occured while connecting to the database." Show="error"></ErrorNotification>
 @code {
 
     string searchText { get; set; }
@@ -101,10 +126,14 @@
 
 
     SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
-    SearchEnginge.Order order { get{
+    SearchEnginge.Order order
+    {
+        get
+        {
             return _oder;
         }
-        set{
+        set
+        {
             _oder = value;
             ReOrderResults();
         }
@@ -113,7 +142,9 @@
     SearchEnginge.SortBy sortBy
     {
         get { return _sortBy; }
-        set { _sortBy = value;
+        set
+        {
+            _sortBy = value;
             ReOrderResults();
         }
     }
@@ -193,7 +224,7 @@
 
             else if (searchText.Length > 0)
             {
-                recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText,wordsAPIservice,offset ));
+                recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText, wordsAPIservice, offset));
 
                 ReOrderResults();
             }
@@ -219,7 +250,7 @@
         }
         //else if(char.IsLetterOrDigit(e.Key))
         //{
-            //searchText += e.Key;
+        //searchText += e.Key;
 
     }
 
@@ -244,13 +275,13 @@
         await Task.Run(() => GetHomepageRecipes());
     }
 
-    private  void MovePage()
+    private void MovePage()
     {
         NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}/{HttpUtility.UrlEncode(order.ToString())}/{HttpUtility.UrlEncode(sortBy.ToString())}", forceLoad: true);
 
     }
 
-    private  void ReOrderResults()
+    private void ReOrderResults()
     {
         recipes = MergeSort.RecipeMergeSort(recipes, sortBy, order);
     }

@@ -56,6 +56,7 @@ namespace BlazorServerApp.Models
             await DeleteIngredientInRecipe(RecipeID);
             await DeleteOnlyRecipe(RecipeID);
             await DeleteOnlyFile(RecipeID);
+            await DeleteOnlyReview(RecipeID);
         }
         private async Task DeleteOnlyFile(uint RecipeID)
         {
@@ -65,6 +66,16 @@ namespace BlazorServerApp.Models
         private async Task DeleteOnlyRecipe(uint RecipeID)
         {
             await _data.SaveData("DELETE FROM Recipe WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        private async Task DeleteOnlyReview(uint RecipeID)
+        {
+            await _data.SaveData("DELETE FROM Review WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task DeleteReviewUsingReviewID(uint ReviewID)
+        {
+            await _data.SaveData("DELETE FROM Review WHERE ReviewID = @reviewID", new { reviewID = ReviewID }, _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task UpdateRecipe(Recipe NewModel)

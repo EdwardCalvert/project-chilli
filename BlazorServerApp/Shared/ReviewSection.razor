@@ -13,6 +13,9 @@
                 <div class="card-body No-Decoration ColourBlack">
                     @displayReviewModel.ReviewText
                 </div>
+                <AuthorizeView Roles="Administrator">
+                    <div class="card-footer"><btn class="btn btn-danger" @onclick="(()=>DeleteReview(displayReviewModel.ReviewID,displayReviewModel))">Delete</btn></div>
+                </AuthorizeView>
             </div>
         }
     }
@@ -63,6 +66,7 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </EditForm>
+    <ErrorNotification ErrorMessage="@errorMessage" Show="@error"></ErrorNotification>
 </div>
 @code {
     [Parameter]
@@ -73,32 +77,53 @@
     private Review newReview = new Review();
     private int StarCount { get; set; }
 
+    private bool error = false;
+    private string errorMessage = "";
+
 
 
     protected override async Task OnInitializedAsync()
     {
-        newReview.RecipeID = RecipeID;
-        await UpdateReviews();
+        try
+        {
+            newReview.RecipeID = RecipeID;
+            await UpdateReviews();
+            error = false;
+        }
+        catch(Exception e)
+        {
+            errorMessage = e.Message;
+            error = true;
+        }
         await base.OnInitializedAsync();
     }
 
     private async Task InsertNewRecipe()
     {
-        newReview.Star = Star.CreateStar(StarCount);
-        newReview.DateSubmitted = DateTime.Now;
-        newReview.RecipeID = RecipeID;
-        await dataLoader.SaveNewReview(newReview);
-
-        newReview = new Review();
-
-        await UpdateReviews();
+        try
+        {
+            newReview.Star = Star.CreateStar(StarCount);
+            newReview.DateSubmitted = DateTime.Now;
+            newReview.RecipeID = RecipeID;
+            await dataLoader.SaveNewReview(newReview);
+            Reviews.Add(newReview);
+            newReview = new Review();
+            error = false;
+        }
+        catch(Exception e)
+        {
+            errorMessage = e.Message;
+            error = true;
+        }
     }
 
+    private async Task DeleteReview(uint reviewID,Review review)
+    {
+        await dataLoader.DeleteReviewUsingReviewID(reviewID);
+        Reviews.Remove(review);
+    }
     private async Task UpdateReviews()
     {
         Reviews = await dataLoader.GetReviews(RecipeID);
     }
-
-
-
 }

@@ -276,7 +276,7 @@ namespace BlazorServerApp.Blazored_Typeahead
             }
             else if (IsMultiselect && !IsShowingSuggestions && args.Key == "Backspace")
             {
-                if (Values.Any())
+                if (Values!= null && Values.Any())
                     await RemoveValue(Values.Last());
             }
         }

@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Net.Http;
-
+using BlazorServerApp.RecipeDataProcessorService;
 
 namespace BlazorServerApp
 {
@@ -53,6 +53,7 @@ namespace BlazorServerApp
             services.AddSingleton<IWordsAPIService, WordsAPIService>();
             services.AddTransient<INounExtractor, NounExtractor>();
             services.AddTransient<ITextProcessor, TextProcessor.TextProcessor>();
+            services.AddSingleton<IDietaryProcessor, DietaryProcessor>();
             services.AddHttpClient();
             // ******
             // BLAZOR COOKIE Auth Code (begin)

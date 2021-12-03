@@ -46,6 +46,7 @@ namespace BlazorServerApp.Models
         public  Task<FileManagerModel> GetFile(string MD5);
         public  Task<FileManagerModel> GetFile(uint RecipeID);
         public  Task<List<FileManagerModel>> BulkImportFiles(int offset);
+        public  Task DeleteReviewUsingReviewID(uint ReviewID);
 
     }
 }

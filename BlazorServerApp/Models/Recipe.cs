@@ -19,9 +19,11 @@ namespace BlazorServerApp.Models
         public string RecipeName { get; set; }
 
         [Required]
+        [MaxLength(63355,ErrorMessage ="Please shorten the description - too long for database")]
         public string Description { get; set; }
 
         [Required]
+        [ValidMethod]
         public List<Method> Method { get; set; } = new List<Method>();
 
         [Required]
@@ -80,13 +82,21 @@ namespace BlazorServerApp.Models
             "Fluid Ounces",
             };
 
+        [ValidNutritionalElement]
         public double Kcal { get; set; }
+        [ValidNutritionalElement]
         public double Fat { get; set; }
+        [ValidNutritionalElement]
         public double Saturates { get; set; }
+        [ValidNutritionalElement]
         public double Sugar { get; set; }
+        [ValidNutritionalElement]
         public double Fibre { get; set; }
+        [ValidNutritionalElement]
         public double Carbohydrates { get; set; }
+        [ValidNutritionalElement]
         public double Salt { get; set; }
+        [ValidNutritionalElement]
         public double Protein { get; set; }
 
         public static Dictionary<string, int> DifficultyEnum = new Dictionary<string, int>()
@@ -96,6 +106,7 @@ namespace BlazorServerApp.Models
             {"Hard",3 },
         };
 
+        [ValidDifficulty]
         public static readonly List<string> DIFICULTY = new List<string>(Recipe.DifficultyEnum.Keys);
 
         public static RecomendedIntake RecomendedIntake = new RecomendedIntake(2000, 70, 20, 260, 90, 50, 6);

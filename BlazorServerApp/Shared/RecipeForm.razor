@@ -306,14 +306,32 @@ else
                 NavManager.NavigateTo($"/Recipe/{RecipeModel.RecipeID}");
             }
             else if( mode == MODES.BulkUpload)
-                {
-                 await OnClick.InvokeAsync();
-                }
+            {
+                await OnClick.InvokeAsync();
+            }
         }
         catch (Exception e)
         {
             error = true;
             ErrorMessage = e.Message;
+        }
+    }
+
+    private void RemoveEmptyRows()
+    {
+        foreach(Method method in RecipeModel.Method)
+        {
+            if(method.MethodText == null || method.MethodText.Length < 2)
+            {
+                RecipeModel.Method.Remove(method);
+            }
+        }
+        foreach(UserDefinedIngredientInRecipe ingredient in RecipeModel.Ingredients)
+        {
+            if(ingredient.IngredientID == default(int) || ingredient.Quantity == default(double) || ingredient.Unit == null || ingredient.Unit.Length < 0)
+            {
+                RecipeModel.Ingredients.Remove(ingredient);
+            }
         }
     }
 

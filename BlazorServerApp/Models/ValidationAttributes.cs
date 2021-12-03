@@ -35,6 +35,61 @@ AttributeTargets.Field, AllowMultiple = true)]
         }
     }
 
+    public sealed class ValidNutritionalElement : ValidationAttribute
+    {
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        {
+            if (ValidMethod.CustomValidation(value, validationContext))
+            {
+                return ValidationResult.Success;
+            }
+            else
+            {
+                return new ValidationResult("Ingredient is required");
+            }
+        }
+
+        public static bool CustomValidation(object value, ValidationContext validationContext)
+        {
+            if(double.TryParse(value.ToString() , out _))
+            {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public sealed class ValidDifficulty : ValidationAttribute
+    {
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        {
+            if (ValidMethod.CustomValidation(value, validationContext))
+            {
+                return ValidationResult.Success;
+            }
+            else
+            {
+                return new ValidationResult("Ingredient is required");
+            }
+        }
+
+        public static bool CustomValidation(object value, ValidationContext validationContext)
+        {
+            try
+            {
+                if (Recipe.DifficultyEnum.ContainsKey((string)validationContext.ObjectInstance))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return false;
+        }
+    }
+
     public sealed class ValidMethod : ValidationAttribute
     {
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
@@ -81,7 +136,11 @@ AttributeTargets.Field, AllowMultiple = true)]
         public static bool ValidateMethodText(Method model)
         {
             //var model = (string ) validationContext.ObjectInstance;
-            return true;
+            if(model.MethodText != null && model.MethodText.Length < DatabaseConstants.VarCharMax )
+            {
+                return true;
+            }
+            return false;
         }
     }
 

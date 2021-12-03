@@ -5,37 +5,39 @@
 @using BlazorServerApp.proccessService
 
 <AuthorizeView Roles="Administrator">
-    <h3>BulkUploadPage</h3>
+    <div style="max-width: 100%!important;width: 100%!important;">
+        <h3>BulkUploadPage</h3>
 
-    @if (recipeProcessorService.FilesAreQueued())
-    {
-        @if (undergoingProccessing && recipeModel != null)
+        @if (recipeProcessorService.FilesAreQueued())
         {
-            <LoadingElement></LoadingElement>
-        }
-        else
-        {
-<div class="row">
-    <div class="col-8">
-        <RecipeForm RecipeModel="@recipeModel" mode="RecipeForm.MODES.BulkUpload" OnClick="SubmitRecipe" />
-    </div>
-    <div class="co-4">
-        @foreach(string line in documentTextPreview.Split("\n"))
+            @if (undergoingProccessing && recipeModel != null)
+            {
+                <LoadingElement></LoadingElement>
+            }
+            else
+            {
+                <div class="row" style="max-width: 100% !important; width: 100% !important; flex-direction: row; flex-wrap: nowrap; ">
+                    <div class="col-8">
+                        <RecipeForm RecipeModel="@recipeModel" mode="RecipeForm.MODES.BulkUpload" OnClick="SubmitRecipe" />
+                    </div>
+                    <div class="co-4" style="margin-left:10px;">
+                        @foreach (string line in documentTextPreview.Split("\n"))
                         {
                             <p>@line</p>
                         }
-    </div>
-</div>
+                    </div>
+                </div>
+            }
+            @*<ProgressBar Percent="@(((recipeProcessorService.GetNumberOfItemsInQueue()-numberOfItemsInitiallyInQueue)/numberOfItemsInitiallyInQueue)*100)"></ProgressBar>*@
+            <btn class="btn btn-danger" @onclick="(()=>DeleteRecipe())">Delete</btn>
         }
-        @*<ProgressBar Percent="@(((recipeProcessorService.GetNumberOfItemsInQueue()-numberOfItemsInitiallyInQueue)/numberOfItemsInitiallyInQueue)*100)"></ProgressBar>*@
-        <btn class="btn btn-danger" @onclick="(()=>DeleteRecipe())">Delete</btn>
-    }
-    else
-    {
-        <p>No recipes are queued for approval. Enjoy your day.</p>
-    }
+        else
+        {
+            <p>No recipes are queued for approval. Enjoy your day.</p>
+        }
 
 
+    </div>
 </AuthorizeView>
 <AuthorizeView>
     <NotAuthorized>

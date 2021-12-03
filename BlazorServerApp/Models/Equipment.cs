@@ -5,6 +5,7 @@ namespace BlazorServerApp.Models
     public class Equipment
     {
         [Required]
+        [MaxLength(DatabaseConstants.TinyTextMax)]
         public string EquipmentName { get; set; }
 
         public uint EquipmentID { get; set; }
