@@ -6,13 +6,11 @@
 <AuthorizeView Roles="Administrator">
     <h3>UserManager</h3>
     <h2>Create a new Administrator</h2>
-    <p>The email field is optional, however we recomend it as it helps with account recovery.</p>
     <div class="container">
         <input type="text"
                placeholder="User Name" @bind="@username" />
         <input type="text"
                placeholder="password" @bind="@password" />
-        <input type="text" placeholder="email (optional)" @bind="@email" />
         <btn class=" btn btn-primary" @onclick="@CreateUser">Create User</btn>
     </div>
 
@@ -30,10 +28,9 @@
                 <tr>
                     <td>@user.UserName</td>
                     <td>@user.Role</td>
-                    @*<td><input @bind-value="@temporraryPassword"/><btn class="btn btn-primary" @onclick="@(()=> UpdatePassword(user,temporraryPassword))">Change </btn></td>*@
                     @if (user.UserName != currentLoggedInUser) // prevent them deleting themsleves!
                     {
-                    <td><btn class="btn btn-danger" @onclick="@(() => DeleteUser(user))">Delete</btn></td>
+                        <td><btn class="btn btn-danger" @onclick="@(() => DeleteUser(user))">Delete</btn></td>
                     }
                     else
                     {
@@ -88,18 +85,6 @@
         await dataLoader.UpdatePassword(user);
     }
 
-    private bool ValidEmail(string email)
-    {
-        if (email == "")
-        {
-            return false;
-        }
-        else if (Regex.IsMatch(email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z"))
-        {
-            return true;
-        }
-        return false;
-    }
 
     private async Task CreateUser()
     {
@@ -127,6 +112,6 @@
             Message = "An unhandled and unexpected result occured while connecting to the database";
             StateHasChanged();
         }
-        LoadUsers();
+        await LoadUsers();
     }
 }
