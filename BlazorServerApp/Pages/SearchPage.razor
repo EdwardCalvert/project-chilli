@@ -118,7 +118,7 @@
     }
 </div>
 
-<ErrorNotification ErrorMessage="An unexpected error occured while connecting to the database." Show="error"></ErrorNotification>
+<ErrorNotification ErrorMessage="An unexpected error occured while connecting to the database." Show="@error"></ErrorNotification>
 @code {
 
     string searchText { get; set; }
@@ -181,7 +181,7 @@
                         order = (SearchEnginge.Order)Enum.Parse(typeof(SearchEnginge.Order), orderByURL, true);
                         sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
                     }
-
+                    error = false;
                 }
                 catch
                 {
@@ -248,31 +248,30 @@
         {
             SearchButtonClicked();
         }
-        //else if(char.IsLetterOrDigit(e.Key))
-        //{
-        //searchText += e.Key;
-
     }
 
     private async Task GetHomepageRecipes()
     {
+
+        List<Recipe> resultsFromDB = await dataLoader.GetHomepageRecipes(offset);
+        offset += resultsFromDB.Count;
+        recipes.AddRange(resultsFromDB);
+        ReOrderResults();
+        error = false;
+
+    }
+
+    private async Task LoadMoreRecipesOnRequest()
+    {
         try
         {
-            List<Recipe> resultsFromDB = await dataLoader.GetHomepageRecipes(offset);
-            offset += resultsFromDB.Count;
-            recipes.AddRange(resultsFromDB);
-            ReOrderResults();
+            await Task.Run(() => GetHomepageRecipes());
             error = false;
         }
         catch
         {
             error = true;
         }
-    }
-
-    private async Task LoadMoreRecipesOnRequest()
-    {
-        await Task.Run(() => GetHomepageRecipes());
     }
 
     private void MovePage()

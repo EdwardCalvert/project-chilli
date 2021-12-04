@@ -48,6 +48,9 @@ namespace BlazorServerApp.Models
         public  Task<List<FileManagerModel>> BulkImportFiles(int offset);
         public  Task DeleteReviewUsingReviewID(uint ReviewID);
         public  Task<uint?> DeleteOnlyFile(string MD5Hash);
-
+        public  Task GenericUpdate<T>(T objectToInsert) where T : ISqlUpdatible;
+        public  Task GenericDelete<T>(T objectToInsert) where T : ISqlDeletible;
+        public  Task GenericInsert<T>(T objectToInsert) where T : ISqlInsertible;
+        public  Task<PasswordRestToken> GetPasswordResetToken(string ResetTokenID);
     }
 }

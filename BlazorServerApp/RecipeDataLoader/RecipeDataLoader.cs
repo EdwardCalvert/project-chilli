@@ -398,6 +398,25 @@ GROUP BY s.RecipeID
             return await _data.LoadData<FileManagerModel, dynamic>("SELECT * FROM FileManager LIMIT 300 OFFSET @offset ;", new { offset = offset }, _config.GetConnectionString("recipeDatabase"));
         }
 
+        public async Task GenericInsert<T>(T objectToInsert) where T: ISqlInsertible
+        {
+            await _data.SaveData(objectToInsert.SqlInsertStatement(), objectToInsert.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task GenericUpdate<T>(T objectToInsert) where T : ISqlUpdatible
+        {
+            await _data.SaveData(objectToInsert.SqlUpdateStatement(), objectToInsert.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+        }
+        public async Task GenericDelete<T>(T objectToInsert) where T : ISqlDeletible
+        {
+            await _data.SaveData(objectToInsert.SqlDeleteStatement(), objectToInsert.SqlDeleteAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<PasswordRestToken> GetPasswordResetToken(string ResetTokenID)
+        {
+            List<PasswordRestToken> passwordRestTokens = await _data.LoadData<PasswordRestToken, dynamic>("SELECT * FROM PasswordResetToken WHERE ResetTokenID = @resetTokenID", new { ResetTokenID = ResetTokenID }, _config.GetConnectionString("recipeDatabase"));
+            return OneOrNull<PasswordRestToken>(passwordRestTokens);
+        }
 
 
         /// <summary>
