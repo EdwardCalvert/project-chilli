@@ -22,17 +22,19 @@ namespace BlazorServerApp.STMPMailer
 
     {
         private readonly EmailSettings _mailSettings;
-        public EmailSender(EmailSettings mailSettings)
+		private readonly IRecipeDataLoader _dataLoader;
+        public EmailSender(EmailSettings mailSettings,IRecipeDataLoader dataLoader)
         {
             _mailSettings = mailSettings;
+			_dataLoader = dataLoader;
         }
         public async  Task SendEmail(EmailMessage emailMessage)
         {
 
                 var message = new MimeMessage();
 				message.From.Add(new MailboxAddress(_mailSettings.From, _mailSettings.From));
-
-				message.To.AddRange(_mailSettings.RecoveryAddresses.Select(x => new MailboxAddress(x.Name, x.Address)));
+			List<RecoveryEmailAddresses> addresses = await _dataLoader.GetEmailAddresses();
+				message.To.AddRange(addresses.Select(x => new MailboxAddress(x.UserName, x.EmailAddress)));
 				message.Subject = emailMessage.Subject;
 
 			Console.WriteLine(message.To);

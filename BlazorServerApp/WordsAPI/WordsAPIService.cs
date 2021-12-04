@@ -19,10 +19,7 @@ namespace BlazorServerApp.WordsAPI
         private readonly IRecipeDataLoader _dataLoader;
         private int remainingCallouts = 2000;
         private bool serviceEnabled = true;
-
-
-
-
+        private Dictionary<string, Task<TypeOf>> taskDictionary = new();
         public WordsAPIService(IHttpClientFactory httpClientFactory, IConfiguration config,IRecipeDataLoader dataAccess)
         {
             _httpClientFactory = httpClientFactory;
@@ -35,18 +32,29 @@ namespace BlazorServerApp.WordsAPI
             searchTerm = searchTerm.ToLower();
             if (!await _dataLoader.ContainsStopWord(searchTerm))
             {
-                List<SearchQuery> queries = await _dataLoader.FindWordsAPISearch(searchTerm);
+                List<SearchQuery> queries = await _dataLoader.FindWordsAPISearch(searchTerm); 
                 if (queries.Count == 1)
                 {
                     return JsonConvert.DeserializeObject<TypeOf>(queries[0].ResultAsJSON);
                 }
                 else
                 {
-                    TypeOf type = await CallAPI(searchTerm);
-                    SearchQuery searchQuery = new();
-                    searchQuery.SearchTerm = searchTerm;
-                    searchQuery.ResultAsJSON = JsonConvert.SerializeObject(type);
-                    await _dataLoader.InsertSearchQuery(searchQuery);
+
+                    TypeOf type;
+                    if (taskDictionary.ContainsKey(searchTerm))
+                    {
+                        type = await taskDictionary[searchTerm];
+                    }
+                    else
+                    {
+                        Task<TypeOf> task = CallAPI(searchTerm);
+                        taskDictionary.Add(searchTerm, task);
+                        await task;
+                        type = task.Result;
+                        taskDictionary.Remove(searchTerm);
+                    }
+
+                    
                     return type;
                 }
             }
@@ -75,13 +83,18 @@ namespace BlazorServerApp.WordsAPI
                 };
                 using (var response = await client.SendAsync(request))
                 {
+                    string jsonResult = await response.Content.ReadAsStringAsync();
                      remainingCallouts =int.Parse(response.Headers.GetValues("x-ratelimit-requests-remaining").FirstOrDefault())-1;
+                        SearchQuery searchQuery = new();
+                        searchQuery.SearchTerm = word;
+                        searchQuery.ResultAsJSON = jsonResult;
+                        await _dataLoader.InsertSearchQuery(searchQuery);
 
-                    
+
                     if (response.IsSuccessStatusCode)
                     {
 
-                        return JsonConvert.DeserializeObject<TypeOf>(await response.Content.ReadAsStringAsync());
+                        return JsonConvert.DeserializeObject<TypeOf>(jsonResult);
                     }
                     else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
@@ -97,7 +110,8 @@ namespace BlazorServerApp.WordsAPI
             {
                 throw new Exception("API Limit has been exhausted. Please try again later.");
             }
-                
+            
+
         }
 
        

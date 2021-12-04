@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace BlazorServerApp.Models
 {
@@ -16,6 +17,29 @@ namespace BlazorServerApp.Models
         {
             _data = data;
             _config = config;
+            List<string> results =  _data.LoadData<string, dynamic>("select schema_name from information_schema.schemata where schema_name = 'RecipeDatabase';",new { },_config.GetConnectionString("wholeDatabase")).Result;
+            if (results.Count == 0)
+            {
+                Console.WriteLine("Need to create database");
+                CreateDatabase();
+            }
+            else
+            {
+                Console.WriteLine("No need to create database");
+            }
+             
+        }
+
+        private async Task CreateDatabase()
+        {
+            string SQLCreateCommand;
+            using (StreamReader stream = new StreamReader(Path.Combine(Directory.GetCurrentDirectory() ,"RecipeDatabase.sql")))
+            {
+                SQLCreateCommand = stream.ReadToEnd();
+            }
+            await _data.SaveData(SQLCreateCommand, new { }, _config.GetConnectionString("wholeDatabase"));
+            Console.WriteLine("Database created");
+
         }
 
         public async Task<bool> ContainsStopWord(string searchTerm)
@@ -418,6 +442,20 @@ GROUP BY s.RecipeID
             return OneOrNull<PasswordRestToken>(passwordRestTokens);
         }
 
+        public async Task UpdateRecoveryEmailAddress(string oldEmailAddress, string newEmailAddress, string userName)
+        {
+            await _data.SaveData("UPDATE RecoveryEmailAddress SET EmailAddress = @newEmailAddress, UserName = @userName  WHERE EmailAddress = @oldEmailAddress", new { newEmailAddress = newEmailAddress, oldEmailAddress = oldEmailAddress, userName = userName }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<List<RecoveryEmailAddresses>> GetEmailAddresses()
+        {
+            return await _data.LoadData<RecoveryEmailAddresses, dynamic>("SELECT * FROM RecoveryEmailAddress", new { }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<RecoveryEmailAddresses> GetSingleAddress(string email)
+        {
+            return OneOrNull<RecoveryEmailAddresses>(await _data.LoadData<RecoveryEmailAddresses, dynamic>("SELECT * FROM RecoveryEmailAddress WHERE EmailAddress=@email", new {email=email }, _config.GetConnectionString("recipeDatabase")));
+        }
 
         /// <summary>
         /// Method that returns the first item in a list- intended for queries where you know there will only be one result. 

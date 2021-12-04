@@ -58,4 +58,10 @@
     <None Include="wwwroot\blazored-typeahead.js" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="RandomWords.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

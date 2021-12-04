@@ -9,125 +9,43 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Mvc.Rendering
 
-@*@page "/dev"
+@page "/dev"
 
-<btn @onclick="@OnClick"> helllooo</btn>
+
+<btn class="btn btn-primary" @onclick="RunTask1">Run Task1</btn>
+<btn class="btn btn-primary" @onclick="RunTask2">Run Task2</btn>
+
 @code{
-    private void OnClick() {
-        EmailMessage emailMessage = new EmailMessage();
-        emailMessage.Subject = "Password Reset";
-        emailMessage.Content = @$"Hello Admin, a user named bob is attempting to reset their password, please can you help?";
-        sender.SendEmail(emailMessage);
-    }
-}
+    Dictionary<string, Task<string>> taskDictionary = new();
 
-
-<table class="table table-striped">
-    <thead class="thead-dark">
-        <tr>
-            <th>Recipe Name</th>
-            <th>Number of views</th>
-            <th>Last viewed</th>
-            <th>Description</th>
-            <th>Recipe ID</th>
-            <th>Manual upload?</th>
-            <th>Delete</th>
-            <th>View</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (Recipe recipe in recipes)
-        {
-        <tr>
-            <td>@recipe.RecipeName</td>
-            <td>@recipe.PageVisits</td>
-
-            <td>@recipe.LastRequested</td>
-            <td>@recipe.ShowShortDescription(100)</td>
-            <td>@recipe.RecipeID</td>
-            <td>@recipe.ManualUpload</td>
-            <td><btn class="btn btn-danger" @onclick="@(()=>DeleteRecipe(recipe))">Delete</btn></td>
-            <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID">View</a></td>
-        </tr>
-        }
-
-    </tbody>
-</table>
-
-    @code
-{
-        private void DeleteRecipe(Recipe recipe)
-        {
-            recipes.Remove(recipe);
-            dataLoader.DeleteRecipeAndRelatedValues(recipe.RecipeID);
-        }
-
-        public List<Recipe> recipes { get; set; }
-
-
-}
-
-<textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput"></textarea>
-    <btn class="btn btn-primary" @onclick="@FetchDefinition"></btn>
-
-    <select style="margin-left: 5px; margin-left: 5px;" @bind="@binary">
-        @foreach (var orderOption in Enum.GetValues(typeof(Binary)))
-        {
-            <option value="@orderOption">@orderOption</option>
-        }
-        <value></value>
-    </select>
-    @if (type != null)
+    async void RunTask2()
     {
-        @foreach (string s in type.typeOf)
+        Console.WriteLine("task2 started");
+        if (taskDictionary.ContainsKey("task1"))
         {
-            <p>@s</p>
+            Console.WriteLine(await taskDictionary["task1"]);
         }
-        @if (type.typeOf.Contains("meat"))
+        else
         {
-            <p>Meat!</p>
+            Console.WriteLine("task not in dict.");
         }
+        Console.WriteLine("task2 finished");
     }
 
-
-    <p>@(binary&Binary.One )</p>
-
-    @code{
-
-        Binary _binary = Binary.Zero;
-        Binary binary { get { return _binary; } set { _binary = value; } }
-
-        string _textAre = "";
-        string textArea { get { return _textAre; } set { _textAre = value; } }
-        TypeOf type;
-        WordsAPIService wordsAPIService;
-        [Flags]
-        private enum Binary
-        {
-            Zero = 0,
-            One = 1,
-            Two = 2,
-            Four = 4,
-        }
-
-
-        protected override async Task OnInitializedAsync()
-        {
-            wordsAPIService = new WordsAPIService(httpClientFactory, config, dataLoader);
-            recipes = await dataLoader.BulkImportRecipes(0);
-        }
-
-        public async Task FetchDefinition()
-        {
-
-            type = await wordsAPIService.CallCachedAPI(textArea);
-
-        }
-        List<Recipe> results = new();
-
-        public async void Search()
-        {
-            //results = await SearchEnginge.SearchForRecipes(dataLoader, "cheese", SearchEnginge.SortBy.CookingTime, SearchEnginge.Order.Descending);
-        }*@
-
+    async void RunTask1()
+    {
+        Console.WriteLine("task1 started");
+        Task<string> task = DoHeavyComputationLastingManySeconds();
+        taskDictionary.Add("task1", task);
+        await task; 
+        Console.WriteLine(task.Result);
+        taskDictionary.Remove("task1");
+        Console.WriteLine("task1 finished");
     }
+
+    async Task<string> DoHeavyComputationLastingManySeconds()
+    {
+        await Task.Delay(5000);
+        return "cheese";
+    }
+}

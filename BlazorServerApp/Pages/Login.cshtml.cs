@@ -20,11 +20,19 @@ namespace BlazorCookieAuth.Server.Pages
         {
             _dataLoader = dataLoader;
         }
-        public string ReturnUrl { get; set; }
-        public async Task<IActionResult> OnGetAsync(string paramUsername, string paramPassword)
+        public async Task<IActionResult> OnGetAsync(string paramUsername, string paramPassword,string paramReturnURL)
         {
+            string returnUrl;
+            if (paramReturnURL == null)
+            {
+                returnUrl= Url.Content("~/");
 
-            string returnUrl = Url.Content("~/");
+            }
+            else
+            {
+                returnUrl = paramReturnURL;
+            }
+           
 
             try
             {
@@ -55,9 +63,7 @@ namespace BlazorCookieAuth.Server.Pages
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity),
                         authProperties);
-                   
-                }
-                
+                }  
             }
             catch
             {

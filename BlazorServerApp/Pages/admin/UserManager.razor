@@ -2,76 +2,295 @@
 @using Microsoft.AspNetCore.Http
 @using System.Text.RegularExpressions
 @inject IHttpContextAccessor httpContextAccessor
+@inject IConfiguration config
+@inject EmailSettings mailSettings
+@inject NavigationManager navManager
 @page "/admin/usermanager"
+@using Newtonsoft.Json
 <AuthorizeView Roles="Administrator">
-    <h3>UserManager</h3>
-    <h2>Create a new Administrator</h2>
-    <div class="container">
-        <input type="text"
-               placeholder="User Name" @bind="@username" />
-        <input type="text"
-               placeholder="password" @bind="@password" />
-        <btn class=" btn btn-primary" @onclick="@CreateUser">Create User</btn>
-    </div>
-
-    <table class="table table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>User Name</th>
-                <th>User Role</th>
-                <th>Delete User</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (User user in users)
-            {
-                <tr>
-                    <td>@user.UserName</td>
-                    <td>@user.Role</td>
-                    @if (user.UserName != currentLoggedInUser) // prevent them deleting themsleves!
-                    {
-                        <td><btn class="btn btn-danger" @onclick="@(() => DeleteUser(user))">Delete</btn></td>
-                    }
-                    else
-                    {
-                        <td>Can't do that!</td>
-                    }
-                </tr>
-            }
-
-        </tbody>
-    </table>
-    @if (error)
+    @if (!error)
     {
-        <p>Error occured</p>
+        <h3>UserManager</h3>
+        <h2>Create a new Administrator</h2>
+        <div class="container">
+            <input type="text"
+                   placeholder="User Name" @bind="@username" />
+            <input type="text"
+                   placeholder="password" @bind="@password" />
+            <btn class=" btn btn-primary" @onclick="@CreateUser">Create User</btn>
+        </div>
+
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>User Name</th>
+                    <th>User Role</th>
+                    <th>Delete User</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (User user in users)
+                {
+                    <tr>
+                        <td>@user.UserName</td>
+                        <td>@user.Role</td>
+                        @if (user.UserName != currentLoggedInUser && !user.UserName.StartsWith("BackupAccount:")) // prevent them deleting themsleves!
+                        {
+                            <td><btn class="btn btn-danger" @onclick="@(() => DeleteUser(user))">Delete</btn></td>
+                        }
+                        else
+                        {
+                            <td>Can't do that!</td>
+                        }
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+        <h2>Add new recovery address</h2>
+        <div class="container">
+            <input type="email"
+                   placeholder="name@domain" @bind="@newEmailAddress" />
+            <input type="text"
+                   placeholder="name" @bind="@newRecoveryAddressName" />
+            <btn class=" btn btn-primary" @onclick="@CreateNewRecoveryEmailAddress">Create recovery address</btn>
+        </div>
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Email address</th>
+                    <th>User name</th>
+                    <th>Delete User</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (RecoveryEmailAddresses address in recoveryEmailAddresses)
+                {
+                    <tr>
+
+                        <td>@address.EmailAddress</td>
+                        <td>@address.UserName</td>
+                        @if (recoveryEmailAddresses.Count > 1) // prevent lockout
+                        {
+                            <td><btn class="btn btn-danger" @onclick="@(() => DeleteAddress(address))">Delete</btn></td>
+                        }
+                        else
+                        {
+                            <td>Can't do that!</td>
+                        }
+                    </tr>
+                }
+
+            </tbody>
+        </table>
     }
-    <p></p>
+    else
+    {
+        <p class="alert-danger">Error occured</p>
+    }
+    <ErrorNotification Show="noRecoveryEmailAddresses" ErrorMessage="Please add a recovery email address to prevent being locked out!"></ErrorNotification>
 
     <ErrorNotification ErrorMessage="@Message" Show="@error"></ErrorNotification>
 </AuthorizeView>
 <AuthorizeView>
     <NotAuthorized>
-        <h1>You will need to login to view this page</h1>
+
+
+        @if (noAdminsHaveBeenCreated )
+        {
+            <h1>DO NOT LEAVE THIS PAGE! OTHERWISE YOU WILL BE LOCKED OUT.</h1>
+            <h2>
+                Welcome to the User Manager. 
+            </h2>
+            <p>You will be supplied with a backup account, and then will need to create a new admin account. We'll also ask for an email address that can recieve mail from @mailSettings.From to recieve password reset instructions. </p>
+            <p>@BackupAccountCredentials</p>
+            <h2>Create a new Administrator</h2>
+            <div class="container">
+                <input type="text"
+                       placeholder="User Name" @bind="@username" />
+                <input type="text"
+                       placeholder="password" @bind="@password" />
+                <btn class=" btn btn-primary" @onclick="@CreateUser">Create User</btn>
+            </div>
+            <h2>Add new recovery address</h2>
+            <div class="container">
+                <input type="email"
+                       placeholder="name@domain" @bind="@newEmailAddress" />
+                <input type="text"
+                       placeholder="name" @bind="@newRecoveryAddressName" />
+                <btn class=" btn btn-primary" @onclick="@CreateNewRecoveryEmailAddress">Create recovery address</btn>
+            </div>
+
+            <p>Now you can login, using the account you created. </p>
+            <btn class="btn btn-primary" @onclick="@(()=>attemptedToLogin = true)">Login</btn>
+            @if (attemptedToLogin) { 
+                <p class="alert-danger">After leaving this page, you will need to login to make changes. Make sure you have created an account.</p>
+                <btn class="btn btn-danger" @onclick="LogUserIn">Are you sure?</btn>
+}
+
+        }
+        else
+        {
+            <h1>You will need to login to view this page</h1>
+        }
     </NotAuthorized>
 </AuthorizeView>
 @code {
     string username;
     string password;
     bool error = false;
+    bool noAdminsHaveBeenCreated = false;
+    bool noRecoveryEmailAddresses = false;
+    bool firstLoad = true;
+    bool attemptedToLogin = false;
+    string BackupAccountCredentials = "";
     string Message;
-    string email;
+    string newEmailAddress;
+    string newRecoveryAddressName;
     string currentLoggedInUser ;
+    string temporaryPassword = "";
+    string temporaryUsername = "";
     List<User> users = new List<User>();
+    List<RecoveryEmailAddresses> recoveryEmailAddresses = new();
+
+    private void LogUserIn()
+    {
+        navManager.NavigateTo($"/Login?paramUsername={HttpUtility.UrlEncode(temporaryUsername)}&paramPassword={HttpUtility.UrlEncode(temporaryPassword)}&paramReturnURL=/admin/usermanager", true);
+    }
+
+    private async Task<string> BackupAccount()
+    {
+        string tempPassword = "";
+        string temptUsername = "";
+        try
+        {
+
+            User user = new User();
+            user.Role = "Administrator";
+            string path  =Path.Combine(Directory.GetCurrentDirectory(),"RandomWords.txt");
+            if (File.Exists(path))
+            {
+                Console.WriteLine("Using random words to generate username and password.");
+                string[] RandomWords;
+
+                using (StreamReader streamReadr = new StreamReader(path))
+                {
+
+                    string fileContents = streamReadr.ReadToEnd();
+                    RandomWords = fileContents.Split("\n");
+                }
+
+                temptUsername = "BackupAccount:"+CreatePassphrase(RandomWords, 2, "-");
+                tempPassword = CreatePassphrase(RandomWords, 3, "&");
+
+                user.UserName = temptUsername;
+                user.SHA512 = User.CreateSHAHash(tempPassword);
+            }
+            else
+            {
+                Console.WriteLine("Random words text file was absent, so using random text instead!");
+                temptUsername = "BackupAccount:" + CreateRandomText(20);
+                tempPassword = CreateRandomText(3);
+
+                user.UserName = temptUsername;
+                user.SHA512 = User.CreateSHAHash(tempPassword);
+            }
+            await dataLoader.SaveUser(user);
+        }
+        catch
+        {
+            error = true;
+        }
+        return $"A backup account was created, username '{temptUsername}', password: '{tempPassword}' ";
+    }
+
+    private string CreatePassphrase(string[] randomWords, uint itterations,string delimiter)
+    {
+        string passPhrase = "";
+        for (uint i = 0; i < itterations; i++)
+        {
+            passPhrase += randomWords[_random.Next(0, randomWords.Length)].Trim() + delimiter;
+        }
+        passPhrase = passPhrase.Substring(0, passPhrase.LastIndexOf(delimiter));
+        return passPhrase;
+
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        currentLoggedInUser = httpContextAccessor.HttpContext.User.Identity.Name;
-        await LoadUsers();
+        try
+        {
+            currentLoggedInUser = httpContextAccessor.HttpContext.User.Identity.Name;
+            await LoadUsers();
+            await LoadRecoveryAddresses();
+        }
+        catch
+        {
+            error = true;
+            Message = "An unhandled database exception occured";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender){
+        if (firstLoad )
+        {
+            firstLoad = false;
+
+            try
+            {
+                currentLoggedInUser = httpContextAccessor.HttpContext.User.Identity.Name;
+                await LoadUsers();
+                if (users.Count <= 1) // I.e. just backup account
+                {
+                    noAdminsHaveBeenCreated = true;
+                    BackupAccountCredentials = await BackupAccount();
+                }
+                await LoadRecoveryAddresses();
+                if (recoveryEmailAddresses.Count == 0)
+                {
+                    noRecoveryEmailAddresses = true;
+                }
+
+            }
+            catch
+            {
+                error = true;
+                Message = "An unhandled database exception occured";
+            }
+        }
+        StateHasChanged();
+    }
+    Random _random = new Random();
+
+    public string CreateRandomText(int lenth)
+    {
+        string alphabet = "abcdefghijklmnopqrstuvwxyz";
+        string text = "";
+
+        for (int i = 0; i < lenth; i++)
+        {
+            int randomIndex = _random.Next(26);
+            text += alphabet[randomIndex];
+        }
+        return text;
+    }
+
+    private async Task LoadRecoveryAddresses()
+    {
+        recoveryEmailAddresses = await dataLoader.GetEmailAddresses();
+
     }
 
     private async Task LoadUsers()
     {
         users = await dataLoader.GetAllUsers();
+    }
+
+    private async void DeleteAddress(RecoveryEmailAddresses recoveryEmailAddress)
+    {
+        await dataLoader.GenericDelete<RecoveryEmailAddresses>(recoveryEmailAddress);
+        recoveryEmailAddresses.Remove(recoveryEmailAddress);
     }
 
     private async void DeleteUser(User user)
@@ -84,7 +303,40 @@
         user.SHA512 = User.CreateSHAHash(newPassword);
         await dataLoader.UpdatePassword(user);
     }
+    private async void UpdateEmail(string oldEmail, string newEmail, string userName)
+    {
+        await dataLoader.UpdateRecoveryEmailAddress(oldEmail, newEmail, userName);
+    }
 
+    private async void CreateNewRecoveryEmailAddress()
+    {
+        try
+        {
+            RecoveryEmailAddresses addresses = await dataLoader.GetSingleAddress(newEmailAddress);
+            if (addresses == null )
+            {
+
+                RecoveryEmailAddresses newAddress = new RecoveryEmailAddresses();
+
+                newAddress.EmailAddress = newEmailAddress;
+                newAddress.UserName = newRecoveryAddressName;
+                await dataLoader.GenericInsert<RecoveryEmailAddresses>(newAddress);
+
+                error = false;
+                newEmailAddress = "";
+                newRecoveryAddressName = "";
+                recoveryEmailAddresses.Add(newAddress);
+            }
+        }
+        catch
+        {
+            error = true;
+            Message = "An unhandled and unexpected result occured while connecting to the database";
+
+        }
+        await LoadUsers();
+
+    }
 
     private async Task CreateUser()
     {
@@ -99,19 +351,21 @@
                 user.SHA512 = User.CreateSHAHash(password);
                 user.UserName = username;
                 await dataLoader.SaveUser(user);
+
+                temporaryUsername = username;
+                temporaryPassword = password;
                 error = false;
                 username = "";
                 password = "";
-                email = "";
-                StateHasChanged();
             }
         }
         catch
         {
             error = true;
             Message = "An unhandled and unexpected result occured while connecting to the database";
-            StateHasChanged();
+
         }
         await LoadUsers();
+        StateHasChanged();
     }
 }

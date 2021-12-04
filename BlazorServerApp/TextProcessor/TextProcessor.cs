@@ -347,35 +347,6 @@ namespace BlazorServerApp.TextProcessor
                 // some post stuff
             });
             await Task.WhenAll(tasks);
-
-            //foreach (Match match in ingredientsWithUnitsRegex)
-            //{
-            //    string unit = "";
-            //    string ingredientName = match.Value;
-
-            //    MatchCollection units = Regex.Matches(match.Value, UNITSFROMTEXT, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            //    if (units.Count == 1)
-            //    {
-            //        unit = TextProcessor.ConvertStringToSUPPORTEDUNITS(units[0].Value);
-            //    }
-            //    else
-            //    {
-            //        unit = "x";
-            //    }
-            //    ingredientName = Regex.Replace(ingredientName, UNITSFROMTEXT, "");
-            //    double quantity = TextProcessor.ExtractDouble(match.Value);
-            //    ingredientName = ingredientName.Replace(quantity.ToString(), "").Trim();
-
-            //    uint? ingredientID = await GetIngredientID(ingredientName, insertIngredientOnEmptyResult);
-            //    if (ingredientID != null)
-            //    {
-            //        UserDefinedIngredientInRecipe userDefinedIngredientInRecipe = new UserDefinedIngredientInRecipe();
-            //        userDefinedIngredientInRecipe.IngredientID = ingredientID;
-            //        userDefinedIngredientInRecipe.Quantity = quantity;
-            //        userDefinedIngredientInRecipe.Unit = unit;
-            //        userDefinedIngredientInRecipes.Add(userDefinedIngredientInRecipe);
-            //    }
-            //}
             List<UserDefinedIngredientInRecipe> bagResults  = new List<UserDefinedIngredientInRecipe>();
             foreach(UserDefinedIngredientInRecipe item in bag)
             {
@@ -463,16 +434,8 @@ namespace BlazorServerApp.TextProcessor
             newRecipe.Description = await Task.Run(() => CreateDescription(inputText));
 
             newRecipe.Difficulty = await Task.Run(() => GetDifficulty(newRecipe.Method));
-            //Old method signature
-            //newRecipe.Ingredients.AddRange(await Task.Run(() => GetIngredientsWithoutUnit(newRecipe.Description, true)));
             Task<List<UserDefinedIngredientInRecipe>> getIngredientsWithUnits =  Task.Run(() => GetIngredientsWithUnits(inputText, true));
             Task<List<UserDefinedIngredientInRecipe>> getIngredientsWithoutUnits = Task.Run(() => GetIngredientsWithoutUnit(newRecipe.Description, true));
-
-            
-
-            
-
-            
 
             string possibleNouns = newRecipe.Description;
             foreach (Method s in newRecipe.Method)
@@ -552,38 +515,6 @@ namespace BlazorServerApp.TextProcessor
                     }
                 }
             }
-            //foreach (string noun in nouns)
-            //{
-            //    bool insertMade = false;
-            //    TypeOf typeOf = await _wordsAPIService.CallCachedAPI(noun);
-            //    if (typeOf != null && (typeOf.typeOf.Contains("equipment") || typeOf.typeOf.Contains("kitchen appliance") || typeOf.typeOf.Contains("utensil") || typeOf.typeOf.Contains("electronic equipment") || typeOf.typeOf.Contains("mixer")))
-            //    {
-            //        IEnumerable<Equipment> equipment = await _dataLoader.FindEquipmentLike(noun);
-            //        if (equipment.Any())
-            //        {
-            //            foreach (Equipment equipment1 in equipment)
-            //                if (TextProcessor.LevenshteinDistance(noun, equipment1.EquipmentName) <= TextProcessor.CalculateLevenshteinThreshold(noun) && !insertMade)
-            //                {
-            //                    if (!DoesEquipmentAreadyHaveID(EquipmentIDs, equipment1.EquipmentName))
-            //                    {
-            //                        EquipmentIDs.Add(equipment1);
-            //                        insertMade = true;
-            //                    }
-            //                    else
-            //                    {
-            //                        insertMade = true;
-            //                    }
-            //                }
-            //        }
-            //        if (!insertMade)
-            //        {
-            //            Equipment equipment1 = new Equipment();
-            //            equipment1.EquipmentName = noun;
-            //            equipment1.EquipmentID = await _dataLoader.InsertEquipment(equipment1);
-            //            EquipmentIDs.Add(equipment1);
-            //        }
-            //    }
-            //}
             return EquipmentIDs;
         }
 
@@ -605,42 +536,57 @@ namespace BlazorServerApp.TextProcessor
             return null;
         }
 
+        private Dictionary<string, Task<uint?>> ingredientTaskDictionary = new();
+
         public async Task<uint?> GetIngredientID(string ingredientName, bool insertIngredientOnEmptyResult)
         {
             ingredientName = ingredientName.Replace("•	", "");
-            uint? ingredientId = await FindIngredientInDatabase(ingredientName);
-            if (ingredientId == null && insertIngredientOnEmptyResult)
+            uint? ingredientId;
+            if (ingredientTaskDictionary.ContainsKey(ingredientName))
             {
-                //The ingredient has not been found. First, find all the nouns in the text. Then call call wordsAPI to find which type the ingredient belongs to.
-                UserDefinedIngredient.Type type = UserDefinedIngredient.Type.None;
-                List<string> nouns = ingredientName.Split(" ").ToList();// await _nounExtractor.ExtractNouns(ingredientName);
-                if (nouns != null)
-                {
-
-                    var bag = new ConcurrentBag<object>();
-                    var tasks = nouns.Select(async noun =>
-                    {
-                        // some pre stuff
-                        TypeOf response = await _wordsAPIService.CallCachedAPI(noun);
-                        bag.Add(response);
-                        // some post stuff
-                    });
-                    await Task.WhenAll(tasks);
-                    var count = bag.Count;
-                    foreach(TypeOf item in bag.ToArray())
-                    {
-                        type |= UserDefinedIngredient.GetTypeEnum(item);
-                    }
-                }
-                UserDefinedIngredient userDefined = new();
-                userDefined.IngredientName = ingredientName;
-                userDefined.TypeOf = type;
-                return await _dataLoader.InsertIngredient(userDefined);
+                return await ingredientTaskDictionary[ingredientName];
             }
             else
             {
-                return ingredientId;
+                Task<uint?> task = FindIngredientInDatabase(ingredientName);
+                ingredientTaskDictionary.Add(ingredientName, task);
+                await task;
+                ingredientId = task.Result ;
+                if (ingredientId == null && insertIngredientOnEmptyResult)
+                {
+                    //The ingredient has not been found. First, find all the nouns in the text. Then call call wordsAPI to find which type the ingredient belongs to.
+                    UserDefinedIngredient.Type type = UserDefinedIngredient.Type.None;
+                    List<string> nouns = ingredientName.Split(" ").ToList();// await _nounExtractor.ExtractNouns(ingredientName);
+                    if (nouns != null)
+                    {
+
+                        var bag = new ConcurrentBag<object>();
+                        var tasks = nouns.Select(async noun =>
+                        {
+                            // some pre stuff
+                            TypeOf response = await _wordsAPIService.CallCachedAPI(noun);
+                            bag.Add(response);
+                            // some post stuff
+                        });
+                        await Task.WhenAll(tasks);
+                        var count = bag.Count;
+                        foreach (TypeOf item in bag.ToArray())
+                        {
+                            type |= UserDefinedIngredient.GetTypeEnum(item);
+                        }
+                    }
+                    UserDefinedIngredient userDefined = new();
+                    userDefined.IngredientName = ingredientName;
+                    userDefined.TypeOf = type;
+                    return await _dataLoader.InsertIngredient(userDefined);
+                }
+                else
+                {
+                    return ingredientId;
+                }
             }
+            
+           
         }
     }
 

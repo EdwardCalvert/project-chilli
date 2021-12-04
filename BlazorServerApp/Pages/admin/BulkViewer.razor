@@ -5,60 +5,64 @@
 <AuthorizeView Roles="Administrator">
     <h3>BulkViewer</h3>
     <p>Use this to view all the recipes in the databse. No warning will appear before you can delete a recipe, so proceceed with caution!</p>
-    <table class="table table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>Recipe Name</th>
-                <th>Number of views</th>
-                <th>Description</th>
-                <th>Recipe ID</th>
-                <th>Manual upload?</th>
-                <th>Delete</th>
-                <th>View</th>
-                <th>Edit</th>
-                <th>File</th>
-                <th>Download</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (Recipe recipe in recipes)
-            {
-            <tr>
-                <td>@recipe.RecipeName</td>
-                <td>@recipe.PageVisits</td>
-
-                <td>@recipe.ShowShortDescription(100)</td>
-                <td>@recipe.RecipeID</td>
-                <td>@recipe.ManualUpload</td>
-
-
-                @if (files.ContainsKey(recipe.RecipeID))
-                {
-                    <td>@System.Web.HttpUtility.UrlDecode(fileManager.GetFileName(files[recipe.RecipeID].FileID))</td>
-                    <td><btn class="btn btn-primary" @onclick="@(()=>DownloadRecipe(recipe.RecipeID))">Download</btn></td>
-                    <td><btn class="btn btn-danger" @onclick="@(()=>DeleteRecipe(recipe,files[recipe.RecipeID].FileID))">Delete + .docx</btn></td>
-                }
-                else
-                {
-                    <td>-</td>
-                    <td>-</td>
-                    <td><btn class="btn btn-danger" @onclick="@(()=>DeleteRecipe(recipe))">Delete</btn></td>
-                }
-                <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID">View</a></td>
-                <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID/Edit">Edit</a></td>
-
-            </tr>
-            }
-
-        </tbody>
-    </table>
-    @if (recipes.Count % resultsPerQuery == 0)
+    @if (recipes != null)
     {
-        <btn class="btn btn-primary" @onclick="@GrabMoreRecipes">Load more recipes</btn>
-    }
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Recipe Name</th>
+                    <th>Number of views</th>
+                    <th>Description</th>
+                    <th>Recipe ID</th>
+                    <th>Manual upload?</th>
+                    <th>Delete</th>
+                    <th>View</th>
+                    <th>Edit</th>
+                    <th>File</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
 
-    <ErrorNotification ErrorMessage="An unhandled database exception has occured" Show="@error"></ErrorNotification>
-</AuthorizeView>
+                @foreach (Recipe recipe in recipes)
+                {
+                    <tr>
+                        <td>@recipe.RecipeName</td>
+                        <td>@recipe.PageVisits</td>
+
+                        <td>@recipe.ShowShortDescription(100)</td>
+                        <td>@recipe.RecipeID</td>
+                        <td>@recipe.ManualUpload</td>
+
+
+                        @if (files.ContainsKey(recipe.RecipeID))
+                        {
+                            <td>@System.Web.HttpUtility.UrlDecode(fileManager.GetFileName(files[recipe.RecipeID].FileID))</td>
+                            <td><btn class="btn btn-primary" @onclick="@(() => DownloadRecipe(recipe.RecipeID))">Download</btn></td>
+                            <td><btn class="btn btn-danger" @onclick="@(() => DeleteRecipe(recipe, files[recipe.RecipeID].FileID))">Delete + .docx</btn></td>
+                        }
+                        else
+                        {
+                            <td>-</td>
+                            <td>-</td>
+                            <td><btn class="btn btn-danger" @onclick="@(() => DeleteRecipe(recipe))">Delete</btn></td>
+                        }
+                        <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID">View</a></td>
+                        <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID/Edit">Edit</a></td>
+
+                    </tr>
+                }
+                
+
+            </tbody>
+        </table>
+        @if (recipes.Count % resultsPerQuery == 0)
+        {
+            <btn class="btn btn-primary" @onclick="@GrabMoreRecipes">Load more recipes</btn>
+        }
+    }
+        <ErrorNotification ErrorMessage="An unhandled database exception has occured" Show="@error"></ErrorNotification>
+    </AuthorizeView>
 <AuthorizeView>
     <NotAuthorized>
         <h1>You will need to sign in to veiw this page.</h1>

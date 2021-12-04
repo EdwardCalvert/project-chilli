@@ -12,7 +12,6 @@ namespace BlazorServerApp.Models
         public string Password { get; set; }
         public string Host { get; set; }
         public int Port { get; set; }
-        public List<EmailAddress> RecoveryAddresses { get; set; }
 
 	}
 	public class EmailAddress

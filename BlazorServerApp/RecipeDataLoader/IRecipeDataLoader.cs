@@ -52,5 +52,10 @@ namespace BlazorServerApp.Models
         public  Task GenericDelete<T>(T objectToInsert) where T : ISqlDeletible;
         public  Task GenericInsert<T>(T objectToInsert) where T : ISqlInsertible;
         public  Task<PasswordRestToken> GetPasswordResetToken(string ResetTokenID);
+        public  Task<List<RecoveryEmailAddresses>> GetEmailAddresses();
+        public  Task UpdateRecoveryEmailAddress(string oldEmailAddress, string newEmailAddress, string userName);
+        public  Task<RecoveryEmailAddresses> GetSingleAddress(string email);
+
+
     }
 }
