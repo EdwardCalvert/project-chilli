@@ -55,7 +55,6 @@ namespace BlazorServerApp.Models
         public  Task<List<RecoveryEmailAddresses>> GetEmailAddresses();
         public  Task UpdateRecoveryEmailAddress(string oldEmailAddress, string newEmailAddress, string userName);
         public  Task<RecoveryEmailAddresses> GetSingleAddress(string email);
-
-
+        public Task<UserDefinedIngredient> GetUserDefinedIngredient(UserDefinedIngredientInRecipe ingredientInRecipe);
     }
 }

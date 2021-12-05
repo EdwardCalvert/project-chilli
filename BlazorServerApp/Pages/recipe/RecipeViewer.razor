@@ -22,10 +22,11 @@ else if (!validIdentifier)
 else if (model != null)
 {
     <h2>@model.RecipeName</h2>
-    <h5>@model.MealType</h5>     
+    <h5>@model.MealType</h5>
+
     if (DownloadPath != null)
     {
-    <a href="@DownloadPath" target="=_top" class="btn btn-primary" style="margin:5px;">Download as .Docx</a>
+        <a href="@DownloadPath" target="=_top" class="btn btn-primary" style="margin:5px;">Download as .Docx</a>
     }
     <AuthorizeView Roles="Administrator">
         <div style="margin: 5px;background-color: rgba(0,0,0,.03);">
@@ -39,6 +40,7 @@ else if (model != null)
             }
         </div>
     </AuthorizeView>
+
 
 
     <FoodLabel nutritionLabel="@model.DisplayNutritionModel" StyleParameters="font-size: 12px; overflow-wrap: anywhere;
@@ -64,7 +66,8 @@ else if (model != null)
     {
         <p style="margin-bottom:0;">Difficulty: @model.Difficulty</p>
     }
-
+    <hr />
+    <IngredientsTag userDefinedIngredients="model.Ingredients"></IngredientsTag>
     <div>
         @if (model.Description != null)
         {
@@ -117,10 +120,7 @@ else if (model != null)
         <ReviewSection RecipeID="@RecipeID" />
 
     </div>
-    @*if (model.DocxFilePath != null)
-        {
-            <div><a href="@model.DocxFilePath" class="btn btn-primary">Download</a></div>
-        }*@
+
 
 }
 else

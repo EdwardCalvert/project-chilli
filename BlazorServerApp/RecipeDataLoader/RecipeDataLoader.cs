@@ -68,6 +68,10 @@ namespace BlazorServerApp.Models
             await _data.SaveData("DELETE FROM EquipmentInRecipe WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
         }
 
+        public async Task<UserDefinedIngredient> GetUserDefinedIngredient(UserDefinedIngredientInRecipe ingredient)
+        {
+            return  OneOrNull<UserDefinedIngredient>(await _data.LoadData<UserDefinedIngredient, dynamic>("SELECT * FROM UserDefinedIngredients WHERE IngredientID = @ingredientID", new { ingredientID = ingredient.IngredientID }, _config.GetConnectionString("recipeDatabase")));
+        }
         private async Task DeleteIngredientInRecipe(uint RecipeID)
         {
             await _data.SaveData("DELETE FROM UserDefinedIngredientsInRecipe WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
@@ -456,6 +460,8 @@ GROUP BY s.RecipeID
         {
             return OneOrNull<RecoveryEmailAddresses>(await _data.LoadData<RecoveryEmailAddresses, dynamic>("SELECT * FROM RecoveryEmailAddress WHERE EmailAddress=@email", new {email=email }, _config.GetConnectionString("recipeDatabase")));
         }
+
+        
 
         /// <summary>
         /// Method that returns the first item in a list- intended for queries where you know there will only be one result. 

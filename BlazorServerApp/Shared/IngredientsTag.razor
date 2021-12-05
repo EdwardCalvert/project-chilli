@@ -1,0 +1,29 @@
+﻿@inject IRecipeDataLoader dataLoader
+<div class="container-fluid" style="padding-left:0;display: flex; flex-direction: row; align-items: flex-start;">
+    <h5>Tags:</h5>
+    @foreach(UserDefinedIngredient.Type flagToCheck in Enum.GetValues(typeof(UserDefinedIngredient.Type)))
+    {
+    if(type.HasFlag(flagToCheck) && flagToCheck != UserDefinedIngredient.Type.None)
+    {
+    <div style="background-color: rgba(0,0,0,.03); margin-bottom:0;margin-left:5px; border-radius:5px;" >@flagToCheck.ToString() <i class="oi oi-tag"> </i></div>
+    }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<UserDefinedIngredientInRecipe> userDefinedIngredients { get; set; }
+
+    UserDefinedIngredient.Type type;
+
+    protected override async Task OnInitializedAsync()
+    {
+        foreach (UserDefinedIngredientInRecipe ingredient in userDefinedIngredients) {
+            UserDefinedIngredient userDefinedIngredients = await dataLoader.GetUserDefinedIngredient(ingredient);
+            type |= userDefinedIngredients.TypeOf;
+
+        }
+        await base.OnInitializedAsync();
+    }
+
+}
