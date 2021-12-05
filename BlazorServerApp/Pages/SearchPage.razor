@@ -1,5 +1,5 @@
 ﻿@page "/search"
-@page "/search/{searchRoute}/{orderByURL}/{sortByURL}"
+@page "/search/{searchRoute}/{orderByURL}/{sortByURL}/{typeURL}"
 @page "/"
 @inject IRecipeDataLoader dataLoader
 @inject NavigationManager NavManager
@@ -35,13 +35,7 @@
         }
     </select>
 </div>
-<MultiSelectDietaryCheckboxes selectedType="@dietaryType"></MultiSelectDietaryCheckboxes>
-<p>@((int)dietaryType)</p>
-
-
-
-
-
+<MultiSelectDietaryCheckboxes @bind-selectedType="@dietaryType"></MultiSelectDietaryCheckboxes>
 @if (showHelpText)
 {
 
@@ -104,51 +98,59 @@
 <ErrorNotification ErrorMessage="An unexpected error occured while connecting to the database." Show="@error"></ErrorNotification>
 @code {
 
-        string searchText { get; set; }
-        List<Recipe> recipes = new List<Recipe>();
+    string searchText { get; set; }
+    List<Recipe> recipes = new List<Recipe>();
 
 
-        SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
-        SearchEnginge.Order order
+    SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
+    SearchEnginge.Order order
     {
-            get
+        get
         {
-                return _oder;
-            }
-            set
-        {
-                _oder = value;
-                ReOrderResults();
-            }
+            return _oder;
         }
-        SearchEnginge.SortBy _sortBy = SearchEnginge.SortBy.Default;
-        SearchEnginge.SortBy sortBy
+        set
+        {
+            _oder = value;
+            ReOrderResults();
+        }
+    }
+    SearchEnginge.SortBy _sortBy = SearchEnginge.SortBy.Default;
+    SearchEnginge.SortBy sortBy
     {
-            get { return _sortBy; }
-            set
+        get { return _sortBy; }
+        set
         {
-                _sortBy = value;
-                ReOrderResults();
-            }
+            _sortBy = value;
+            ReOrderResults();
         }
+    }
 
-        [Parameter]
-        public string searchRoute { get; set; }
+    [Parameter]
+    public string searchRoute { get; set; }
 
-        [Parameter]
-        public string orderByURL { get; set; }
+    [Parameter]
+    public string orderByURL { get; set; }
 
-        [Parameter]
-        public string sortByURL { get; set; }
+    [Parameter]
+    public string sortByURL { get; set; }
+    [Parameter]
+    public string typeURL { get; set; }
 
-        bool showHelpText = false;
-        bool homepage = true;
-        int offset = 0;
-        int resultsPerQuery = 20;
-        bool error = false;
-        bool firstLoad = true;
+    bool showHelpText = false;
+    bool homepage = true;
+    int offset = 0;
+    int resultsPerQuery = 20;
+    bool error = false;
+    bool firstLoad = true;
 
     UserDefinedIngredient.Type dietaryType;
+
+    public async void TypeChanged(UserDefinedIngredient.Type type)
+    {
+        Console.WriteLine(type);
+        // Gets and consume the user name
+    }
 
 
     protected override async Task OnInitializedAsync()
@@ -165,6 +167,7 @@
                     {
                         order = (SearchEnginge.Order)Enum.Parse(typeof(SearchEnginge.Order), orderByURL, true);
                         sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
+                        dietaryType = (UserDefinedIngredient.Type)Enum.Parse(typeof(UserDefinedIngredient.Type), typeURL, true);
                     }
                     // error = false;
                 }
@@ -172,16 +175,20 @@
                 {
                     order = SearchEnginge.Order.Descending;
                     sortBy = SearchEnginge.SortBy.Default;
-                    error = true;
+                    dietaryType = UserDefinedIngredient.AllSelected;
+                    error = true; 
                 }
 
+            }
+            else
+            {
+                dietaryType = UserDefinedIngredient.AllSelected;
             }
 
             await FindRecipes();
             firstLoad = false;
             this.StateHasChanged();
 
-            
         }
     }
 
@@ -211,7 +218,7 @@
 
             else if (searchText.Length > 0)
             {
-                recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText, wordsAPIservice, offset));
+                recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText, wordsAPIservice, offset,dietaryType));
 
                 ReOrderResults();
             }
@@ -264,8 +271,10 @@
 
     private void MovePage()
     {
-        NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}/{HttpUtility.UrlEncode(order.ToString())}/{HttpUtility.UrlEncode(sortBy.ToString())}", forceLoad: true);
-
+        if (searchText != null)
+        {
+            NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}/{HttpUtility.UrlEncode(order.ToString())}/{HttpUtility.UrlEncode(sortBy.ToString())}/{HttpUtility.UrlEncode(((int)dietaryType).ToString())}", forceLoad: true);
+        }
     }
 
     private void ReOrderResults()

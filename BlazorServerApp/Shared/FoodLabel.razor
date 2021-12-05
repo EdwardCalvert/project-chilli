@@ -8,7 +8,6 @@
                 <td class="FoodLabelServingTitle" colspan="6" style="@StyleParameters">Per g serving as per recipe provides</td>
             </tr>
         }
-
         <tr>
             <td rowspan="2" class="FoodLabelTd" style="@StyleParameters"> Energy- @($"{nutritionLabel.Kcal}kcal")</td>
             @foreach (string methodName in nutritionLabel)
@@ -38,16 +37,13 @@
     }
 </div>
 }
-    @code{
-        //Data from https://www.nhs.uk/live-well/eat-well/what-are-reference-intakes-on-food-labels/
+@code{
+    //Data from https://www.nhs.uk/live-well/eat-well/what-are-reference-intakes-on-food-labels/
 
-        [Parameter]
-        public string StyleParameters { get; set; }
-        [Parameter]
-        public bool ShowTitle { get; set; }
-        [Parameter]
-        public DisplayNutritionModel nutritionLabel { get; set; }
-
-
-
-    }
+    [Parameter]
+    public string StyleParameters { get; set; }
+    [Parameter]
+    public bool ShowTitle { get; set; }
+    [Parameter]
+    public DisplayNutritionModel nutritionLabel { get; set; }
+}

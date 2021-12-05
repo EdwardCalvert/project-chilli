@@ -1,7 +1,5 @@
 ﻿@inject IRecipeDataLoader dataLoader
 <div class="ReviewCard">
-
-
     @if (Reviews.Count > 0)
     { <ReviewSummary DisplayReviewModel="Reviews" TitleText="Average review:" />
         @foreach (Review displayReviewModel in Reviews)
@@ -79,8 +77,6 @@
 
     private bool error = false;
     private string errorMessage = "";
-
-
 
     protected override async Task OnInitializedAsync()
     {

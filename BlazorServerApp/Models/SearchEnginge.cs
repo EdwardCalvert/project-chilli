@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BlazorServerApp.HelperMethods;
-using BlazorServerApp.Models;
-using System.Text.RegularExpressions;
-using BlazorServerApp.TextProcessor;
+﻿using BlazorServerApp.TextProcessor;
 using BlazorServerApp.WordsAPI;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BlazorServerApp.Models
 {
     public class SearchEnginge
     {
-       public enum SearchFields //Things that make sense to be looked for in the database
+        public enum SearchFields //Things that make sense to be looked for in the database
         {
             RecipeName,
             Equipment,
@@ -42,31 +37,30 @@ namespace BlazorServerApp.Models
             Descending,
         }
 
-        public static async Task<List<Recipe>> SearchForRecipes(IRecipeDataLoader dataLoader, string searchTerm, IWordsAPIService wordsAPIService, int offset)
+        public static async Task<List<Recipe>> SearchForRecipes(IRecipeDataLoader dataLoader, string searchTerm, IWordsAPIService wordsAPIService, int offset, UserDefinedIngredient.Type type)
         {
             List<Recipe> searchResults = new List<Recipe>();
             List<uint> recipeIDs = new();
             searchTerm = searchTerm.ToLower();
             //TextProcessor.TextProcessor.
-            UserDefinedIngredient.Type  type=UserDefinedIngredient.GetTypeEnum(searchTerm);
-            TextProcessor.TextProcessor textProcessor = new TextProcessor.TextProcessor(new NounExtractor(),wordsAPIService,dataLoader);
+            //UserDefinedIngredient.Type  type=UserDefinedIngredient.GetTypeEnum(searchTerm);
+            TextProcessor.TextProcessor textProcessor = new TextProcessor.TextProcessor(new NounExtractor(), wordsAPIService, dataLoader);
 
-            if( searchTerm.Contains("vegan") )
+            if (searchTerm.Contains("vegan"))
             {
                 type = UserDefinedIngredient.Veganism;
             }
-            else if(searchTerm.Contains("vegetarian"))
+            else if (searchTerm.Contains("vegetarian"))
             {
                 type = UserDefinedIngredient.Vegetarianism;
             }
 
             if (type != UserDefinedIngredient.Type.None)
             {
-                recipeIDs.AddRange(await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset, (ushort)~(ushort)type));
+                recipeIDs.AddRange(await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset, (ushort)type)); //(ushort)~
             }
             else
             {
-
                 List<UserDefinedIngredientInRecipe> ingredientsInRecipes = await textProcessor.GetIngredientsWithUnits(searchTerm, false);
 
                 if (ingredientsInRecipes.Count > 0)
@@ -76,20 +70,15 @@ namespace BlazorServerApp.Models
                         recipeIDs.Add((uint)ingredient.IngredientID);
                     }
                 }
-                recipeIDs.AddRange( await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset));
-
-
+                recipeIDs.AddRange(await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset));
             }
-            
+
             foreach (uint recipeID in recipeIDs)
             {
                 Recipe r = await dataLoader.GetRecipeAndTree(recipeID);
                 searchResults.Add(r);
             }
             return searchResults;
-
         }
-
-       
     }
 }

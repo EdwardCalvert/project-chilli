@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlazorServerApp.proccessService
 {
@@ -14,11 +10,10 @@ namespace BlazorServerApp.proccessService
         private int _maximumQueueSize;
         private int _itemsInQueue;
 
-
         public CircularQueue(int queueSize)
         {
             _maximumQueueSize = queueSize;
-            _queueItems = new T[_maximumQueueSize] ;
+            _queueItems = new T[_maximumQueueSize];
             _front = 0;
             _rear = -1;
             _itemsInQueue = 0;
@@ -26,7 +21,7 @@ namespace BlazorServerApp.proccessService
 
         public void EnqueueItem(T item)
         {
-            if(!HasCapacity())
+            if (!HasCapacity())
             {
                 throw new StackOverflowException();
             }
@@ -40,7 +35,7 @@ namespace BlazorServerApp.proccessService
 
         public T DequeueItem()
         {
-            if(QueueIsEmpty())
+            if (QueueIsEmpty())
             {
                 throw new Exception("No Items in queue");
             }
@@ -50,7 +45,6 @@ namespace BlazorServerApp.proccessService
                 int oldQueuePosition = _front;
                 _front = (_front + 1) % _maximumQueueSize;
                 return _queueItems[oldQueuePosition];
-               
             }
         }
 
@@ -68,13 +62,14 @@ namespace BlazorServerApp.proccessService
 
         public int GetCapacity()
         {
-            return _maximumQueueSize- _itemsInQueue;
+            return _maximumQueueSize - _itemsInQueue;
         }
 
         public int Count()
         {
             return _itemsInQueue;
         }
+
         public bool HasCapacity()
         {
             return _itemsInQueue < _maximumQueueSize;
@@ -93,17 +88,16 @@ namespace BlazorServerApp.proccessService
 
             if (_itemsInQueue == 0)
             {
-                return "Queue is empty"; ;            
+                return "Queue is empty"; ;
             }
             else
             {
                 for (i = _front; j < _itemsInQueue;)
                 {
-                    text +=("\tItem[" + (i + 1) + "]: " + _queueItems[i]);
+                    text += ("\tItem[" + (i + 1) + "]: " + _queueItems[i]);
 
                     i = (i + 1) % _maximumQueueSize;
                     j++;
-
                 }
             }
             return text;

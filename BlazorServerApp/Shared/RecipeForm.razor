@@ -6,17 +6,17 @@
 
 @if (mode == MODES.Create)
 {
-<h3>Paste text and auotmatically insert into the recipe</h3>
-<p>(this will override the current text of the form)</p>
+    <h3>Paste text and auotmatically insert into the recipe</h3>
+    <p>(this will override the current text of the form)</p>
 
-@if (runningPatternRecognition)
-{
-    <LoadingElement></LoadingElement>
-}
-else
-{
-<textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput" readonly="@PreventTextboxEdit"></textarea> 
-}
+    @if (runningPatternRecognition)
+    {
+        <LoadingElement></LoadingElement>
+    }
+    else
+    {
+        <textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput" readonly="@PreventTextboxEdit"></textarea> 
+    }
 }
 
 <ErrorNotification ErrorMessage="@ErrorMessage" Show="@error" />
@@ -57,7 +57,6 @@ else
                                                 <option>@value</option>
                                                 }
                                         </InputSelect>
-
                                         <BlazorServerApp.Blazored_Typeahead.BlazoredTypeahead SearchMethod="dataLoader.FindIngredients"
                                                                                               @bind-Value="copyOfIngredient.IngredientID"
                                                                                               EnableDropDown="true"
@@ -85,8 +84,6 @@ else
                                         <div>
                                             <ValidationMessage For="@(() => copyOfIngredient)" />
                                         </div>
-
-
                                         <div class="FieldLine">
                                             <button type="button" style="margin-right:5px" class="btn btn-danger" @onclick="@(e => DeleteIngredient(i - 1))">✕</button>
                                         </div>
@@ -101,21 +98,18 @@ else
                             {
                                 <p class="alert-danger">Sorry, you can't add any more rows</p>
                                 <ErrorNotification ErrorMessage="@($"You can't add any more rows. Only a dominos pizza needs more than {Recipe.INGREDIENTSCAPACITY} rows! ")" />
-
                             }
                             else
                             {
                                 <div>
                                     <button class="btn btn-primary" type="button" @onclick="IncrementCount">Add Ingredient</button>
-                                </div>}
+                                </div>
+                            }
                         </div>
-
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="EquipmentLable">Equipment used in recipe </label></div>
                         <div class="row row-cols-1">
-
-
                             <BlazorServerApp.Blazored_Typeahead.BlazoredTypeahead SearchMethod="dataLoader.FindEquipmentLike"
                                                                                   @bind-Values="RecipeModel.Equipment"
                                                                                   EnableDropDown="true"
@@ -141,7 +135,6 @@ else
                             <ValidationMessage For="@(() => RecipeModel.Equipment)" />
                         </div>
                     </div>
-
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="MethodLabel">Method* </label></div>
                         <ol>
@@ -182,7 +175,6 @@ else
                             <div class="InputFieldContainer"><InputNumber id="recipeCookingTimeInput" class="TimeInputField" @bind-Value="RecipeModel.CookingTime" /></div>
                             <div class="InputLabelContainer"><p>Minutes</p></div>
                         </div>
-
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipePreparationTimeLabel">Preperation Time </label></div>
@@ -220,7 +212,6 @@ else
                     @if (mode == MODES.Create)
                     {
                         <button type="submit" class="btn btn-primary">Submit</button>
-
                     }
                     else if (mode == MODES.Edit)
                     {
@@ -230,8 +221,6 @@ else
                     {
                         <button type="submit" class="btn btn-primary">Submit &amp; process next </button>
                     }
-
-
                 </EditForm>
             </td>
         </tr>
@@ -264,7 +253,6 @@ else
 
     TextProcessor textProcessor;
 
-
     public enum MODES
     {
         Edit,
@@ -288,7 +276,6 @@ else
     }
 
     private async Task HandleSubmit()
-
     {
         try
         {
@@ -346,8 +333,6 @@ else
 
     private async Task<Equipment> AddEquipmentOnEmptyResult(string searchText)
     {
-
-
         Equipment newEquipment = new Equipment();
         newEquipment.EquipmentName = searchText;
         uint equipmentID = await dataLoader.InsertEquipment(newEquipment);
@@ -367,11 +352,6 @@ else
             RecipeModel = new();
             RecipeModel.InsertEmptyIngredient(3);
             RecipeModel.InsertEmptyMethod(5);
-
-        }
-        else
-        {
-
         }
         return base.OnInitializedAsync();
     }
@@ -391,7 +371,6 @@ else
         if (RecipeModel.Ingredients.Count != Recipe.INGREDIENTSCAPACITY)
         {
             RecipeModel.InsertEmptyIngredient(2);
-
         }
     }
 
@@ -427,7 +406,5 @@ else
                 error = true;
             }
         }
-
-
     }
 }

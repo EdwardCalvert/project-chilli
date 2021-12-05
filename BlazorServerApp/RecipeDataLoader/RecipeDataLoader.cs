@@ -326,25 +326,25 @@ namespace BlazorServerApp.Models
         }
 
         private const string FullTextSearchWithoutLimit = @"SELECT  RecipeID FROM Method
-WHERE MATCH(MethodText) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 1
+WHERE MATCH(MethodText) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
 UNION DISTINCT
 SELECT RecipeID FROM Recipe
 WHERE MATCH(RecipeName) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
 UNION DISTINCT
 SELECT RecipeID FROM Recipe
-WHERE MATCH(Description) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 1
+WHERE MATCH(Description) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
 UNION DISTINCT
 SELECT RecipeID FROM UserDefinedIngredientsInRecipe
 INNER JOIN(
 SELECT IngredientID FROM UserDefinedIngredients
-WHERE MATCH(IngredientName) AGAINST (@searchText IN NATURAL LANGUAGE MODE)> 1
+WHERE MATCH(IngredientName) AGAINST (@searchText IN NATURAL LANGUAGE MODE)> 0
 ) AS T2 ON UserDefinedIngredientsInRecipe.IngredientID = T2.IngredientID
 UNION DISTINCT
 SELECT RecipeID FROM EquipmentInRecipe
 INNER JOIN(
 SELECT EquipmentID
 FROM Equipment
-WHERE MATCH(EquipmentName) AGAINST (@searchText IN NATURAL LANGUAGE MODE)> 1
+WHERE MATCH(EquipmentName) AGAINST (@searchText IN NATURAL LANGUAGE MODE)> 0
 ) AS T2 ON EquipmentInRecipe.EquipmentID = T2.EquipmentID"; //Removed natural expansion  WITH QUERY EXPANSION
 
         private const string QueryLimit = " LIMIT 20 OFFSET 0";

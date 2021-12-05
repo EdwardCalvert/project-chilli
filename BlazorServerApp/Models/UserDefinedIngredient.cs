@@ -24,16 +24,16 @@ namespace BlazorServerApp.Models
             Dairy = 1 << 8,
             Vegan = Vegetables | Fruit | Nuts,
             Vegetarian = Vegan | Dairy | Egg,
-
         }
+
         public const Type AllSelected = Type.Poultry | Type.Meat | Type.Fish | Type.Fruit | Type.Vegetables | Type.Nuts | Type.Milk | Type.Egg | Type.Dairy;
         public const Type Veganism = Type.Vegetables | Type.Fruit | Type.Nuts;
-        public static Dictionary<string, string[]> ComplexTypes = new() { { "Vegan", new string[3] { "Vegetables", "Fruit", "Nuts" } }, { "Vegetarian", new string[7] { "Vegan", "Dairy", "Egg","Vegetables","Fruit","Milk","Nuts" } } };
+        public static Dictionary<string, string[]> ComplexTypes = new() { { "Vegan", new string[3] { "Vegetables", "Fruit", "Nuts" } }, { "Vegetarian", new string[7] { "Vegan", "Dairy", "Egg", "Vegetables", "Fruit", "Milk", "Nuts" } } };
         public const Type Vegetarianism = Veganism | Type.Dairy | Type.Egg;
 
         public static Type GetTypeEnum(TypeOf typeOf)
         {
-            if (typeOf != null)
+            if (typeOf != null && typeOf.typeOf != null)
             {
                 Type type = Type.None;
                 foreach (string s in typeOf.typeOf)

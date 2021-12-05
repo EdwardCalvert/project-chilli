@@ -36,8 +36,6 @@
         {
             <p>No recipes are queued for approval. Enjoy your day.</p>
         }
-
-
     </div>
     <ErrorNotification ErrorMessage="@errorMessage" Show="@error"></ErrorNotification>
 </AuthorizeView>
@@ -46,7 +44,6 @@
         <h1>Sorry, you'll have to login in to view this page.</h1>
     </NotAuthorized>
 </AuthorizeView>
-
 @code {
     int numberOfItemsInitiallyInQueue;
     string documentTextPreview="";
@@ -66,8 +63,7 @@
         try
         {
             await recipeProcessorService.InsertRecipeAndFileToDB(recipeModel, currentMD5Hash);
-
-            FindNextRecipeForProcessing();
+            await FindNextRecipeForProcessing();
             error = false;
         }
         catch(Exception e)
@@ -79,15 +75,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-            try { 
-        numberOfItemsInitiallyInQueue = recipeProcessorService.GetNumberOfItemsInQueue();
-        await FindNextRecipeForProcessing();
+        try { 
+            numberOfItemsInitiallyInQueue = recipeProcessorService.GetNumberOfItemsInQueue();
+            await FindNextRecipeForProcessing();
         }
         catch(Exception e)
         {
             errorMessage = e.Message + " Click the 'clear queue button' to prevent a deadlock";
             error = true;
-            
         }
     }
     public async Task FindNextRecipeForProcessing()
@@ -99,7 +94,6 @@
         currentMD5Hash = recipeProcessorService.PeekNextDocument();
         if (currentMD5Hash !=null)
         {
-
             documentTextPreview = await recipeProcessorService.DocxToText(currentMD5Hash);
 
             undergoingProccessing = true;
@@ -111,17 +105,17 @@
             undergoingProccessing = false;
             await Task.Delay(1);      // changes are flushed again
             this.StateHasChanged();
-
         }
     }
 
     public async void DeleteRecipe()
-        {
-            try { 
-        await recipeProcessorService.DeleteFile(currentMD5Hash);
-        recipeProcessorService.Dequeue();
-        await FindNextRecipeForProcessing();
-        StateHasChanged();
+    {
+        try 
+        { 
+            await recipeProcessorService.DeleteFile(currentMD5Hash);
+            recipeProcessorService.Dequeue();
+            await FindNextRecipeForProcessing();
+            StateHasChanged();
         }
         catch(Exception e)
         {

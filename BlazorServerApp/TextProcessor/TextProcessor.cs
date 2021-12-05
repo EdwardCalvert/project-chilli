@@ -486,7 +486,7 @@ namespace BlazorServerApp.TextProcessor
             {
                 
                 bool insertMade = false;
-                if (typeOf != null && (typeOf.typeOf.Contains("equipment") || typeOf.typeOf.Contains("kitchen appliance") || typeOf.typeOf.Contains("utensil") || typeOf.typeOf.Contains("electronic equipment") || typeOf.typeOf.Contains("mixer")))
+                if (typeOf != null&& typeOf.typeOf != null && (typeOf.typeOf.Contains("equipment") || typeOf.typeOf.Contains("kitchen appliance") || typeOf.typeOf.Contains("utensil") || typeOf.typeOf.Contains("electronic equipment") || typeOf.typeOf.Contains("mixer")))
                 {
                     string noun = typeOf.word;
                     IEnumerable<Equipment> equipment = await _dataLoader.FindEquipmentLike(noun);

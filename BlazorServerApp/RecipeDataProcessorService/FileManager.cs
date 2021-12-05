@@ -16,8 +16,6 @@ namespace BlazorServerApp.proccessService
     {
         private IWebHostEnvironment _environment;
         private IRecipeDataLoader _dataLoader;
-
-
         public FileManager(IWebHostEnvironment Environment, IRecipeDataLoader dataLoader)
         {
             _environment = Environment;
@@ -48,7 +46,6 @@ namespace BlazorServerApp.proccessService
                 await using FileStream fs = new(Path.Combine(path, file.Name), FileMode.Create);
                 await file.OpenReadStream(maxFileSizeInBytes).CopyToAsync(fs);
                 return (1, md5AsHex);
-
             }
             catch (Exception e)
             {

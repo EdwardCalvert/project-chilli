@@ -2,8 +2,6 @@
 @using System.Web;
 @inject IRecipeDataLoader _dataLoader
 @inject NavigationManager navMangaer
-
-
     <AuthorizeView>
         <Authorized>
             <b>Hello, @context.User.Identity.Name!</b>
@@ -36,19 +34,16 @@
             return HttpUtility.UrlEncode(param);
         }
 
-
         private async Task Authenticate()
         {
             try
             {
                 User user = await _dataLoader.GetUserFromDatabase(Username);
-
                 string sha512 = BlazorServerApp.Models.User.CreateSHAHash(Password);
                 if (user != null && user.SHA512 == sha512)
                 {
                     error = false;
                     navMangaer.NavigateTo($"/Login?paramUsername={@encode(@Username)}&paramPassword={@encode(@Password)}", true);
-
                 }
                 else
                 {

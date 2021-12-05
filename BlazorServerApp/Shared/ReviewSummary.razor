@@ -1,11 +1,7 @@
-﻿@if (Models.Review.ReturnStars(DisplayReviewModel) == "")
+﻿@if (Models.Review.ReturnStars(DisplayReviewModel) != "")
 {
-    @*<p>No ratings yet.</p>*@
+    <p>@TitleText @Models.Review.ReturnStars(DisplayReviewModel)</p>
 }
-else
-{
-    <p>@TitleText @Models.Review.ReturnStars(DisplayReviewModel)</p>}
-
 @code {
     [Parameter]
     public List<Review> DisplayReviewModel { get; set; }
