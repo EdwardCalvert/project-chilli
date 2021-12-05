@@ -35,29 +35,12 @@
         }
     </select>
 </div>
-<div style="display:flex;margin:5px;">
-    
-    @foreach (var item in list)
-    {
-    <p style="margin-bottom: 0px;"><input type="checkbox" @bind="item.Selected" @onclick="(()=>handleClick(item))" />&nbsp;@item.Text&nbsp;&nbsp;</p>
-    }
-</div>
+<MultiSelectDietaryCheckboxes selectedType="@dietaryType"></MultiSelectDietaryCheckboxes>
+<p>@((int)dietaryType)</p>
 
-@foreach (var item in list.Where(x => x.Selected))
-{
-    <p>  @item.Text is Selected</p>
-}
-@code {
-    MultiSelectList list = new MultiSelectList(Enum.GetValues(typeof(UserDefinedIngredient.Type)));
 
-    private void handleClick(SelectListItem item)
-    {
-        //Do something crazy
-        Console.WriteLine(item);
-        Console.WriteLine(!item.Selected);
-    }
 
-}
+
 
 @if (showHelpText)
 {
@@ -121,49 +104,51 @@
 <ErrorNotification ErrorMessage="An unexpected error occured while connecting to the database." Show="@error"></ErrorNotification>
 @code {
 
-    string searchText { get; set; }
-    List<Recipe> recipes = new List<Recipe>();
+        string searchText { get; set; }
+        List<Recipe> recipes = new List<Recipe>();
 
 
-    SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
-    SearchEnginge.Order order
+        SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
+        SearchEnginge.Order order
     {
-        get
+            get
         {
-            return _oder;
-        }
-        set
+                return _oder;
+            }
+            set
         {
-            _oder = value;
-            ReOrderResults();
+                _oder = value;
+                ReOrderResults();
+            }
         }
-    }
-    SearchEnginge.SortBy _sortBy = SearchEnginge.SortBy.Default;
-    SearchEnginge.SortBy sortBy
+        SearchEnginge.SortBy _sortBy = SearchEnginge.SortBy.Default;
+        SearchEnginge.SortBy sortBy
     {
-        get { return _sortBy; }
-        set
+            get { return _sortBy; }
+            set
         {
-            _sortBy = value;
-            ReOrderResults();
+                _sortBy = value;
+                ReOrderResults();
+            }
         }
-    }
 
-    [Parameter]
-    public string searchRoute { get; set; }
+        [Parameter]
+        public string searchRoute { get; set; }
 
-    [Parameter]
-    public string orderByURL { get; set; }
+        [Parameter]
+        public string orderByURL { get; set; }
 
-    [Parameter]
-    public string sortByURL { get; set; }
+        [Parameter]
+        public string sortByURL { get; set; }
 
-    bool showHelpText = false;
-    bool homepage = true;
-    int offset = 0;
-    int resultsPerQuery = 20;
-    bool error = false;
-    bool firstLoad = true;
+        bool showHelpText = false;
+        bool homepage = true;
+        int offset = 0;
+        int resultsPerQuery = 20;
+        bool error = false;
+        bool firstLoad = true;
+
+    UserDefinedIngredient.Type dietaryType;
 
 
     protected override async Task OnInitializedAsync()
@@ -181,7 +166,7 @@
                         order = (SearchEnginge.Order)Enum.Parse(typeof(SearchEnginge.Order), orderByURL, true);
                         sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
                     }
-                    error = false;
+                    // error = false;
                 }
                 catch
                 {
@@ -195,6 +180,8 @@
             await FindRecipes();
             firstLoad = false;
             this.StateHasChanged();
+
+            
         }
     }
 
@@ -228,7 +215,7 @@
 
                 ReOrderResults();
             }
-            error = false;
+            //error = false;
         }
         catch
         {
@@ -266,7 +253,8 @@
         try
         {
             await Task.Run(() => GetHomepageRecipes());
-            error = false;
+            //
+            //error = false;
         }
         catch
         {
