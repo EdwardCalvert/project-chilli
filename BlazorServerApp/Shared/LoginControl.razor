@@ -13,20 +13,24 @@
             @if (error) { 
             <p class="alert-danger"> Unable to sign you in.</p> <p><a href="/userStuck/passwordReset">Forgot your password?</a></p>
             }
-            <input type="text"
-                   placeholder="User Name"
-                   @bind="@Username" />
+        <EditForm OnValidSubmit="Authenticate" Context="LoginComponent" Model="loginForm">
+            <DataAnnotationsValidator />
+            <InputText type="text"
+                       placeholder="User Name"
+                       @bind-Value="@loginForm.Username" />
             &nbsp;&nbsp;
-            <input type="password"
+            <InputText type="password"
                    placeholder="Password"
-                   @bind="@Password" />
-            <btn style="margin-left:5px;" class="btn btn-primary" @onclick="@Authenticate">Login</btn>
+                   @bind-Value="@loginForm.Password" />
+            <button type="submit" style="margin-left:5px;" class="btn btn-primary">Login</button>
+
+
+        </EditForm>
         </NotAuthorized>
     </AuthorizeView>
 <ErrorNotification Show="@error" ErrorMessage="Unable to log you in."> </ErrorNotification>
     @code {
-        string Username = "";
-        string Password = "";
+        LoginForm loginForm = new LoginForm();
         bool error = false;
 
         private string encode(string param)
@@ -38,12 +42,12 @@
         {
             try
             {
-                User user = await _dataLoader.GetUserFromDatabase(Username);
-                string sha512 = BlazorServerApp.Models.User.CreateSHAHash(Password);
+                User user = await _dataLoader.GetUserFromDatabase(loginForm.Username);
+                string sha512 = BlazorServerApp.Models.User.CreateSHAHash(loginForm.Password);
                 if (user != null && user.SHA512 == sha512)
                 {
                     error = false;
-                    navMangaer.NavigateTo($"/Login?paramUsername={@encode(@Username)}&paramPassword={@encode(@Password)}", true);
+                    navMangaer.NavigateTo($"/Login?paramUsername={@encode(loginForm.Username)}&paramPassword={@encode(loginForm.Password)}", true);
                 }
                 else
                 {

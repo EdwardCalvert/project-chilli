@@ -15,21 +15,19 @@ namespace BlazorServerApp.DocxReader
 
 
         public string doccumentText = "";
+        public int stepNumber = 1;
 
         public async Task<string> GetTextAsync(string path)
         {
             doccumentText = ""; // Clear text.
-            using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(path, true))
-            {
-                var text = wordDoc.MainDocumentPart.Document.InnerXml;
+            stepNumber = 1;
+            using WordprocessingDocument wordDoc = WordprocessingDocument.Open(path, true);
+            var text = wordDoc.MainDocumentPart.Document.InnerXml;
+            XmlDocument xml = new();
+            xml.LoadXml(text);
+            await Task.Run(() => Traverse(xml.DocumentElement));
 
-                XmlDocument xml = new();
-                xml.LoadXml(text);
-                await Task.Run(()=>Traverse(xml.DocumentElement));
-
-                return doccumentText;
-
-            }
+            return doccumentText;
 
         }
 
@@ -43,9 +41,15 @@ namespace BlazorServerApp.DocxReader
             {
                 doccumentText += "\t";
             }
-            if(node.Name == "w:drawing")//<w:drawing> // do nothing. as this would cause co-ordinates to appear!
+            
+            if(node.Name == "w:numPr") //<w:numId w:val=\"1\" />{
             {
-                //doccumentText += "\t";
+                doccumentText += stepNumber+".\t";
+                stepNumber++;
+            }
+            if (node.Name == "w:drawing")//<w:drawing> // do nothing. as this would cause co-ordinates to appear!
+            {
+                //do nothing.
             }
             else if (node is XmlElement) 
             {

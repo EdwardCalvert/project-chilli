@@ -22,20 +22,19 @@ namespace BlazorServerApp.Models
         [MaxLength(63355,ErrorMessage ="Please shorten the description - too long for database")]
         public string Description { get; set; }
 
-        [Required]
-        [ValidMethod]
+        [ValidateComplexType,Required,ListLengthGreaterThanZero]
         public List<Method> Method { get; set; } = new List<Method>();
 
-        [Required]
+        [ValidateComplexType,Required, ListLengthGreaterThanZero]
         public IList<Equipment> Equipment { get; set; }
 
-        [Range(1, 100)]
+        [Range(1, 100),Required]
         public int Servings { get; set; }
 
-        [Range(1, 1000)]
+        [Range(0, 1000)]
         public int CookingTime { get; set; }
 
-        [Required, Range(1, 1000)]
+        [Required, Range(0, 1000)]
         public int PreperationTime { get; set; }
 
         [Required, ValidMealType]
@@ -55,7 +54,7 @@ namespace BlazorServerApp.Models
             "Light Meal",
         };
 
-        [Required, ValidIngredientsInRecipe]
+        [ValidateComplexType,Required, ListLengthGreaterThanZero]
         public List<UserDefinedIngredientInRecipe> Ingredients { get; set; } = new List<UserDefinedIngredientInRecipe>();
 
         public bool ManualUpload { get; set; }
@@ -82,21 +81,14 @@ namespace BlazorServerApp.Models
             "Fluid Ounces",
             };
 
-        [ValidNutritionalElement]
         public double Kcal { get; set; }
-        [ValidNutritionalElement]
         public double Fat { get; set; }
-        [ValidNutritionalElement]
         public double Saturates { get; set; }
-        [ValidNutritionalElement]
         public double Sugar { get; set; }
-        [ValidNutritionalElement]
         public double Fibre { get; set; }
-        [ValidNutritionalElement]
         public double Carbohydrates { get; set; }
-        [ValidNutritionalElement]
         public double Salt { get; set; }
-        [ValidNutritionalElement]
+        //[ValidNutritionalElement]
         public double Protein { get; set; }
 
         public static Dictionary<string, int> DifficultyEnum = new Dictionary<string, int>()

@@ -15,17 +15,24 @@ namespace BlazorServerApp.Models
 
         public RecipeDataLoader(IDataAccess data, IConfiguration config)
         {
-            _data = data;
-            _config = config;
-            List<string> results =  _data.LoadData<string, dynamic>("select schema_name from information_schema.schemata where schema_name = 'RecipeDatabase';",new { },_config.GetConnectionString("wholeDatabase")).Result;
-            if (results.Count == 0)
+            try
             {
-                Console.WriteLine("Need to create database");
-                CreateDatabase();
+                _data = data;
+                _config = config;
+                List<string> results = _data.LoadData<string, dynamic>("select schema_name from information_schema.schemata where schema_name = 'RecipeDatabase';", new { }, _config.GetConnectionString("wholeDatabase")).Result;
+                if (results.Count == 0)
+                {
+                    Console.WriteLine("Need to create database");
+                    Task.Run(()=>CreateDatabase());
+                }
+                else
+                {
+                    Console.WriteLine("No need to create database");
+                }
             }
-            else
+            catch
             {
-                Console.WriteLine("No need to create database");
+                Console.WriteLine("An error occured while attempting to connect to the database. You may need to start the SQL server, or change the connection string.");
             }
              
         }
@@ -33,12 +40,19 @@ namespace BlazorServerApp.Models
         private async Task CreateDatabase()
         {
             string SQLCreateCommand;
-            using (StreamReader stream = new StreamReader(Path.Combine(Directory.GetCurrentDirectory() ,"RecipeDatabase.sql")))
-            {
-                SQLCreateCommand = stream.ReadToEnd();
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "RecipeDatabase.sql");
+            if (File.Exists(path)) {
+                using (StreamReader stream = new StreamReader(path))
+                {
+                    SQLCreateCommand = stream.ReadToEnd();
+                }
+                await _data.SaveData(SQLCreateCommand, new { }, _config.GetConnectionString("wholeDatabase"));
+                Console.WriteLine("Database created");
             }
-            await _data.SaveData(SQLCreateCommand, new { }, _config.GetConnectionString("wholeDatabase"));
-            Console.WriteLine("Database created");
+            else
+            {
+                Console.WriteLine("Unable to create database: 'RecipeDatabase.sql' no such file exists");
+            }
 
         }
 
@@ -322,14 +336,11 @@ namespace BlazorServerApp.Models
 
         public async Task<List<uint>> GetSearchDatabaseTextFields(string searchText, int offset)
         {
-            return await _data.LoadData<uint, dynamic>(FullTextSearchWithoutLimit + QueryLimit + Terminator, new { searchText = searchText, offset = offset }, _config.GetConnectionString("recipeDatabase"));
+            return await _data.LoadData<uint, dynamic>(RecipeSearch+Union +FullTextSearchWithoutLimit + QueryLimit + Terminator, new { searchText = searchText, offset = offset }, _config.GetConnectionString("recipeDatabase"));
         }
 
         private const string FullTextSearchWithoutLimit = @"SELECT  RecipeID FROM Method
 WHERE MATCH(MethodText) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
-UNION DISTINCT
-SELECT RecipeID FROM Recipe
-WHERE MATCH(RecipeName) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
 UNION DISTINCT
 SELECT RecipeID FROM Recipe
 WHERE MATCH(Description) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
@@ -347,13 +358,18 @@ FROM Equipment
 WHERE MATCH(EquipmentName) AGAINST (@searchText IN NATURAL LANGUAGE MODE)> 0
 ) AS T2 ON EquipmentInRecipe.EquipmentID = T2.EquipmentID"; //Removed natural expansion  WITH QUERY EXPANSION
 
-        private const string QueryLimit = " LIMIT 20 OFFSET 0";
+        private const string RecipeSearch = @"SELECT RecipeID FROM Recipe
+WHERE MATCH(RecipeName) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
+";
+        private const string Union = @" UNION DISTINCT ";
+
+        private const string QueryLimit = " LIMIT 20 OFFSET @offset";
 
         private const string BitwiseDieaterySearch = @"SELECT s.RecipeID
 FROM   UserDefinedIngredientsInRecipe s
-WHERE  s.IngredientID IN (SELECT IngredientID FROM UserDefinedIngredients WHERE TypeOf & @bitPattern = 0) AND s.RecipeID IN (" + FullTextSearchWithoutLimit + @")
+WHERE  s.IngredientID IN (SELECT IngredientID FROM UserDefinedIngredients WHERE TypeOf & @bitPattern = 0 AND TypeOf!=0) AND s.RecipeID IN (" + FullTextSearchWithoutLimit + @")
 GROUP BY s.RecipeID
-" + QueryLimit;
+" + QueryLimit +Terminator;
 
         private const string Terminator = ";";
 

@@ -30,7 +30,7 @@ namespace BlazorServerApp.WordsAPI
         public async Task<TypeOf> CallCachedAPI(string searchTerm)
         {
             searchTerm = searchTerm.ToLower();
-            if (!await _dataLoader.ContainsStopWord(searchTerm))
+            if (!await _dataLoader.ContainsStopWord(searchTerm) && searchTerm.Length>1)
             {
                 List<SearchQuery> queries = await _dataLoader.FindWordsAPISearch(searchTerm); 
                 if (queries.Count == 1)

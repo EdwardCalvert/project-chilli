@@ -63,7 +63,7 @@ namespace BlazorServerApp.TextProcessor
             else if (input.Length >= 20)
                 return 3; //Longer words may have more spelling inaccuracies, but we wouldn't want totally irrevivant results
             else if (input.Length >= 10)
-                return 2; //thiis is the range 5<=input.Length<=10 This may be too high.
+                return 1; //thiis is the range 5<=input.Length<=10 This may be too high.
             else
                 return 1;//thiis is the range 5<=input.Length<=10 This may be too high.
         }
@@ -128,6 +128,7 @@ namespace BlazorServerApp.TextProcessor
 
         private static double ExtractDouble(string input)
         {
+            input = input.Trim();
             if (Regex.IsMatch(input, "[0-9]{1,2} [0-9]{1,2}/[0-9]"))// Matches fractions in the form 1 1/2 etc
             {
                 //then return.
@@ -145,7 +146,7 @@ namespace BlazorServerApp.TextProcessor
             {
                 return double.Parse(input);
             }
-            else if (Regex.IsMatch(input, "[0-9] ?(½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒)"))
+            else if (Regex.IsMatch(input, "[0-9]? ?(½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒)"))
             {
                 int integerComponent = TextProcessor.extractMaximumNumber(input);
                 //Find which fraction was in the input. Find the value of the number. Add
@@ -153,6 +154,7 @@ namespace BlazorServerApp.TextProcessor
                 {
                     if (input.Contains(keyValuePair.Key)) // It has
                     {
+                        Console.WriteLine($"Returning- {integerComponent + keyValuePair.Value}");
                         return integerComponent + keyValuePair.Value;
                     }
                 }
@@ -160,6 +162,7 @@ namespace BlazorServerApp.TextProcessor
             }
             else //I really have no idea what input they attempted, so I will just choose the largest number.
             {
+                Console.WriteLine($"Finding first integer for{input}");
                 return TextProcessor.FindFirstInteger(input);
             }
         }
@@ -273,11 +276,12 @@ namespace BlazorServerApp.TextProcessor
         public const string UNITS = "(((fluid ounce|ounce|oz|kilograms|cup|gram|pint|pound|quart|kg|g|ml|fl\\.|gal\\.|lb\\.|pt|qt\\.)s?)|(" + SPOONS + "))"; //sort by length- ie teaspoons before teaspoon
         public const string NUMBERSWITHFRACTIONS = "([0-9]|½|⅓|⅔|¼|¾|⅕|⅖|⅗|⅘|⅙|⅚|⅐|⅛|⅜|⅝|⅞|⅑|⅒)";
         public const string TIMEWORDS = "(minutes|minute|mins|min|hours|hour|seconds|second|days|day)";
-        public const string INGREDIENTSWITHCOUNTREGEX = BULLETPOINT + "[0-9]{0,3} ?" + NUMBERSWITHFRACTIONS + "(\\.|\\/| |-)?[0-9]{0,6} ?" + UNITS + " [^\\.\\;\n\t]{3,200}";
+        public const string INGREDIENTSWITHCOUNTREGEX = BULLETPOINT + "[0-9]{0,3} ?" + NUMBERSWITHFRACTIONS + "(\\.|\\/| |-)?[0-9]{0,6} ?" + UNITS + " ([^\\.\\;\n\t](?!(and|or))){3,200}";
         public const string INGREDIENTSWITHOUTUNITREGEX = BULLETPOINT + "[1-9][0-9]? ((?!" + TIMEWORDS + ")[A-z]| |,|\\([^\r\t\\(\\)\n]{2,100}\\)|-){3,150}[a-z]";
         public const string UNITSFROMTEXT = "(?<=" + NUMBERSWITHFRACTIONS + ") ?" + UNITS + " ";
+        public const string STOPWORDLOOKBEHIND = "(?!(and|or))";
         public const string BULLETPOINT = "(•\t)?";
-        public const string METHODREGEX = "[1-9][0-9]{0,3}\\.(\t| )[^\t\n\r]{10,500}";
+        public const string METHODREGEX = @"[1-9][0-9]{0,3}\.(\t| ){0,4}[^\t\n\r]{10,500}";
         public const string SERVINGREGEX = "((serves|makes) ?[1-9][0-9]? ?(to|-)? ?[1-9]?[0-9]?)|([1-9][0-9]? ?(to|-)? ?[1-9]?[0-9]? ?(servings|serving|portions|portion))";
 
         public const string TIMEREGEX = "([1-9][0-9]?( (to|-|—) ))?[1-9][0-9]? " + TIMEWORDS;
@@ -301,7 +305,7 @@ namespace BlazorServerApp.TextProcessor
             foreach (Match match in methodMatchCollection)
             {
                 Method method = new Method();
-                method.MethodText = Regex.Replace(match.Value, "[1-9][0-9]{0,3}\\.(\t| )", "");
+                method.MethodText = Regex.Replace(match.Value, @"[1-9][0-9]{0,3}\.(\t| )", "").Trim();
                 methods.Add(method);
             }
             return methods;
@@ -316,6 +320,7 @@ namespace BlazorServerApp.TextProcessor
             var bag = new ConcurrentBag<object>();
             var tasks = ingredientsWithUnitsRegex.Select(async match =>
             {
+                Console.WriteLine($"Ingredient: {match.Value}");
                 // some pre stuff
                 string unit = "";
                 string ingredientName = match.Value;
@@ -330,8 +335,10 @@ namespace BlazorServerApp.TextProcessor
                     unit = "x";
                 }
                 ingredientName = Regex.Replace(ingredientName, UNITSFROMTEXT, "");
+                ingredientName = Regex.Replace(ingredientName, NUMBERSWITHFRACTIONS, "");
+                Console.WriteLine(ingredientName);
                 double quantity = TextProcessor.ExtractDouble(match.Value);
-                ingredientName = ingredientName.Replace(quantity.ToString(), "").Trim();
+                //ingredientName = ingredientName.Replace(quantity.ToString(), "").Trim();
 
                 uint? ingredientID = await GetIngredientID(ingredientName, insertIngredientOnEmptyResult);
                 if (ingredientID != null)
@@ -408,7 +415,7 @@ namespace BlazorServerApp.TextProcessor
         {
             foreach(string line in input.Split("\n"))
             {
-                if (line != null)
+                if (line != null && line.Length>2)
                     return line;
             }
             return input.Split("\n")[0];
@@ -424,19 +431,9 @@ namespace BlazorServerApp.TextProcessor
             string description;
             Recipe newRecipe = new Recipe();
             newRecipe.RecipeName = GetTitle(inputText);
-            description = inputText;
+            description = inputText.Replace(newRecipe.RecipeName,"");
             //see https://regexr.com/69vg0
-
-            newRecipe.Servings = await Task.Run(() => GetServingCount(inputText));
-
-            newRecipe.Method = await Task.Run(() => GetMethods(inputText));
-
-            newRecipe.Description = await Task.Run(() => CreateDescription(inputText));
-
-            newRecipe.Difficulty = await Task.Run(() => GetDifficulty(newRecipe.Method));
-            Task<List<UserDefinedIngredientInRecipe>> getIngredientsWithUnits =  Task.Run(() => GetIngredientsWithUnits(inputText, true));
-            Task<List<UserDefinedIngredientInRecipe>> getIngredientsWithoutUnits = Task.Run(() => GetIngredientsWithoutUnit(newRecipe.Description, true));
-
+            newRecipe.Description = await Task.Run(() => CreateDescription(description));
             string possibleNouns = newRecipe.Description;
             foreach (Method s in newRecipe.Method)
             {
@@ -444,12 +441,20 @@ namespace BlazorServerApp.TextProcessor
             }
 
             //Dependent on description and method being complete!
-            newRecipe.Equipment = await Task.Run(() => GetEquipmentID(possibleNouns));
+            Task<List<Equipment>> getEquipment = Task.Run(() => GetEquipmentID(possibleNouns));
+
+            newRecipe.Servings = await Task.Run(() => GetServingCount(inputText));
+
+            newRecipe.Method = await Task.Run(() => GetMethods(inputText));
+
+            newRecipe.Difficulty = await Task.Run(() => GetDifficulty(newRecipe.Method));
+            Task<List<UserDefinedIngredientInRecipe>> getIngredientsWithUnits =  Task.Run(() => GetIngredientsWithUnits(inputText, true));
+            Task<List<UserDefinedIngredientInRecipe>> getIngredientsWithoutUnits = Task.Run(() => GetIngredientsWithoutUnit(newRecipe.Description, true));
+
             await Task.Delay(10);
-            getIngredientsWithoutUnits.Wait();
-            getIngredientsWithUnits.Wait();
-            newRecipe.Ingredients.AddRange(getIngredientsWithoutUnits.Result);
-            newRecipe.Ingredients.AddRange(getIngredientsWithUnits.Result);
+            newRecipe.Ingredients.AddRange(await getIngredientsWithoutUnits);
+            newRecipe.Ingredients.AddRange(await getIngredientsWithUnits);
+            newRecipe.Equipment = await getEquipment ;
             Console.WriteLine("Processing finished");
 
             return newRecipe;
@@ -493,7 +498,7 @@ namespace BlazorServerApp.TextProcessor
                     if (equipment.Any())
                     {
                         foreach (Equipment equipment1 in equipment)
-                            if (TextProcessor.LevenshteinDistance(noun, equipment1.EquipmentName) <= TextProcessor.CalculateLevenshteinThreshold(noun) && !insertMade)
+                            if ( noun == equipment1.EquipmentName) /*TextProcessor.LevenshteinDistance(noun, equipment1.EquipmentName) <= TextProcessor.CalculateLevenshteinThreshold(noun) && !insertMade)*/
                             {
                                 if (!DoesEquipmentAreadyHaveID(EquipmentIDs, equipment1.EquipmentName))
                                 {
@@ -527,7 +532,7 @@ namespace BlazorServerApp.TextProcessor
             {
                 foreach (UserDefinedIngredient userDefinedIngredient in ingredientsInDB)
                 {
-                    if (TextProcessor.LevenshteinDistance(ingredientName, userDefinedIngredient.IngredientName) <= TextProcessor.CalculateLevenshteinThreshold(ingredientName)) // i.e. only find a ingredient that is very similar to the cureent ingedient. The threshold is designed to prevent erreoneous results at the low end e.g. eggs => egg etc, but having a small ammount of flexibility at the top end.
+                    if (ingredientName == userDefinedIngredient.IngredientName)/*TextProcessor.LevenshteinDistance(ingredientName, userDefinedIngredient.IngredientName) <= TextProcessor.CalculateLevenshteinThreshold(ingredientName))*/ // i.e. only find a ingredient that is very similar to the cureent ingedient. The threshold is designed to prevent erreoneous results at the low end e.g. eggs => egg etc, but having a small ammount of flexibility at the top end.
                     {
                         return userDefinedIngredient.IngredientID;
                     }

@@ -1,10 +1,32 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace BlazorServerApp.Models
 {
-    [AttributeUsage(AttributeTargets.Property |
+    public sealed class ListLengthGreaterThanZero : ValidationAttribute
+    {
+        protected override ValidationResult IsValid(object v, ValidationContext validationContext)
+        {
+            List<object> list = new List<object>();
+            IList value = v as IList;
+
+            if (value != null && value.GetType().IsGenericType)
+            {
+                list = value.Cast<object>().ToList();
+                if(list.Count>0)
+                {
+                    return ValidationResult.Success;
+                }
+                
+            }
+            return new ValidationResult($"{validationContext.DisplayName} must have more items than 0");
+        }
+    }
+
+        [AttributeUsage(AttributeTargets.Property |
 AttributeTargets.Field, AllowMultiple = true)]
     public sealed class ValidIngredientsInRecipe : ValidationAttribute
     {
@@ -45,7 +67,7 @@ AttributeTargets.Field, AllowMultiple = true)]
             }
             else
             {
-                return new ValidationResult("Ingredient is required");
+                return new ValidationResult("Nutritional element is required");
             }
         }
 
@@ -69,7 +91,7 @@ AttributeTargets.Field, AllowMultiple = true)]
             }
             else
             {
-                return new ValidationResult("Ingredient is required");
+                return new ValidationResult("Difficulty is required");
             }
         }
 

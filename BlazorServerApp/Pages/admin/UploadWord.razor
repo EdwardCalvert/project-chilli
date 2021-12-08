@@ -10,7 +10,6 @@
 
 <AuthorizeView Roles="Administrator">
     <h3>Upload Word Documents in Bulk.</h3>
-
     <p>
         <label>
             Upload up to @maxAllowedFiles @(maxAllowedFiles == 1 ? "Word document" : "Word documents (.docx)") to a maximum document size of @(maxFileSize/1000) Kilobytes:
@@ -50,6 +49,7 @@
         bool filesAreSmallEnough = true;
         foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
         {
+            Console.WriteLine($"Adding {file.Name}");
             if (file.Size < recipeProcessorService.MaximumSingleFileSizeInBytes)
             {
                 if (file.Name.EndsWith(".docx") && file.ContentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document")

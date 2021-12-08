@@ -25,7 +25,7 @@
         <tr>
             <td colspan="2">
                 <EditForm Model="@RecipeModel" OnValidSubmit="@HandleSubmit" Context="RecipeForm">
-                    <DataAnnotationsValidator />
+                    <ObjectGraphDataAnnotationsValidator />
 
                     <div class="FieldLine">
                         <div class="FieldHeader">
@@ -62,7 +62,7 @@
                                                                                               EnableDropDown="true"
                                                                                               MinimumLength="3"
                                                                                               ConvertMethod="ConvertIngredientToID"
-                                                                                              MaximumSuggestions="20"
+                                                                                              MaximumSuggestions="5"
                                                                                               Disabled="false"
                                                                                               AddItemOnEmptyResultMethod="ItemAddedMethod"
                                                                                               placeholder="Search by ingredient name..."
@@ -81,9 +81,8 @@
                                                 @ingredient.IngredientName
                                             </ResultTemplate>
                                         </BlazorServerApp.Blazored_Typeahead.BlazoredTypeahead>
-                                        <div>
-                                            <ValidationMessage For="@(() => copyOfIngredient)" />
-                                        </div>
+                                        <ValidationMessage For="@(() => copyOfIngredient)" />
+                                        <ValidationMessage For="() =>RecipeModel.Ingredients" />
                                         <div class="FieldLine">
                                             <button type="button" style="margin-right:5px" class="btn btn-danger" @onclick="@(e => DeleteIngredient(i - 1))">✕</button>
                                         </div>
@@ -114,7 +113,7 @@
                                                                                   @bind-Values="RecipeModel.Equipment"
                                                                                   EnableDropDown="true"
                                                                                   MinimumLength="3"
-                                                                                  MaximumSuggestions="100"
+                                                                                  MaximumSuggestions="5"
                                                                                   AddItemOnEmptyResultMethod="AddEquipmentOnEmptyResult"
                                                                                   placeholder="Search by equipment name...">
                                 <SelectedTemplate Context="equipment">

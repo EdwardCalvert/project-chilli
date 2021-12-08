@@ -5,9 +5,16 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Timers;
 using BlazorServerApp.DocxReader;
+using BlazorServerApp.TextProcessor;
+using System.Collections.Concurrent;
 
 namespace BlazorServerApp.proccessService
 {
+    public struct preProcessingContainer
+    {
+        public Task<Recipe> Recipe;
+        public string DoccumentText;
+    }
     public class RecipeProcessorService : IRecipeProcessorService
     {
         public const int maxiumumCapacity = 500;
@@ -15,12 +22,15 @@ namespace BlazorServerApp.proccessService
         private readonly IFileManger _fileManager;
         private readonly IRecipeDataLoader _recipeDataLoader;
         private IDocxReader _docxReader;
+        private ConcurrentDictionary<string, preProcessingContainer> preProcessRecipes = new();
+        private ITextProcessor _textProcessor;
 
-        public RecipeProcessorService(IFileManger fileManger, IRecipeDataLoader recipeDataLoader,IDocxReader docxReader)
+        public RecipeProcessorService(IFileManger fileManger, IRecipeDataLoader recipeDataLoader,IDocxReader docxReader,ITextProcessor text)
         {
             _fileManager = fileManger;
             _recipeDataLoader = recipeDataLoader;
             _docxReader = docxReader;
+            _textProcessor = text;
         }
 
         
@@ -46,6 +56,7 @@ namespace BlazorServerApp.proccessService
             {
                 resultCode.AddIBrowserFiles(670, validFiles);
             }
+            Task.Run(() => PreProcessRecipes()); //Expected result - want this to be done in background!
             return resultCode;
         }
 
@@ -59,39 +70,50 @@ namespace BlazorServerApp.proccessService
             return _recipesToProcess.GetCapacity();
         }
 
-        private async Task SortOutFiles()
+        public async Task PreProcessRecipes()
         {
-            if (!_recipesToProcess.QueueIsEmpty())
+            Console.WriteLine("Pre-processing started ....");
+            if(GetNumberOfItemsInQueue() > 0)
             {
-                string MD5ToProcess = _recipesToProcess.DequeueItem();
-
-                Recipe recipe = new Recipe();
-                recipe.RecipeName = "Demo recipe for testing";
-                recipe.Description = "this was created to show the result of the Processing service";
-                recipe.MealType = "Service test";
-                uint recipeID = await _recipeDataLoader.InsertRecipeAndRelatedFields(recipe);
-
-                FileManagerModel model = new FileManagerModel();
-                model.FileID = MD5ToProcess;
-                model.DateUploaded = DateTime.Now;
-                model.NumberOfViews = 0;
-                model.RecipeID = recipeID;
+                foreach(string MD5 in _recipesToProcess.GetQueueAsList())
+                {
+                    if (!preProcessRecipes.ContainsKey(MD5))
+                    {
+                        preProcessingContainer container = new();
+                        container.DoccumentText = await DocxToText(MD5);
+                        container.Recipe  =  _textProcessor.CreateRecipe(container.DoccumentText);
+                        preProcessRecipes.TryAdd(MD5, container);
+                        Task.Run(() => container.Recipe);
+                        //await Task.Delay(10);
+                    }
+                }
             }
         }
+
 
         public int GetNumberOfItemsInQueue()
         {
             return _recipesToProcess.Count();
         }
 
-        public string PeekNextDocument()
+        public async Task<ProcessorResult> PeekNextRecipe()
         {
             string nextItem = _recipesToProcess.PeekItem();
-            if (nextItem == default(string))
-            {
-                return null;
+            if (nextItem != default(string)) {
+                if (preProcessRecipes.ContainsKey(nextItem))
+                {
+                    preProcessingContainer container = preProcessRecipes[nextItem];
+                    Console.WriteLine("Contains key");
+                    return new ProcessorResult(await container.Recipe, nextItem,container.DoccumentText); ;
+                }
+                else
+                {
+                    Console.WriteLine($"No key found, {nextItem}, {preProcessRecipes}");
+                    string documentAsText = await DocxToText(nextItem);
+                    return new ProcessorResult(await  _textProcessor.CreateRecipe(documentAsText),nextItem,documentAsText);
+                }
             }
-            return nextItem;
+            return new ProcessorResult(null,null,null);
         }
 
         public async Task<string> DocxToText(string MD5Hash)
@@ -106,7 +128,15 @@ namespace BlazorServerApp.proccessService
 
         public void Dequeue()
         {
-            _recipesToProcess.DequeueItem();
+            string MD5 = _recipesToProcess.DequeueItem();
+            if (preProcessRecipes.ContainsKey(MD5))
+            {
+                preProcessingContainer preProcessingContainer = new preProcessingContainer();
+                if(preProcessRecipes.TryGetValue(MD5,out preProcessingContainer)){
+                    preProcessRecipes.TryRemove(MD5, out preProcessingContainer);
+                }
+                
+            }
         }
 
         public async Task InsertRecipeAndFileToDB(Recipe recipe, string MD5)
@@ -137,6 +167,22 @@ namespace BlazorServerApp.proccessService
         }
     }
 
+    public class ProcessorResult
+    {
+        public ProcessorResult()
+        {
+
+        }
+        public ProcessorResult(Recipe recipe, string md5, string doccumentText)
+        {
+            MD5 = md5;
+            Recipe = recipe;
+            DocumentText = doccumentText;
+        }
+        public Recipe Recipe { get; set; }
+        public string MD5 { get; set; }
+        public string DocumentText { get; set; }
+    }
     public interface IRecipeProcessorService
     {
         public int GetCurrentQueueCapacity();
@@ -145,9 +191,10 @@ namespace BlazorServerApp.proccessService
 
         public int MaximumSingleFileSizeInBytes { get; }
         public bool FilesAreQueued();
-        public string PeekNextDocument();
+        //public string PeekNextDocument();
         public int GetNumberOfItemsInQueue();
-        public Task<string> DocxToText(string MD5Hash);
+        //public Task<string> DocxToText(string MD5Hash);
+        public  Task<ProcessorResult> PeekNextRecipe();
         public Task DeleteFile(string MD5Hash);
         public void Dequeue();
         public  Task InsertRecipeAndFileToDB(Recipe recipe, string MD5);

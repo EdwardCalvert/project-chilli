@@ -144,21 +144,13 @@
     bool error = false;
     bool firstLoad = true;
 
-    UserDefinedIngredient.Type dietaryType;
-
-    public async void TypeChanged(UserDefinedIngredient.Type type)
-    {
-        Console.WriteLine(type);
-        // Gets and consume the user name
-    }
-
+    UserDefinedIngredient.Type dietaryType = UserDefinedIngredient.AllSelected;
 
     protected override async Task OnInitializedAsync()
     {
         if (firstLoad)
         {
             homepage = !NavManager.ToBaseRelativePath(NavManager.Uri).Contains("search");
-
             if (!homepage)
             {
                 try
@@ -169,26 +161,17 @@
                         sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
                         dietaryType = (UserDefinedIngredient.Type)Enum.Parse(typeof(UserDefinedIngredient.Type), typeURL, true);
                     }
-                    // error = false;
                 }
                 catch
                 {
                     order = SearchEnginge.Order.Descending;
                     sortBy = SearchEnginge.SortBy.Default;
                     dietaryType = UserDefinedIngredient.AllSelected;
-                    error = true; 
+                    error = true;
                 }
-
             }
-            else
-            {
-                dietaryType = UserDefinedIngredient.AllSelected;
-            }
-
             await FindRecipes();
             firstLoad = false;
-            this.StateHasChanged();
-
         }
     }
 
@@ -200,7 +183,6 @@
             Console.WriteLine(irration);
             vs.Add(irration.ToString());
         }
-
         return await Task.FromResult(vs);
     }
 
@@ -209,20 +191,15 @@
         try
         {
             searchText = HttpUtility.UrlDecode(searchRoute);
-
             if (searchText == null)
             {
                 await GetHomepageRecipes();
-
             }
-
             else if (searchText.Length > 0)
             {
                 recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText, wordsAPIservice, offset,dietaryType));
-
                 ReOrderResults();
             }
-            //error = false;
         }
         catch
         {
@@ -246,13 +223,11 @@
 
     private async Task GetHomepageRecipes()
     {
-
         List<Recipe> resultsFromDB = await dataLoader.GetHomepageRecipes(offset);
         offset += resultsFromDB.Count;
         recipes.AddRange(resultsFromDB);
         ReOrderResults();
         error = false;
-
     }
 
     private async Task LoadMoreRecipesOnRequest()
@@ -260,8 +235,6 @@
         try
         {
             await Task.Run(() => GetHomepageRecipes());
-            //
-            //error = false;
         }
         catch
         {

@@ -16,14 +16,16 @@ using BlazorServerApp.RecipeDataProcessorService;
 using System;
 using Microsoft.Extensions.Options;
 using BlazorServerApp.STMPMailer;
-
+using System.IO;
 namespace BlazorServerApp
 {
     public class Startup
     {
+        private readonly string _modelPath;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            _modelPath = GetAbsolutePath("MLModel.zip");
         }
 
         public IConfiguration Configuration { get; }
@@ -59,6 +61,8 @@ namespace BlazorServerApp
             services.AddTransient<ITextProcessor, TextProcessor.TextProcessor>();
             services.AddSingleton<IDietaryProcessor, DietaryProcessor>();
             services.AddTransient<IEmailSender, EmailSender>();
+        //    services.AddPredictionEnginePool<ModelInput, ModelOutput>()
+        //.FromFile(_modelPath);
             services.AddHttpClient();
             // ******
             // BLAZOR COOKIE Auth Code (begin)
@@ -105,6 +109,14 @@ namespace BlazorServerApp
             });
 
 
+        }
+        public static string GetAbsolutePath(string relativePath)
+        {
+            FileInfo _dataRoot = new FileInfo(typeof(Program).Assembly.Location);
+            string assemblyFolderPath = _dataRoot.Directory.FullName;
+
+            string fullPath = Path.Combine(assemblyFolderPath, relativePath);
+            return fullPath;
         }
     }
 

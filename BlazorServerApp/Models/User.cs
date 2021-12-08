@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BlazorServerApp.Models
 {
@@ -33,6 +34,11 @@ namespace BlazorServerApp.Models
         public string SqlUpdateStatement()
         {
             return "UPDATE Users SET Role=@role, SHA512 = @SHA512 WHERE UserName = @UserName";
+        }
+
+        public static List<string> GetCurrentRoles()
+        {
+            return new List<string>() { "Administrator" };
         }
     }
 }

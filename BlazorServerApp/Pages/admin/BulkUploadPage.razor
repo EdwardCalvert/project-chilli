@@ -7,7 +7,6 @@
 <AuthorizeView Roles="Administrator">
     <div style="max-width: 100%!important;width: 100%!important;">
         <h3>BulkUploadPage</h3>
-
         @if (recipeProcessorService.FilesAreQueued())
         {
             @if (undergoingProccessing && recipeModel != null)
@@ -28,7 +27,10 @@
                     </div>
                 </div>
             }
-            @*<ProgressBar Percent="@(((recipeProcessorService.GetNumberOfItemsInQueue()-numberOfItemsInitiallyInQueue)/numberOfItemsInitiallyInQueue)*100)"></ProgressBar>*@
+            @if (numberOfItemsInitiallyInQueue != 0) //Prevent divide by 0
+            {
+            <ProgressBar Percent="@(((recipeProcessorService.GetNumberOfItemsInQueue() - numberOfItemsInitiallyInQueue) / numberOfItemsInitiallyInQueue) * 100)"></ProgressBar>
+            }
             <btn class="btn btn-danger" @onclick="(()=>DeleteRecipe())">Delete</btn>
             <btn class="btn btn-danger" @onclick="(()=>ClearQueue())">Delete all files queued for processing</btn>
         }
@@ -54,9 +56,9 @@
     Recipe recipeModel = new();
 
     private void ClearQueue()
-        {
-            recipeProcessorService.Clear();
-        }
+    {
+        recipeProcessorService.Clear();
+    }
 
     private async Task SubmitRecipe()
     {
@@ -75,8 +77,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        try { 
-            numberOfItemsInitiallyInQueue = recipeProcessorService.GetNumberOfItemsInQueue();
+        try {
+            if (numberOfItemsInitiallyInQueue == 0)
+            {
+                numberOfItemsInitiallyInQueue = recipeProcessorService.GetNumberOfItemsInQueue();
+            }
             await FindNextRecipeForProcessing();
         }
         catch(Exception e)
@@ -91,27 +96,32 @@
         {
             recipeProcessorService.Dequeue();
         }
-        currentMD5Hash = recipeProcessorService.PeekNextDocument();
-        if (currentMD5Hash !=null)
-        {
-            documentTextPreview = await recipeProcessorService.DocxToText(currentMD5Hash);
+        undergoingProccessing = true;
+        this.StateHasChanged();
+        ProcessorResult result = await recipeProcessorService.PeekNextRecipe();
+        currentMD5Hash = result.MD5;
+        documentTextPreview = result.DocumentText;
+        recipeModel = result.Recipe;
+        await Task.Delay(2);
+        undergoingProccessing = false;
+        this.StateHasChanged();
+        //if (currentMD5Hash !=null)
+        //{
+        //    //documentTextPreview = await recipeProcessorService.DocxToText(currentMD5Hash);
+        //    
+        //    
+        //    await Task.Delay(1);
 
-            undergoingProccessing = true;
-            this.StateHasChanged();
-            await Task.Delay(1);
-
-            recipeModel = await textProcessor.CreateRecipe(documentTextPreview);
-
-            undergoingProccessing = false;
-            await Task.Delay(1);      // changes are flushed again
-            this.StateHasChanged();
-        }
+        //    undergoingProccessing = false;
+        //    await Task.Delay(1);      // changes are flushed again
+        //    
+        //}
     }
 
     public async void DeleteRecipe()
     {
-        try 
-        { 
+        try
+        {
             await recipeProcessorService.DeleteFile(currentMD5Hash);
             recipeProcessorService.Dequeue();
             await FindNextRecipeForProcessing();

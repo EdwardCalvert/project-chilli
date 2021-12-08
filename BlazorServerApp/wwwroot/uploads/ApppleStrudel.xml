@@ -1,0 +1,646 @@
+"<w:body xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\">
+	<w:p w:rsidR=\"00A96FE2\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:b />
+				<w:sz w:val=\"28\" />
+				<w:szCs w:val=\"28\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:b />
+				<w:sz w:val=\"28\" />
+				<w:szCs w:val=\"28\" />
+			</w:rPr>
+			<w:t>APPLE AND PEAR STRUDEL</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:b />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:b />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>Ingredients</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>175g cooking apples</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>175g pears</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\">2 </w:t>
+		</w:r>
+		<w:proofErr w:type=\"spellStart\" />
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>tbsp</w:t>
+		</w:r>
+		<w:proofErr w:type=\"spellEnd\" />
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\"> lemon juice</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>75g caster sugar</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>50g sultanas</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>50g currants</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>2 slices of bread</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\">1 </w:t>
+		</w:r>
+		<w:proofErr w:type=\"spellStart\" />
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>tsp</w:t>
+		</w:r>
+		<w:proofErr w:type=\"spellEnd\" />
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\"> cinnamon</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\">1 </w:t>
+		</w:r>
+		<w:proofErr w:type=\"spellStart\" />
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>tsp</w:t>
+		</w:r>
+		<w:proofErr w:type=\"spellEnd\" />
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\"> mixed spice</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>1 pack of filo pastry</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>75g butter</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\">1 </w:t>
+		</w:r>
+		<w:proofErr w:type=\"spellStart\" />
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>tbsp</w:t>
+		</w:r>
+		<w:proofErr w:type=\"spellEnd\" />
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\"> icing sugar</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidRPr=\"005D7A51\" w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+	</w:p>
+	<w:p w:rsidRPr=\"005D7A51\" w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:b />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:b />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>Method</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:pStyle w:val=\"ListParagraph\" />
+			<w:numPr>
+				<w:ilvl w:val=\"0\" />
+				<w:numId w:val=\"1\" />
+			</w:numPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>Turn on the oven, 190°C or gas mark 5.</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidRPr=\"005D7A51\" w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:pStyle w:val=\"ListParagraph\" />
+			<w:numPr>
+				<w:ilvl w:val=\"0\" />
+				<w:numId w:val=\"1\" />
+			</w:numPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>Make the bread into crumbs using a food processor.</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:pStyle w:val=\"ListParagraph\" />
+			<w:numPr>
+				<w:ilvl w:val=\"0\" />
+				<w:numId w:val=\"1\" />
+			</w:numPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>Peel &amp; core the apples and pears and then grate in a food processor.</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:pStyle w:val=\"ListParagraph\" />
+			<w:numPr>
+				<w:ilvl w:val=\"0\" />
+				<w:numId w:val=\"1\" />
+			</w:numPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>Mix together the apple &amp; pear and lemon juice in a bowl.  Mix in the breadcrumbs, dried fruit, sugar and spices.</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:pStyle w:val=\"ListParagraph\" />
+			<w:numPr>
+				<w:ilvl w:val=\"0\" />
+				<w:numId w:val=\"1\" />
+			</w:numPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>Melt the butter in a small saucepan or microwave.</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"00864BC0\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"005D7A51\">
+		<w:pPr>
+			<w:pStyle w:val=\"ListParagraph\" />
+			<w:numPr>
+				<w:ilvl w:val=\"0\" />
+				<w:numId w:val=\"1\" />
+			</w:numPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>Lay the sheets of filo pastry on top of each other, brushing with melted butter between each sheet.</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"00864BC0\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"00864BC0\">
+		<w:pPr>
+			<w:pStyle w:val=\"ListParagraph\" />
+			<w:numPr>
+				<w:ilvl w:val=\"0\" />
+				<w:numId w:val=\"1\" />
+			</w:numPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>Spread the filling over ¾ of the pastry, then roll up to form a sausage shape.</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"00864BC0\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"00864BC0\">
+		<w:pPr>
+			<w:pStyle w:val=\"ListParagraph\" />
+			<w:numPr>
+				<w:ilvl w:val=\"0\" />
+				<w:numId w:val=\"1\" />
+			</w:numPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>Transfer the strudel to a greased baking tray, and brush the outside of it with melted butter.</w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"00864BC0\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"00864BC0\">
+		<w:pPr>
+			<w:pStyle w:val=\"ListParagraph\" />
+			<w:numPr>
+				<w:ilvl w:val=\"0\" />
+				<w:numId w:val=\"1\" />
+			</w:numPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\">Bake in the oven for 20-30 minutes until golden brown.  </w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"00864BC0\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"00864BC0\">
+		<w:pPr>
+			<w:pStyle w:val=\"ListParagraph\" />
+			<w:numPr>
+				<w:ilvl w:val=\"0\" />
+				<w:numId w:val=\"1\" />
+			</w:numPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\">Once slightly cool sprinkle with icing sugar, or make glacé icing and drizzle this over the top.  </w:t>
+		</w:r>
+	</w:p>
+	<w:p w:rsidR=\"005D7A51\" w:rsidP=\"005D7A51\" w:rsidRDefault=\"00864BC0\">
+		<w:pPr>
+			<w:pStyle w:val=\"ListParagraph\" />
+			<w:numPr>
+				<w:ilvl w:val=\"0\" />
+				<w:numId w:val=\"1\" />
+			</w:numPr>
+			<w:spacing w:after=\"0\" />
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+		</w:pPr>
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t>Serve warm or cold.</w:t>
+		</w:r>
+		<w:bookmarkStart w:name=\"_GoBack\" w:id=\"0\" />
+		<w:bookmarkEnd w:id=\"0\" />
+		<w:r>
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\"> </w:t>
+		</w:r>
+		<w:r w:rsidR=\"005D7A51\">
+			<w:rPr>
+				<w:rFonts w:ascii=\"Comic Sans MS\" w:hAnsi=\"Comic Sans MS\" />
+				<w:sz w:val=\"24\" />
+				<w:szCs w:val=\"24\" />
+			</w:rPr>
+			<w:t xml:space=\"preserve\"> </w:t>
+		</w:r>
+	</w:p>
+	<w:sectPr w:rsidR=\"005D7A51\">
+		<w:pgSz w:w=\"11906\" w:h=\"16838\" />
+		<w:pgMar w:top=\"1440\" w:right=\"1440\" w:bottom=\"1440\" w:left=\"1440\" w:header=\"708\" w:footer=\"708\" w:gutter=\"0\" />
+		<w:cols w:space=\"708\" />
+		<w:docGrid w:linePitch=\"360\" />
+	</w:sectPr>
+</w:body>"

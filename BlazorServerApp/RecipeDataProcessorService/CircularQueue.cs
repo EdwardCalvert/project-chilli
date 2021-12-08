@@ -102,5 +102,10 @@ namespace BlazorServerApp.proccessService
             }
             return text;
         }
+
+        public T[] GetQueueAsList()
+        {
+            return _queueItems;
+        }
     }
 }

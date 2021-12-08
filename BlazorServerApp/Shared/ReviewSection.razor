@@ -17,53 +17,55 @@
             </div>
         }
     }
-    <EditForm Model="@newReview" OnValidSubmit="@InsertNewRecipe">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <div class="FieldLine">
-            <div class="FieldHeader">
-                <label id="reviewTitleLabel">ReviewTitle</label>
-            </div>
-            <div class="col-12 col-xs-8 col-md-6 col-lg-4 FieldData">
-                <InputText style="width: 100%" id="reviewTitleInput" @bind-Value="newReview.ReviewTitle" />
-            </div>
+<EditForm Model="@newReview" OnValidSubmit="@InsertNewRecipe">
 
-        </div>
-        <div class="FieldLine">
-            <div class="FieldHeader">
-                <label id="reviewRatingTitle">Your Rating</label>
-            </div>
-            <div class="FieldData">
-                <div class="InputFieldContainer">
-                    <InputSelect id="reviewRatingSelector" @bind-Value="StarCount">
-                        @foreach (var value in Star.Stars)
-                        {
-                            <option value="@value.Key">@value.Value</option>
-                        }
-                    </InputSelect>
-                </div>
-            </div>
-        </div>
-        <div class="FieldLine">
-            <div class="FieldHeader">
-                <label id="recipeNameLabel">Your name</label>
-            </div>
-            <div class="col-12 col-xs-8 col-md-6 col-lg-4 FieldData">
-                <InputText style="width:100%" id="reviewerNameInput" @bind-Value="newReview.ReviewersName" />
-            </div>
 
+    <div class="FieldLine">
+        <div class="FieldHeader">
+            <label id="reviewTitleLabel">ReviewTitle</label>
         </div>
-        <div class="FieldLine">
-            <div class="FieldHeader">
-                <label id="recipeNameLabel">ReviewText</label>
-            </div>
-            <div class="FieldData">
-                <InputTextArea rows="6" style=" width:100%;" id="reviewText" @bind-Value="newReview.ReviewText" />
-            </div>
+        <div class="col-12 col-xs-8 col-md-6 col-lg-4 FieldData">
+            <InputText style="width: 100%" id="reviewTitleInput" @bind-Value="newReview.ReviewTitle" />
+        </div>
 
+    </div>
+    <div class="FieldLine">
+        <div class="FieldHeader">
+            <label id="reviewRatingTitle">Your Rating</label>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </EditForm>
+        <div class="FieldData">
+            <div class="InputFieldContainer">
+                <InputSelect id="reviewRatingSelector" @bind-Value="StarCount">
+                    @foreach (var value in Star.Stars)
+                    {
+                        <option value="@value.Key">@value.Value</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+    </div>
+    <div class="FieldLine">
+        <div class="FieldHeader">
+            <label id="recipeNameLabel">Your name</label>
+        </div>
+        <div class="col-12 col-xs-8 col-md-6 col-lg-4 FieldData">
+            <InputText style="width:100%" id="reviewerNameInput" @bind-Value="newReview.ReviewersName" />
+        </div>
+
+    </div>
+    <div class="FieldLine">
+        <div class="FieldHeader">
+            <label id="recipeNameLabel">ReviewText</label>
+        </div>
+        <div class="FieldData">
+            <InputTextArea rows="6" style=" width:100%;" id="reviewText" @bind-Value="newReview.ReviewText" />
+        </div>
+
+    </div>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
     <ErrorNotification ErrorMessage="@errorMessage" Show="@error"></ErrorNotification>
 </div>
 @code {

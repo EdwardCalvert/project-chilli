@@ -57,7 +57,7 @@ namespace BlazorServerApp.Models
 
             if (type != UserDefinedIngredient.Type.None)
             {
-                recipeIDs.AddRange(await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset, (ushort)type)); //(ushort)~
+                recipeIDs.AddRange(await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset, (ushort)~(ushort)type)); //
             }
             else
             {

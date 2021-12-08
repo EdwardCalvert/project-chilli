@@ -5,7 +5,14 @@
         <h3>EditRecipe</h3>
         @if (recipeModel == null)
         {
+            if (pageRequested)
+            {
+                        <h1>Sorry pal, the recipe you attempted to edit doesn't exist!</h1>
+            }
+            else
+            {
             <LoadingElement />
+            }
         }
         else if (!validIdentifier)
         {
@@ -30,7 +37,6 @@
         private Recipe recipeModel = new Recipe();
         private bool error = false;
 
-
         protected override async Task OnInitializedAsync()
         {
             try
@@ -43,12 +49,9 @@
                     recipeModel = await dataLoader.GetRecipeAndTree(Result);
                     if (!pageRequested)
                     {
-
                         await dataLoader.IncrementViews(RecipeID);
                         pageRequested = true;
                     }
-
-
                 }
                 error = false;
             }

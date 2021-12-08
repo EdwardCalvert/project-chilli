@@ -5,6 +5,7 @@ namespace BlazorServerApp.Models
 {
     public class UserDefinedIngredientInRecipe
     {
+        [Required]
         public uint? IngredientID { get; set; }
         public uint RecipeID { get; set; }
 

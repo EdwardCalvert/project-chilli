@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,8 +8,9 @@ namespace BlazorServerApp.Models
 {
     public class RecoveryEmailAddresses : ISqlDeletible, ISqlInsertible
     {
-
+        [Required, EmailAddress]
         public string EmailAddress { get; set; }
+        [Required, MinLength(2)]
         public string UserName { get; set; }
 
         public string SqlInsertStatement()

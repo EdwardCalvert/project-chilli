@@ -1,0 +1,154 @@
+﻿
+@inject IRecipeDataLoader dataLoader
+<div class="ReviewCard">
+    @if (Reviews.Count > 0)
+    {<ReviewSummary DisplayReviewModel="Reviews" TitleText="Average review:" />
+        @foreach (Review displayReviewModel in Reviews)
+        {
+            <div class="card m-3">
+                <div class="card-header No-Decoration ColourBlack">
+                    <p>@displayReviewModel.ReviewersName on the @displayReviewModel.DateSubmitted.ToString("d") said : </p><h3>@displayReviewModel.ReviewTitle (@displayReviewModel.Star.GetStarsForUI())</h3>
+                </div>
+                <div class="card-body No-Decoration ColourBlack">
+                    @displayReviewModel.ReviewText
+                </div>
+                <AuthorizeView Roles="Administrator">
+                    <div class="card-footer"><btn class="btn btn-danger" @onclick="(()=>DeleteReview(displayReviewModel.ReviewID,displayReviewModel))">Delete</btn></div>
+                </AuthorizeView>
+            </div>
+        }
+    }
+    <EditForm Model="@newReview" OnValidSubmit="@InsertNewRecipe">
+
+
+        <div class="FieldLine">
+            <div class="FieldHeader">
+                <label id="reviewTitleLabel">ReviewTitle</label>
+            </div>
+            <div class="col-12 col-xs-8 col-md-6 col-lg-4 FieldData">
+                <InputText style="width: 100%" id="reviewTitleInput" @bind-Value="newReview.ReviewTitle" />
+            </div>
+
+        </div>
+        <div class="FieldLine">
+            <div class="FieldHeader">
+                <label id="reviewRatingTitle">Your Rating</label>
+            </div>
+            <div class="FieldData">
+                <div class="InputFieldContainer">
+                    <InputSelect id="reviewRatingSelector" @bind-Value="StarCount">
+                        @foreach (var value in Star.Stars)
+                        {
+                            <option value="@value.Key">@value.Value</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+        </div>
+        <div class="FieldLine">
+            <div class="FieldHeader">
+                <label id="recipeNameLabel">Your name</label>
+            </div>
+            <div class="col-12 col-xs-8 col-md-6 col-lg-4 FieldData">
+                <InputText style="width:100%" id="reviewerNameInput" @bind-Value="newReview.ReviewersName" />
+            </div>
+
+        </div>
+        <div class="FieldLine">
+            <div class="FieldHeader">
+                <label id="recipeNameLabel">ReviewText</label>
+            </div>
+            <div class="FieldData">
+                <InputTextArea rows="6" style=" width:100%;" id="reviewText" @bind-Value="newReview.ReviewText" />
+            </div>
+
+        </div>
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </EditForm>
+    <ErrorNotification ErrorMessage="@errorMessage" Show="@error"></ErrorNotification>
+</div>
+@code {
+    [Parameter]
+    public List<Review> Reviews { get; set; }
+    [Parameter]
+    public uint RecipeID { get; set; }
+
+    private Review newReview = new Review();
+    private int StarCount { get; set; }
+
+    private bool error = false;
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            newReview.RecipeID = RecipeID;
+            await UpdateReviews();
+            error = false;
+        }
+        catch (Exception e)
+        {
+            errorMessage = e.Message;
+            error = true;
+        }
+        await base.OnInitializedAsync();
+    }
+
+    private async Task InsertNewRecipe()
+    {
+        try
+        {
+            newReview.Star = Star.CreateStar(StarCount);
+            newReview.DateSubmitted = DateTime.Now;
+            newReview.RecipeID = RecipeID;
+            
+            Reviews.Add(newReview);
+
+
+            //Load sample data
+            var sampleData = new SentimentAnalysis.ModelInput()
+            {
+                SentimentText = $"{newReview.ReviewText} {newReview.ReviewTitle} {newReview.ReviewersName}",
+                LoggedIn = true,
+            };
+
+            //Load model and predict output
+            var result = SentimentAnalysis.Predict(sampleData);
+            @if (result.Prediction == 1)
+                {
+                    //errorMessage = "The review comment was flagged as inappropriate, so has not been submitted!";
+                    //error = true;
+                    Console.WriteLine("The review comment was flagged as inappropriate, so has not been submitted!");
+                }
+                else
+                {
+                    await dataLoader.SaveNewReview(newReview);
+
+
+                    newReview = new Review();
+                    error = false;
+                }
+
+
+            }
+        catch (Exception e)
+        {
+            errorMessage = e.Message;
+            error = true;
+        }
+    }
+
+    private async Task DeleteReview(uint reviewID, Review review)
+    {
+        await dataLoader.DeleteReviewUsingReviewID(reviewID);
+        Reviews.Remove(review);
+    }
+    private async Task UpdateReviews()
+    {
+        Reviews = await dataLoader.GetReviews(RecipeID);
+    }
+
+    }

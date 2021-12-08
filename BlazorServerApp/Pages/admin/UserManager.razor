@@ -13,13 +13,47 @@
         <h3>UserManager</h3>
         <h2>Create a new Administrator</h2>
         <div class="container">
-            <input type="text"
-                   placeholder="User Name" @bind="@username" />
-            <input type="text"
-                   placeholder="password" @bind="@password" />
-            <btn class=" btn btn-primary" @onclick="@CreateUser">Create User</btn>
-        </div>
+            
+            <EditForm Model="newUser" OnValidSubmit="@CreateUser" Context="UserCreator">
+                <DataAnnotationsValidator />
+                <div>
+                    <label>UserName</label>
+                    <InputText type="text"
+                               placeholder="User Name" @bind-Value="@newUser.UserName" />
+                </div>
+                <div>
+                    <label>Password</label>
+                    <InputText type="password"
+                               placeholder="password" @bind-Value="@newUser.RepeatPassword" />
+                </div>
+                <div>
+                    <label>Repeat password</label>
+                    <InputText type="password"
+                               placeholder="password" @bind-Value="@newUser.Password" />
+                </div>
+                <div>
+                    <label>Role</label>
+                    <InputSelect @bind-Value="@newUser.Role">
+                        <option></option>
+                        @foreach (string role in User.GetCurrentRoles())
 
+                            {
+                            <option value="@role">@role</option>
+                            }
+                    </InputSelect>
+                </div>
+                <ValidationSummary />
+                <button type="submit" class="btn btn-primary">Create User</button>
+            </EditForm>
+            @if(errorsWhileCreatingUser!= null && errorsWhileCreatingUser.Length >= 0)
+                    {
+                <p class="alert-danger">@errorsWhileCreatingUser</p>
+                    }
+
+        </div>
+        @code{
+            CreateNewUser newUser = new CreateNewUser();
+        }
         <table class="table table-striped">
             <thead class="thead-dark">
                 <tr>
@@ -50,11 +84,25 @@
 
         <h2>Add new recovery address</h2>
         <div class="container">
-            <input type="email"
-                   placeholder="name@domain" @bind="@newEmailAddress" />
-            <input type="text"
-                   placeholder="name" @bind="@newRecoveryAddressName" />
-            <btn class=" btn btn-primary" @onclick="@CreateNewRecoveryEmailAddress">Create recovery address</btn>
+            <EditForm Context="CreateRecoveryAddress" Model="recoveryEmail" OnValidSubmit="@CreateNewRecoveryEmailAddress">
+                <DataAnnotationsValidator/>
+                <div>
+                    <label>Email Address</label>
+                    <InputText type="email"
+                               placeholder="name@domain" @bind-Value="@recoveryEmail.EmailAddress" />
+                </div>
+                <div>
+                    <label>Name</label>
+                    <InputText type="text"
+                               placeholder="name" @bind-Value="@recoveryEmail.UserName" />
+                </div>
+                <button type="submit" class=" btn btn-primary">Create recovery address</button>
+                <ValidationSummary></ValidationSummary>
+            </EditForm>
+            @if (errorsWhileCreatingRecoveryAddress != null && errorsWhileCreatingRecoveryAddress.Length >= 0)
+            {
+                <p class="alert-danger">@errorsWhileCreatingRecoveryAddress</p>
+            }
         </div>
         <table class="table table-striped">
             <thead class="thead-dark">
@@ -97,37 +145,81 @@
     <NotAuthorized>
 
 
-        @if (noAdminsHaveBeenCreated )
+        @if (noAdminsHaveBeenCreated)
         {
             <h1>DO NOT LEAVE THIS PAGE! OTHERWISE YOU WILL BE LOCKED OUT.</h1>
             <h2>
-                Welcome to the User Manager. 
+                Welcome to the User Manager.
             </h2>
             <p>You will be supplied with a backup account, and then will need to create a new admin account. We'll also ask for an email address that can recieve mail from @mailSettings.From to recieve password reset instructions. </p>
-            <p>@BackupAccountCredentials</p>
-            <h2>Create a new Administrator</h2>
+            <p>@BackupAccountCredentials You should keep a copy of these account details, incase you get locked out!</p>
+            <h2>Create a new admin</h2>
             <div class="container">
-                <input type="text"
-                       placeholder="User Name" @bind="@username" />
-                <input type="text"
-                       placeholder="password" @bind="@password" />
-                <btn class=" btn btn-primary" @onclick="@CreateUser">Create User</btn>
+
+                <EditForm Model="newUser" OnValidSubmit="@CreateUser" Context="UserCreator">
+                    <DataAnnotationsValidator />
+                    <div>
+                        <label>UserName</label>
+                        <InputText type="text"
+                                   placeholder="User Name" @bind-Value="@newUser.UserName" />
+                    </div>
+                    <div>
+                        <label>Password</label>
+                        <InputText type="password"
+                                   placeholder="password" @bind-Value="@newUser.RepeatPassword" />
+                    </div>
+                    <div>
+                        <label>Repeat password</label>
+                        <InputText type="password"
+                                   placeholder="password" @bind-Value="@newUser.Password" />
+                    </div>
+                    <div>
+                        <label>Role</label>
+                        <InputSelect @bind-Value="@newUser.Role">
+                            <option></option>
+                            @foreach (string role in User.GetCurrentRoles())
+
+                                {
+                                <option value="@role">@role</option>
+                                }
+                        </InputSelect>
+                    </div>
+                    <ValidationSummary />
+                    <button type="submit" class="btn btn-primary">Create User</button>
+                </EditForm>
+                @if (errorsWhileCreatingUser != null && errorsWhileCreatingUser.Length >= 0)
+                {
+                    <p class="alert-danger">@errorsWhileCreatingUser</p>
+                }
+
             </div>
-            <h2>Add new recovery address</h2>
-            <div class="container">
-                <input type="email"
-                       placeholder="name@domain" @bind="@newEmailAddress" />
-                <input type="text"
-                       placeholder="name" @bind="@newRecoveryAddressName" />
-                <btn class=" btn btn-primary" @onclick="@CreateNewRecoveryEmailAddress">Create recovery address</btn>
-            </div>
+            <EditForm Context="CreateRecoveryAddress" Model="recoveryEmail" OnValidSubmit="@CreateNewRecoveryEmailAddress">
+                <DataAnnotationsValidator />
+                <div>
+                    <label>Email Address</label>
+                    <InputText type="email"
+                               placeholder="name@domain" @bind-Value="@recoveryEmail.EmailAddress" />
+                </div>
+                <div>
+                    <label>Name</label>
+                    <InputText type="text"
+                               placeholder="name" @bind-Value="@recoveryEmail.UserName" />
+                </div>
+                <button type="submit" class=" btn btn-primary">Create recovery address</button>
+                <ValidationSummary></ValidationSummary>
+            </EditForm>
+            @if (errorsWhileCreatingRecoveryAddress != null && errorsWhileCreatingRecoveryAddress.Length >= 0)
+            {
+                <p class="alert-danger">@errorsWhileCreatingRecoveryAddress</p>
+            }
 
             <p>Now you can login, using the account you created. </p>
             <btn class="btn btn-primary" @onclick="@(()=>attemptedToLogin = true)">Login</btn>
-            @if (attemptedToLogin) { 
+            @if (attemptedToLogin)
+            {
                 <p class="alert-danger">After leaving this page, you will need to login to make changes. Make sure you have created an account.</p>
                 <btn class="btn btn-danger" @onclick="LogUserIn">Are you sure?</btn>
-}
+            }
 
         }
         else
@@ -137,8 +229,6 @@
     </NotAuthorized>
 </AuthorizeView>
 @code {
-    string username;
-    string password;
     bool error = false;
     bool noAdminsHaveBeenCreated = false;
     bool noRecoveryEmailAddresses = false;
@@ -146,13 +236,13 @@
     bool attemptedToLogin = false;
     string BackupAccountCredentials = "";
     string Message;
-    string newEmailAddress;
-    string newRecoveryAddressName;
     string currentLoggedInUser ;
     string temporaryPassword = "";
     string temporaryUsername = "";
+    string errorsWhileCreatingRecoveryAddress = "";
     List<User> users = new List<User>();
     List<RecoveryEmailAddresses> recoveryEmailAddresses = new();
+    RecoveryEmailAddresses recoveryEmail = new();
 
     private void LogUserIn()
     {
@@ -173,17 +263,14 @@
             {
                 Console.WriteLine("Using random words to generate username and password.");
                 string[] RandomWords;
-
                 using (StreamReader streamReadr = new StreamReader(path))
                 {
 
                     string fileContents = streamReadr.ReadToEnd();
                     RandomWords = fileContents.Split("\n");
                 }
-
                 temptUsername = "BackupAccount:"+CreatePassphrase(RandomWords, 2, "-");
                 tempPassword = CreatePassphrase(RandomWords, 3, "&");
-
                 user.UserName = temptUsername;
                 user.SHA512 = User.CreateSHAHash(tempPassword);
             }
@@ -192,7 +279,6 @@
                 Console.WriteLine("Random words text file was absent, so using random text instead!");
                 temptUsername = "BackupAccount:" + CreateRandomText(20);
                 tempPassword = CreateRandomText(3);
-
                 user.UserName = temptUsername;
                 user.SHA512 = User.CreateSHAHash(tempPassword);
             }
@@ -214,29 +300,12 @@
         }
         passPhrase = passPhrase.Substring(0, passPhrase.LastIndexOf(delimiter));
         return passPhrase;
-
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            currentLoggedInUser = httpContextAccessor.HttpContext.User.Identity.Name;
-            await LoadUsers();
-            await LoadRecoveryAddresses();
-        }
-        catch
-        {
-            error = true;
-            Message = "An unhandled database exception occured";
-        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender){
         if (firstLoad )
         {
             firstLoad = false;
-
             try
             {
                 currentLoggedInUser = httpContextAccessor.HttpContext.User.Identity.Name;
@@ -245,21 +314,21 @@
                 {
                     noAdminsHaveBeenCreated = true;
                     BackupAccountCredentials = await BackupAccount();
+                    StateHasChanged();
                 }
                 await LoadRecoveryAddresses();
                 if (recoveryEmailAddresses.Count == 0)
                 {
                     noRecoveryEmailAddresses = true;
                 }
-
             }
             catch
             {
                 error = true;
                 Message = "An unhandled database exception occured";
             }
+
         }
-        StateHasChanged();
     }
     Random _random = new Random();
 
@@ -267,7 +336,6 @@
     {
         string alphabet = "abcdefghijklmnopqrstuvwxyz";
         string text = "";
-
         for (int i = 0; i < lenth; i++)
         {
             int randomIndex = _random.Next(26);
@@ -279,7 +347,6 @@
     private async Task LoadRecoveryAddresses()
     {
         recoveryEmailAddresses = await dataLoader.GetEmailAddresses();
-
     }
 
     private async Task LoadUsers()
@@ -298,74 +365,70 @@
         await dataLoader.DeleteUser(user.UserName);
         users.Remove(user);
     }
-    private async void UpdatePassword(User user, string newPassword)
-    {
-        user.SHA512 = User.CreateSHAHash(newPassword);
-        await dataLoader.UpdatePassword(user);
-    }
-    private async void UpdateEmail(string oldEmail, string newEmail, string userName)
-    {
-        await dataLoader.UpdateRecoveryEmailAddress(oldEmail, newEmail, userName);
-    }
-
     private async void CreateNewRecoveryEmailAddress()
     {
+        errorsWhileCreatingRecoveryAddress = "";
         try
         {
-            RecoveryEmailAddresses addresses = await dataLoader.GetSingleAddress(newEmailAddress);
+            RecoveryEmailAddresses addresses = await dataLoader.GetSingleAddress(recoveryEmail.EmailAddress);
             if (addresses == null )
             {
-
-                RecoveryEmailAddresses newAddress = new RecoveryEmailAddresses();
-
-                newAddress.EmailAddress = newEmailAddress;
-                newAddress.UserName = newRecoveryAddressName;
-                await dataLoader.GenericInsert<RecoveryEmailAddresses>(newAddress);
-
+                await dataLoader.GenericInsert<RecoveryEmailAddresses>(recoveryEmail);
                 error = false;
-                newEmailAddress = "";
-                newRecoveryAddressName = "";
-                recoveryEmailAddresses.Add(newAddress);
+                recoveryEmailAddresses.Add(recoveryEmail);
+            }
+            else
+            {
+                errorsWhileCreatingRecoveryAddress += $"{recoveryEmail.EmailAddress} already exists in the database! ";
             }
         }
         catch
         {
             error = true;
             Message = "An unhandled and unexpected result occured while connecting to the database";
-
+            errorsWhileCreatingRecoveryAddress += Message;
         }
         await LoadUsers();
-
     }
+    string errorsWhileCreatingUser;
 
     private async Task CreateUser()
     {
+        errorsWhileCreatingUser = "";
         try
         {
-            User existingUser = await dataLoader.GetUserFromDatabase(username);
+            User existingUser = await dataLoader.GetUserFromDatabase(newUser.UserName);
             if (existingUser == null)
             {
+                if (newUser.Password == newUser.RepeatPassword)
+                {
+                    User user = new User();
+                    user.Role = newUser.Role;
+                    user.SHA512 = User.CreateSHAHash(newUser.Password);
+                    user.UserName = newUser.UserName;
+                    await dataLoader.SaveUser(user);
 
-                User user = new User();
-                user.Role = "Administrator";
-                user.SHA512 = User.CreateSHAHash(password);
-                user.UserName = username;
-                await dataLoader.SaveUser(user);
-
-                temporaryUsername = username;
-                temporaryPassword = password;
-                error = false;
-                username = "";
-                password = "";
+                    temporaryUsername = user.UserName; //Provides support for the inital setup
+                    temporaryPassword = newUser.RepeatPassword;
+                    error = false;
+                    newUser = new CreateNewUser();
+                }
+                else
+                {
+                    errorsWhileCreatingUser += " The two passwords provided didn't match";
+                }
+            }
+            else
+            {
+                errorsWhileCreatingUser += "A user with the same name already exists on the database ";
             }
         }
         catch
         {
             error = true;
             Message = "An unhandled and unexpected result occured while connecting to the database";
-
+            errorsWhileCreatingUser += Message;
         }
         await LoadUsers();
-        StateHasChanged();
     }
 }

@@ -5,6 +5,7 @@
         
     <div style="background-color: rgba(0,0,0,.03); margin-bottom:0;margin-left:5px; border-radius:5px;"> <p style="margin-bottom: 0px;"><input type="checkbox" @bind="selectedBoxes[key]" @onclick="(()=>HandleCheckboxChange(key))" />&nbsp;@key  &nbsp;<i class="oi oi-tag"> </i>&nbsp;</p></div>
     }
+    <btn class="btn btn-primary" @onclick="SetAllFalse">Clear tags</btn>
 </div>
 @code {
 
@@ -44,25 +45,25 @@
     private void HandleCheckboxChange(string key)
     {
         selectedBoxes[key] = !selectedBoxes[key];
-        if (key == "None")
+        //if (key == "None")
+        //{
+        //    HandleNone();
+        //}
+        //else
+        //{
+        //    //SetAnyAssociatedTypes(key);
+        //SetCheckboxesForComplexTypes();
+        UserDefinedIngredient.Type type = (UserDefinedIngredient.Type)Enum.Parse(typeof(UserDefinedIngredient.Type), key, true);
+        if (selectedBoxes[key])
         {
-            HandleNone();
+            selectedType |= type; //Select item
         }
         else
         {
-            SetAnyAssociatedTypes(key);
-            SetCheckboxesForComplexTypes();
-            UserDefinedIngredient.Type type = (UserDefinedIngredient.Type)Enum.Parse(typeof(UserDefinedIngredient.Type), key, true);
-            if (selectedBoxes[key])
-            {
-                selectedType |= type; //Select item
-            }
-            else
-            {
-                selectedType &= ~type; //Deselect item
-            }
-            SetNoneWhenNoSelected();
+            selectedType &= ~type; //Deselect item
         }
+        //SetNoneWhenNoSelected();
+        //}
         selectedTypeChanged.InvokeAsync(selectedType);
     }
 
@@ -77,13 +78,21 @@
                 selectedBoxes[complexType] = selectedBoxes[key];
             }
         }
+
+        if (UserDefinedIngredient.ExclusiveTypeBlacklist.ContainsKey(key))
+        {
+            foreach (string complexType in UserDefinedIngredient.ExclusiveTypeBlacklist[key])
+            {
+                selectedBoxes[complexType] = !selectedBoxes[key];
+            }
+        }
     }
 
     protected override async Task OnInitializedAsync()
     {
         foreach (UserDefinedIngredient.Type flagToCheck in Enum.GetValues(typeof(UserDefinedIngredient.Type)))
         {
-            if (selectedType.HasFlag(flagToCheck) && flagToCheck != UserDefinedIngredient.Type.None)
+            if (selectedType.HasFlag(flagToCheck) )//&& flagToCheck != UserDefinedIngredient.Type.None)// && flagToCheck != UserDefinedIngredient.Type.Vegan && flagToCheck != UserDefinedIngredient.Type.Vegetarian)
             {
                 selectedBoxes.Add(flagToCheck.ToString(), true);
             }
@@ -95,6 +104,15 @@
 
         //selectedType = UserDefinedIngredient.AllSelected;
         await selectedTypeChanged.InvokeAsync(selectedType);
+    }
+
+    private void SetAllFalse()
+    {
+        foreach(string key in selectedBoxes.Keys)
+        {
+            selectedBoxes[key]= false;
+        }
+        selectedBoxes["None"] = true;
     }
 
     private void SetNoneWhenNoSelected()

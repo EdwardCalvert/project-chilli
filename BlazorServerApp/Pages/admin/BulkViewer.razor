@@ -33,8 +33,6 @@
                         <td>@recipe.ShowShortDescription(100)</td>
                         <td>@recipe.RecipeID</td>
                         <td>@recipe.ManualUpload</td>
-
-
                         @if (files.ContainsKey(recipe.RecipeID))
                         {
                             <td>@System.Web.HttpUtility.UrlDecode(fileManager.GetFileName(files[recipe.RecipeID].FileID))</td>
@@ -49,11 +47,8 @@
                         }
                         <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID">View</a></td>
                         <td><a class="btn btn-primary" href="/Recipe/@recipe.RecipeID/Edit">Edit</a></td>
-
                     </tr>
                 }
-                
-
             </tbody>
         </table>
         @if (recipes.Count % resultsPerQuery == 0)
@@ -74,26 +69,21 @@
     int offset = 0;
     bool error = false;
     Dictionary<uint, FileManagerModel> files = new();
-
     private async void DownloadRecipe(uint recipeID)
     {
         await JSRuntime.InvokeAsync<object>("open", await fileManager.GetURL(recipeID),"_blank");
     }
-
     private void DeleteRecipe(Recipe recipe)
     {
         recipes.Remove(recipe);
         dataLoader.DeleteRecipeAndRelatedValues(recipe.RecipeID);
-
     }
     private void DeleteRecipe(Recipe recipe, string MD5)
     {
         recipes.Remove(recipe);
         fileManager.DeleteFile(MD5);
         dataLoader.DeleteRecipeAndRelatedValues(recipe.RecipeID);
-
     }
-
     public List<Recipe> recipes { get; set; }
     protected override async Task OnInitializedAsync()
     {
@@ -108,9 +98,6 @@
             error = true;
         }
     }
-
-
-
     private async Task GetRelatedFiles()
     {
         foreach (Recipe recipe in recipes)
@@ -121,7 +108,6 @@
             }
         }
     }
-
     private async Task GrabMoreRecipes()
     {
         try

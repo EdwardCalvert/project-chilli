@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UnderstandText.Models
+﻿namespace UnderstandText.Models
 {
-    class WordApiModel
+    internal class WordApiModel
     {
     }
     public class Rootobject
@@ -15,18 +9,15 @@ namespace UnderstandText.Models
         public Syllables syllables { get; set; }
         public Pronunciation pronunciation { get; set; }
     }
-
     public class Syllables
     {
         public int count { get; set; }
         public string[] list { get; set; }
     }
-
     public class Pronunciation
     {
         public string all { get; set; }
     }
-
     public class Result
     {
         public string definition { get; set; }
@@ -35,5 +26,4 @@ namespace UnderstandText.Models
         public string[] typeOf { get; set; }
         public string[] derivation { get; set; }
     }
-
 }
