@@ -85,16 +85,25 @@ namespace BlazorServerApp.WordsAPI
                 {
                     string jsonResult = await response.Content.ReadAsStringAsync();
                      remainingCallouts =int.Parse(response.Headers.GetValues("x-ratelimit-requests-remaining").FirstOrDefault())-1;
-                        SearchQuery searchQuery = new();
-                        searchQuery.SearchTerm = word;
-                        searchQuery.ResultAsJSON = jsonResult;
-                        await _dataLoader.InsertSearchQuery(searchQuery);
+                        
 
 
                     if (response.IsSuccessStatusCode)
                     {
-
-                        return JsonConvert.DeserializeObject<TypeOf>(jsonResult);
+                        SearchQuery searchQuery = new();
+                        searchQuery.SearchTerm = word;
+                        searchQuery.ResultAsJSON = jsonResult;
+                        List<SearchQuery> queries  = await _dataLoader.FindWordsAPISearch(word);
+                        if (queries == null || queries.Count == 0)
+                        {
+                            await _dataLoader.InsertSearchQuery(searchQuery);
+                            return JsonConvert.DeserializeObject<TypeOf>(jsonResult);
+                        }
+                        else
+                        {
+                            return JsonConvert.DeserializeObject<TypeOf>(queries[0].ResultAsJSON); // Naiively assume only one result.
+                        }
+                        
                     }
                     else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {

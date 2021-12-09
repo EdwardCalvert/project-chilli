@@ -244,6 +244,7 @@
 
     private void MovePage()
     {
+        Console.WriteLine("Tags before submitt " + dietaryType);
         if (searchText != null)
         {
             NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}/{HttpUtility.UrlEncode(order.ToString())}/{HttpUtility.UrlEncode(sortBy.ToString())}/{HttpUtility.UrlEncode(((int)dietaryType).ToString())}", forceLoad: true);

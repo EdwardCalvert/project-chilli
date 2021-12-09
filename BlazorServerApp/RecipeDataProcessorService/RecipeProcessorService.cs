@@ -83,7 +83,7 @@ namespace BlazorServerApp.proccessService
                         container.DoccumentText = await DocxToText(MD5);
                         container.Recipe  =  _textProcessor.CreateRecipe(container.DoccumentText);
                         preProcessRecipes.TryAdd(MD5, container);
-                        Task.Run(() => container.Recipe);
+                        await Task.Run(() => container.Recipe);
                         //await Task.Delay(10);
                     }
                 }

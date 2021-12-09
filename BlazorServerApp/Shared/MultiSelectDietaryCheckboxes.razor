@@ -5,7 +5,7 @@
         
     <div style="background-color: rgba(0,0,0,.03); margin-bottom:0;margin-left:5px; border-radius:5px;"> <p style="margin-bottom: 0px;"><input type="checkbox" @bind="selectedBoxes[key]" @onclick="(()=>HandleCheckboxChange(key))" />&nbsp;@key  &nbsp;<i class="oi oi-tag"> </i>&nbsp;</p></div>
     }
-    <btn class="btn btn-primary" @onclick="SetAllFalse">Clear tags</btn>
+    <btn class="btn btn-primary" @onclick="SetAllFalse">Clear tags</btn><btn class="btn btn-primary" @onclick="SetAllTrue">Activate all tags</btn>
 </div>
 @code {
 
@@ -23,36 +23,10 @@
     }
     Dictionary<string, bool> selectedBoxes = new Dictionary<string, bool>();
 
-    private void HandleNone()
-    {
-        foreach (string key in selectedBoxes.Keys)
-        {
-            if (key != "None")
-            {
-                selectedBoxes[key] = !selectedBoxes["None"];
-            }
-        }
-        if (selectedBoxes["None"])
-        {
-            selectedType = UserDefinedIngredient.Type.None;
-        }
-        else
-        {
-            selectedType = UserDefinedIngredient.AllSelected;
-        }
-    }
 
     private void HandleCheckboxChange(string key)
     {
         selectedBoxes[key] = !selectedBoxes[key];
-        //if (key == "None")
-        //{
-        //    HandleNone();
-        //}
-        //else
-        //{
-        //    //SetAnyAssociatedTypes(key);
-        //SetCheckboxesForComplexTypes();
         UserDefinedIngredient.Type type = (UserDefinedIngredient.Type)Enum.Parse(typeof(UserDefinedIngredient.Type), key, true);
         if (selectedBoxes[key])
         {
@@ -62,31 +36,9 @@
         {
             selectedType &= ~type; //Deselect item
         }
-        //SetNoneWhenNoSelected();
-        //}
         selectedTypeChanged.InvokeAsync(selectedType);
     }
 
-    private void SetAnyAssociatedTypes(string key)
-    {
-        //If vegan is changed, set Vegetables, fruit etc
-
-        if (UserDefinedIngredient.ComplexTypes.ContainsKey(key))
-        {
-            foreach (string complexType in UserDefinedIngredient.ComplexTypes[key])
-            {
-                selectedBoxes[complexType] = selectedBoxes[key];
-            }
-        }
-
-        if (UserDefinedIngredient.ExclusiveTypeBlacklist.ContainsKey(key))
-        {
-            foreach (string complexType in UserDefinedIngredient.ExclusiveTypeBlacklist[key])
-            {
-                selectedBoxes[complexType] = !selectedBoxes[key];
-            }
-        }
-    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,75 +53,27 @@
                 selectedBoxes.Add(flagToCheck.ToString(), false);
             }
         }
-
-        //selectedType = UserDefinedIngredient.AllSelected;
         await selectedTypeChanged.InvokeAsync(selectedType);
     }
 
-    private void SetAllFalse()
+    private async void SetAllFalse()
     {
         foreach(string key in selectedBoxes.Keys)
         {
             selectedBoxes[key]= false;
         }
         selectedBoxes["None"] = true;
+        selectedType = UserDefinedIngredient.Type.None;
+        await selectedTypeChanged.InvokeAsync(selectedType);
     }
-
-    private void SetNoneWhenNoSelected()
+    private async void SetAllTrue()
     {
-        int selectedCount = 0;
-        foreach (KeyValuePair<string, bool> keyValuePair in selectedBoxes)
+        foreach (string key in selectedBoxes.Keys)
         {
-            if (keyValuePair.Key != "None" && keyValuePair.Value)
-            {
-                selectedCount++;
-            }
+            selectedBoxes[key] = true;
         }
-        if (selectedCount == 0)
-        {
-            selectedBoxes["None"] = true;
-            selectedType = UserDefinedIngredient.Type.None;
-        }
-        else
-        {
-            selectedBoxes["None"] = false;
-        }
-
-    }
-
-    private void SetCheckboxesForComplexTypes()
-    {
-        //Find complex types such as Vegan etc.
-        foreach (KeyValuePair<string, string[]> keyValuePair in UserDefinedIngredient.ComplexTypes)
-        {
-            bool allValuesAreTheSame = true;
-            bool initalState = false; //Should be overwritten on first itteration!
-
-            int index = 0;
-            while (allValuesAreTheSame && index < keyValuePair.Value.Length)
-            {
-                if (index == 0)
-                {
-                    initalState = selectedBoxes[keyValuePair.Value[index]];
-                    allValuesAreTheSame = true;
-                }
-                else
-                {
-                    if (selectedBoxes[keyValuePair.Value[index]] != initalState)
-                    {
-                        allValuesAreTheSame = false;
-                    }
-                }
-                index++;
-            }
-            if (allValuesAreTheSame)
-            {
-                selectedBoxes[keyValuePair.Key] = initalState;
-            }
-            else
-            {
-                selectedBoxes[keyValuePair.Key] = false;
-            }
-        }
+        selectedBoxes["None"] = true;
+        selectedType = UserDefinedIngredient.Type.None;
+        await selectedTypeChanged.InvokeAsync(selectedType);
     }
 }

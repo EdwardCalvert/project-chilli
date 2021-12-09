@@ -307,7 +307,17 @@ namespace BlazorServerApp.Models
 
         public async Task<IEnumerable<UserDefinedIngredient>> FindIngredients(string text)
         {
-            return await _data.LoadData<UserDefinedIngredient, dynamic>("SELECT IngredientName, IngredientID FROM UserDefinedIngredients WHERE MATCH(IngredientName) AGAINST(@Text IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION) > 0 ORDER BY MATCH(IngredientName) AGAINST(@Text IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION) DESC LIMIT 50; ", new { Text = text }, _config.GetConnectionString("recipeDatabase")); ;
+            int lowerBound;
+            if (text.Length < 5)
+            {
+                lowerBound = 1;
+            }
+            else
+            {
+                lowerBound = text.Length - 4;
+            }
+            int upperbound = text.Length * 2 + 3;
+            return await _data.LoadData<UserDefinedIngredient, dynamic>(@"SELECT IngredientName, IngredientID FROM UserDefinedIngredients WHERE MATCH(IngredientName) AGAINST(@Text IN NATURAL LANGUAGE MODE) > 0 AND CHAR_LENGTH(IngredientName) <= @upperBound AND CHAR_LENGTH(IngredientName) >= @lowerBound LIMIT 10;", new { Text = text,lowerBound = lowerBound, upperBound = upperbound }, _config.GetConnectionString("recipeDatabase")); ;
         }
 
         public async Task<string> GetIngredientName(uint ingredientID)

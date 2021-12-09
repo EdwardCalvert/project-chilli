@@ -279,7 +279,7 @@ namespace BlazorServerApp.TextProcessor
         public const string INGREDIENTSWITHCOUNTREGEX = BULLETPOINT + "[0-9]{0,3} ?" + NUMBERSWITHFRACTIONS + "(\\.|\\/| |-)?[0-9]{0,6} ?" + UNITS + " ([^\\.\\;\n\t](?!(and|or))){3,200}";
         public const string INGREDIENTSWITHOUTUNITREGEX = BULLETPOINT + "[1-9][0-9]? ((?!" + TIMEWORDS + ")[A-z]| |,|\\([^\r\t\\(\\)\n]{2,100}\\)|-){3,150}[a-z]";
         public const string UNITSFROMTEXT = "(?<=" + NUMBERSWITHFRACTIONS + ") ?" + UNITS + " ";
-        public const string STOPWORDLOOKBEHIND = "(?!(and|or))";
+        public const string STOPWORDLOOKBEHIND = "(?!( and| or))";
         public const string BULLETPOINT = "(•\t)?";
         public const string METHODREGEX = @"[1-9][0-9]{0,3}\.(\t| ){0,4}[^\t\n\r]{10,500}";
         public const string SERVINGREGEX = "((serves|makes) ?[1-9][0-9]? ?(to|-)? ?[1-9]?[0-9]?)|([1-9][0-9]? ?(to|-)? ?[1-9]?[0-9]? ?(servings|serving|portions|portion))";
@@ -335,10 +335,10 @@ namespace BlazorServerApp.TextProcessor
                     unit = "x";
                 }
                 ingredientName = Regex.Replace(ingredientName, UNITSFROMTEXT, "");
-                ingredientName = Regex.Replace(ingredientName, NUMBERSWITHFRACTIONS, "");
+                //ingredientName = Regex.Replace(ingredientName, NUMBERSWITHFRACTIONS, "");
                 Console.WriteLine(ingredientName);
                 double quantity = TextProcessor.ExtractDouble(match.Value);
-                //ingredientName = ingredientName.Replace(quantity.ToString(), "").Trim();
+                ingredientName = ingredientName.Replace(quantity.ToString(), "").Trim();
 
                 uint? ingredientID = await GetIngredientID(ingredientName, insertIngredientOnEmptyResult);
                 if (ingredientID != null)
