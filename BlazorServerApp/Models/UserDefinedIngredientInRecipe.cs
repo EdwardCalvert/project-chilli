@@ -7,6 +7,7 @@ namespace BlazorServerApp.Models
     {
         [Required]
         public uint? IngredientID { get; set; }
+
         public uint RecipeID { get; set; }
 
         [Required, Range(0.01, 1000)]

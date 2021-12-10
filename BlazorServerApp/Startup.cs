@@ -1,8 +1,10 @@
+using BlazorServerApp.DocxReader;
 using BlazorServerApp.Models;
 using BlazorServerApp.proccessService;
-using BlazorServerApp.WordsAPI;
-using BlazorServerApp.DocxReader;
+using BlazorServerApp.RecipeDataProcessorService;
+using BlazorServerApp.STMPMailer;
 using BlazorServerApp.TextProcessor;
+using BlazorServerApp.WordsAPI;
 using DataLibrary;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -11,17 +13,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Net.Http;
-using BlazorServerApp.RecipeDataProcessorService;
-using System;
 using Microsoft.Extensions.Options;
-using BlazorServerApp.STMPMailer;
+using System;
 using System.IO;
+using System.Net.Http;
+
 namespace BlazorServerApp
 {
     public class Startup
     {
         private readonly string _modelPath;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -34,7 +36,6 @@ namespace BlazorServerApp
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-
             // BLAZOR COOKIE Auth Code (begin)
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -46,13 +47,13 @@ namespace BlazorServerApp
                 .AddCookie();
             // BLAZOR COOKIE Auth Code (end)
             // ******
-            
+
             services.AddConfiguration<EmailSettings>(Configuration, "EmailSettings");
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<IDataAccess, MySqlDataAccess>(); //Inject the mysql data access- could be changed to any data layer implementing IDataAcess. This launches it in memory- the overhead is worth it as data layer is vital.
             services.AddSingleton<IDocxReader, docxReader>();
-            
+
             services.AddSingleton<IRecipeDataLoader, RecipeDataLoader>();
             services.AddSingleton<IFileManger, FileManager>();
             services.AddSingleton<IRecipeProcessorService, RecipeProcessorService>();
@@ -61,8 +62,8 @@ namespace BlazorServerApp
             services.AddTransient<ITextProcessor, TextProcessor.TextProcessor>();
             services.AddSingleton<IDietaryProcessor, DietaryProcessor>();
             services.AddTransient<IEmailSender, EmailSender>();
-        //    services.AddPredictionEnginePool<ModelInput, ModelOutput>()
-        //.FromFile(_modelPath);
+            //    services.AddPredictionEnginePool<ModelInput, ModelOutput>()
+            //.FromFile(_modelPath);
             services.AddHttpClient();
             // ******
             // BLAZOR COOKIE Auth Code (begin)
@@ -107,9 +108,8 @@ namespace BlazorServerApp
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
-
-
         }
+
         public static string GetAbsolutePath(string relativePath)
         {
             FileInfo _dataRoot = new FileInfo(typeof(Program).Assembly.Location);

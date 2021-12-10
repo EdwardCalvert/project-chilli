@@ -1,18 +1,12 @@
 ﻿using Catalyst;
-using Catalyst.Models;
 using Mosaik.Core;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Linq;
-using Version = Mosaik.Core.Version;
-using P = Catalyst.PatternUnitPrototype;
-using System.Text;
-using Microsoft.Extensions.Logging;
 
 namespace BlazorServerApp.TextProcessor
 {
-    public class NounExtractor :INounExtractor
+    public class NounExtractor : INounExtractor
 
     {
         private Pipeline nlp;
@@ -21,15 +15,14 @@ namespace BlazorServerApp.TextProcessor
         {
             Catalyst.Models.English.Register();
             Storage.Current = new DiskStorage("catalyst-models");
-            
         }
 
-        public  async Task<List<string>> ExtractNouns(string wallOfText)
+        public async Task<List<string>> ExtractNouns(string wallOfText)
         {
             nlp = await Pipeline.ForAsync(Language.English);
             string processedDoc = wallOfText.Replace(".", ".  ").Replace("\t", " ");
             var doc = new Document(processedDoc, Language.English);
-             nlp.ProcessSingle(doc);
+            nlp.ProcessSingle(doc);
             List<string> noungs = new();
             foreach (List<TokenData> tokenDatas in doc.TokensData)
             {
@@ -46,8 +39,6 @@ namespace BlazorServerApp.TextProcessor
             }
             return noungs;
         }
-
-
     }
 
     public interface INounExtractor
@@ -68,4 +59,3 @@ namespace BlazorServerApp.TextProcessor
         }
     }
 }
-

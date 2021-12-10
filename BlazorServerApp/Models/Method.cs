@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+
 namespace BlazorServerApp.Models
 {
     public class Method
     {
         [Required]
-        [MaxLength(63355,ErrorMessage ="Method too long for database")]
+        [MaxLength(63355, ErrorMessage = "Method too long for database")]
         public string MethodText { get; set; }
 
         public uint StepNumber { get; set; }

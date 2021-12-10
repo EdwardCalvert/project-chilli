@@ -1,23 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlazorServerApp.Models
 {
-    public class PasswordRestToken :ISqlInsertible,ISqlUpdatible,ISqlDeletible
+    public class PasswordRestToken : ISqlInsertible, ISqlUpdatible, ISqlDeletible
     {
-        Random _random = new Random();
+        private Random _random = new Random();
         public const int MAXTOKENSIZE = 20;
         public const int MAXOTPSIZE = 6;
+
         public PasswordRestToken()
         {
-
         }
+
         public PasswordRestToken(string userName)
         {
             UserName = userName;
-            ResetTokenID =  GenerateResetToken(MAXTOKENSIZE);
+            ResetTokenID = GenerateResetToken(MAXTOKENSIZE);
             ResetTokenIDViewed = false;
             OTP = GenerateResetToken(MAXOTPSIZE);
             OTPUsed = false;
@@ -38,7 +36,7 @@ namespace BlazorServerApp.Models
 
         public string GetAbsoluteURL(string baseUri)
         {
-            return   baseUri+ PasswordResetBaseUri + $"/{ResetTokenID}/change"; 
+            return baseUri + PasswordResetBaseUri + $"/{ResetTokenID}/change";
         }
 
         public const string PasswordResetBaseUri = "admin/newpassword";

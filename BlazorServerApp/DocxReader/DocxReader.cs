@@ -1,5 +1,4 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
-using System;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -10,10 +9,8 @@ namespace BlazorServerApp.DocxReader
         public Task<string> GetTextAsync(string path);
     }
 
-    class docxReader:IDocxReader
+    internal class docxReader : IDocxReader
     {
-
-
         public string doccumentText = "";
         public int stepNumber = 1;
 
@@ -28,7 +25,6 @@ namespace BlazorServerApp.DocxReader
             await Task.Run(() => Traverse(xml.DocumentElement));
 
             return doccumentText;
-
         }
 
         private void Traverse(XmlNode node)
@@ -41,19 +37,18 @@ namespace BlazorServerApp.DocxReader
             {
                 doccumentText += "\t";
             }
-            
-            if(node.Name == "w:numPr") //<w:numId w:val=\"1\" />{
+
+            if (node.Name == "w:numPr") //<w:numId w:val=\"1\" />{
             {
-                doccumentText += stepNumber+".\t";
+                doccumentText += stepNumber + ".\t";
                 stepNumber++;
             }
             if (node.Name == "w:drawing")//<w:drawing> // do nothing. as this would cause co-ordinates to appear!
             {
                 //do nothing.
             }
-            else if (node is XmlElement) 
+            else if (node is XmlElement)
             {
-
                 if (node.HasChildNodes)
                 {
                     Traverse(node.FirstChild);

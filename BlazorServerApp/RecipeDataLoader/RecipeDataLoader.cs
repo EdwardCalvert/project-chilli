@@ -23,7 +23,7 @@ namespace BlazorServerApp.Models
                 if (results.Count == 0)
                 {
                     Console.WriteLine("Need to create database");
-                    Task.Run(()=>CreateDatabase());
+                    Task.Run(() => CreateDatabase());
                 }
                 else
                 {
@@ -34,14 +34,15 @@ namespace BlazorServerApp.Models
             {
                 Console.WriteLine("An error occured while attempting to connect to the database. You may need to start the SQL server, or change the connection string.");
             }
-             
+
         }
 
         private async Task CreateDatabase()
         {
             string SQLCreateCommand;
             string path = Path.Combine(Directory.GetCurrentDirectory(), "RecipeDatabase.sql");
-            if (File.Exists(path)) {
+            if (File.Exists(path))
+            {
                 using (StreamReader stream = new StreamReader(path))
                 {
                     SQLCreateCommand = stream.ReadToEnd();
@@ -84,7 +85,7 @@ namespace BlazorServerApp.Models
 
         public async Task<UserDefinedIngredient> GetUserDefinedIngredient(UserDefinedIngredientInRecipe ingredient)
         {
-            return  OneOrNull<UserDefinedIngredient>(await _data.LoadData<UserDefinedIngredient, dynamic>("SELECT * FROM UserDefinedIngredients WHERE IngredientID = @ingredientID", new { ingredientID = ingredient.IngredientID }, _config.GetConnectionString("recipeDatabase")));
+            return OneOrNull<UserDefinedIngredient>(await _data.LoadData<UserDefinedIngredient, dynamic>("SELECT * FROM UserDefinedIngredients WHERE IngredientID = @ingredientID", new { ingredientID = ingredient.IngredientID }, _config.GetConnectionString("recipeDatabase")));
         }
         private async Task DeleteIngredientInRecipe(uint RecipeID)
         {
@@ -94,7 +95,7 @@ namespace BlazorServerApp.Models
         public async Task<uint?> DeleteOnlyFile(string MD5Hash)
         {
             List<uint> result = await _data.LoadData<uint, dynamic>("SELECT RecipeID FROM FileManager WHERE FileID=@fileID", new { fileID = MD5Hash }, _config.GetConnectionString("recipeDatabase"));
-            if(result != null && result.Count == 1)
+            if (result != null && result.Count == 1)
             {
                 await DeleteOnlyFile(result[0]);
                 return result[0];
@@ -317,7 +318,7 @@ namespace BlazorServerApp.Models
                 lowerBound = text.Length - 4;
             }
             int upperbound = text.Length * 2 + 3;
-            return await _data.LoadData<UserDefinedIngredient, dynamic>(@"SELECT IngredientName, IngredientID FROM UserDefinedIngredients WHERE MATCH(IngredientName) AGAINST(@Text IN NATURAL LANGUAGE MODE) > 0 AND CHAR_LENGTH(IngredientName) <= @upperBound AND CHAR_LENGTH(IngredientName) >= @lowerBound LIMIT 10;", new { Text = text,lowerBound = lowerBound, upperBound = upperbound }, _config.GetConnectionString("recipeDatabase")); ;
+            return await _data.LoadData<UserDefinedIngredient, dynamic>(@"SELECT IngredientName, IngredientID FROM UserDefinedIngredients WHERE MATCH(IngredientName) AGAINST(@Text IN NATURAL LANGUAGE MODE) > 0 AND CHAR_LENGTH(IngredientName) <= @upperBound AND CHAR_LENGTH(IngredientName) >= @lowerBound LIMIT 10;", new { Text = text, lowerBound = lowerBound, upperBound = upperbound }, _config.GetConnectionString("recipeDatabase")); ;
         }
 
         public async Task<string> GetIngredientName(uint ingredientID)
@@ -346,10 +347,14 @@ namespace BlazorServerApp.Models
 
         public async Task<List<uint>> GetSearchDatabaseTextFields(string searchText, int offset)
         {
-            return await _data.LoadData<uint, dynamic>(RecipeSearch+Union +FullTextSearchWithoutLimit + QueryLimit + Terminator, new { searchText = searchText, offset = offset }, _config.GetConnectionString("recipeDatabase"));
+            return await _data.LoadData<uint, dynamic>(RecipeSearch + Union + FullTextSearchWithoutLimit + QueryLimit + Terminator, new { searchText = searchText, offset = offset }, _config.GetConnectionString("recipeDatabase"));
         }
 
-        private const string FullTextSearchWithoutLimit = @"SELECT  RecipeID FROM Method
+        private const string FullTextSearchWithoutLimit = @"
+SELECT  RecipeID FROM Recipe
+WHERE MATCH(RecipeName) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
+UNION DISTINCT
+SELECT  RecipeID FROM Method
 WHERE MATCH(MethodText) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
 UNION DISTINCT
 SELECT RecipeID FROM Recipe
@@ -373,13 +378,19 @@ WHERE MATCH(RecipeName) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
 ";
         private const string Union = @" UNION DISTINCT ";
 
+        private const string UnTaggedRecipes = @"SELECT RecipeID
+FROM UserDefinedIngredients a LEFT JOIN UserDefinedIngredientsInRecipe i
+   ON a.IngredientID = i.IngredientID
+GROUP BY i.RecipeID
+HAVING  SUM(TypeOf) = 0";
+
         private const string QueryLimit = " LIMIT 20 OFFSET @offset";
 
         private const string BitwiseDieaterySearch = @"SELECT s.RecipeID
 FROM   UserDefinedIngredientsInRecipe s
-WHERE  s.IngredientID IN (SELECT IngredientID FROM UserDefinedIngredients WHERE TypeOf & @bitPattern = 0 AND TypeOf!=0) AND s.RecipeID IN (" + FullTextSearchWithoutLimit + @")
+WHERE  s.IngredientID IN (SELECT IngredientID FROM UserDefinedIngredients WHERE TypeOf & @bitPattern = 0  AND TypeOf != 0) AND s.RecipeID IN (" + FullTextSearchWithoutLimit + @") 
 GROUP BY s.RecipeID
-" + QueryLimit +Terminator;
+" + " UNION DISTINCT  " + UnTaggedRecipes + " " + QueryLimit + Terminator; //XOR TypeOf = 0
 
         private const string Terminator = ";";
 
@@ -452,7 +463,7 @@ GROUP BY s.RecipeID
             return await _data.LoadData<FileManagerModel, dynamic>("SELECT * FROM FileManager LIMIT 300 OFFSET @offset ;", new { offset = offset }, _config.GetConnectionString("recipeDatabase"));
         }
 
-        public async Task GenericInsert<T>(T objectToInsert) where T: ISqlInsertible
+        public async Task GenericInsert<T>(T objectToInsert) where T : ISqlInsertible
         {
             await _data.SaveData(objectToInsert.SqlInsertStatement(), objectToInsert.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
         }
@@ -484,10 +495,10 @@ GROUP BY s.RecipeID
 
         public async Task<RecoveryEmailAddresses> GetSingleAddress(string email)
         {
-            return OneOrNull<RecoveryEmailAddresses>(await _data.LoadData<RecoveryEmailAddresses, dynamic>("SELECT * FROM RecoveryEmailAddress WHERE EmailAddress=@email", new {email=email }, _config.GetConnectionString("recipeDatabase")));
+            return OneOrNull<RecoveryEmailAddresses>(await _data.LoadData<RecoveryEmailAddresses, dynamic>("SELECT * FROM RecoveryEmailAddress WHERE EmailAddress=@email", new { email = email }, _config.GetConnectionString("recipeDatabase")));
         }
 
-        
+
 
         /// <summary>
         /// Method that returns the first item in a list- intended for queries where you know there will only be one result. 
@@ -497,7 +508,7 @@ GROUP BY s.RecipeID
         /// <returns></returns>
         static T OneOrNull<T>(List<T> list)
         {
-            if( list != null &&list.Count == 1)
+            if (list != null && list.Count == 1)
             {
                 return list[0];
             }
@@ -505,6 +516,6 @@ GROUP BY s.RecipeID
             {
                 return default;
             }
-        } 
+        }
     }
 }

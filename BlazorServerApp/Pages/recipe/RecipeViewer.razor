@@ -4,10 +4,6 @@
 @inject IFileManger fileManager
 @using BlazorServerApp.proccessService
 @using BlazorServerApp.Extensions
-
-
-
-
 @if (!recipeFound)
 {
     <h1>Sorry pal, no recipe found with the ID @RecipeID.</h1>
@@ -17,8 +13,6 @@ else if (!validIdentifier)
 {
     <ErrorNotification ErrorMessage="Sorry, the ID you provided was not recognised as valid!" />
 }
-
-
 else if (model != null)
 {
     <h2>@model.RecipeName</h2>
@@ -40,9 +34,6 @@ else if (model != null)
             }
         </div>
     </AuthorizeView>
-
-
-
     <FoodLabel nutritionLabel="@model.DisplayNutritionModel" StyleParameters="font-size: 12px; overflow-wrap: anywhere;
     width: 100px;" ShowTitle="false" />
 
@@ -120,11 +111,8 @@ else if (model != null)
                 </ol>
             </div>
         }
-
         <ReviewSectionWithSentiment RecipeID="@RecipeID" />
-
     </div>
-
 
 }
 else
@@ -135,24 +123,22 @@ else
 @code{
     [Parameter]
     public long RecipeIDRequest { get; set; }
-
     private bool pageRequested = false;
     private bool validIdentifier;
-
     private uint RecipeID;
-
     private bool recipeFound = false;
     string DownloadPath;
-
     Recipe model;
-
-
 
     private async Task DeleteRecipe()
     {
         FileManagerModel managerModel = await dataLoader.GetFile(RecipeID);
-        fileManager.DeleteFile(managerModel.FileID);
-        await dataLoader.DeleteOnlyFile(managerModel.FileID);
+        if (managerModel.FileID != null)
+        {
+            fileManager.DeleteFile(managerModel.FileID);
+            await dataLoader.DeleteOnlyFile(managerModel.FileID);
+
+        }
         await dataLoader.DeleteRecipeAndRelatedValues(RecipeID);
         NavManager.NavigateTo($"/");
     }

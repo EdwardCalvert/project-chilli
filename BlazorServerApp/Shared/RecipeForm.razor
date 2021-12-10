@@ -15,7 +15,7 @@
     }
     else
     {
-        <textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput" readonly="@PreventTextboxEdit"></textarea> 
+        <textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput" readonly="@PreventTextboxEdit"></textarea>
     }
 }
 
@@ -244,7 +244,7 @@
     string ErrorMessage = "";
 
     string _textAre = "";
-    string textArea { get { return _textAre; } set { _textAre = value;  ProcessRecipeFromText(); } }
+    string textArea { get { return _textAre; } set { _textAre = value; ProcessRecipeFromText(); } }
 
     Equipment addEquipmentModel { get; set; } = new();
 
@@ -291,7 +291,7 @@
                 await dataLoader.UpdateRecipe(RecipeModel);
                 NavManager.NavigateTo($"/Recipe/{RecipeModel.RecipeID}");
             }
-            else if( mode == MODES.BulkUpload)
+            else if (mode == MODES.BulkUpload)
             {
                 await OnClick.InvokeAsync();
             }
@@ -305,16 +305,16 @@
 
     private void RemoveEmptyRows()
     {
-        foreach(Method method in RecipeModel.Method)
+        foreach (Method method in RecipeModel.Method)
         {
-            if(method.MethodText == null || method.MethodText.Length < 2)
+            if (method.MethodText == null || method.MethodText.Length < 2)
             {
                 RecipeModel.Method.Remove(method);
             }
         }
-        foreach(UserDefinedIngredientInRecipe ingredient in RecipeModel.Ingredients)
+        foreach (UserDefinedIngredientInRecipe ingredient in RecipeModel.Ingredients)
         {
-            if(ingredient.IngredientID == default(int) || ingredient.Quantity == default(double) || ingredient.Unit == null || ingredient.Unit.Length < 0)
+            if (ingredient.IngredientID == default(int) || ingredient.Quantity == default(double) || ingredient.Unit == null || ingredient.Unit.Length < 0)
             {
                 RecipeModel.Ingredients.Remove(ingredient);
             }
@@ -384,7 +384,7 @@
         {
             try
             {
-                if(textProcessor == null)
+                if (textProcessor == null)
                 {
                     textProcessor = new TextProcessor(new NounExtractor(), wordsAPI, dataLoader);
                 }
@@ -399,7 +399,7 @@
                 this.StateHasChanged();
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 ErrorMessage = e.Message;
                 error = true;

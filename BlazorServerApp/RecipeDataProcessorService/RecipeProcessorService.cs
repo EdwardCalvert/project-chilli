@@ -1,12 +1,11 @@
-﻿using BlazorServerApp.Models;
+﻿using BlazorServerApp.DocxReader;
+using BlazorServerApp.Models;
+using BlazorServerApp.TextProcessor;
 using Microsoft.AspNetCore.Components.Forms;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Timers;
-using BlazorServerApp.DocxReader;
-using BlazorServerApp.TextProcessor;
-using System.Collections.Concurrent;
 
 namespace BlazorServerApp.proccessService
 {
@@ -15,25 +14,24 @@ namespace BlazorServerApp.proccessService
         public Task<Recipe> Recipe;
         public string DoccumentText;
     }
+
     public class RecipeProcessorService : IRecipeProcessorService
     {
         public const int maxiumumCapacity = 500;
-        private  CircularQueue<string> _recipesToProcess = new CircularQueue<string>(maxiumumCapacity);
+        private CircularQueue<string> _recipesToProcess = new CircularQueue<string>(maxiumumCapacity);
         private readonly IFileManger _fileManager;
         private readonly IRecipeDataLoader _recipeDataLoader;
         private IDocxReader _docxReader;
         private ConcurrentDictionary<string, preProcessingContainer> preProcessRecipes = new();
         private ITextProcessor _textProcessor;
 
-        public RecipeProcessorService(IFileManger fileManger, IRecipeDataLoader recipeDataLoader,IDocxReader docxReader,ITextProcessor text)
+        public RecipeProcessorService(IFileManger fileManger, IRecipeDataLoader recipeDataLoader, IDocxReader docxReader, ITextProcessor text)
         {
             _fileManager = fileManger;
             _recipeDataLoader = recipeDataLoader;
             _docxReader = docxReader;
             _textProcessor = text;
         }
-
-        
 
         public int MaximumSingleFileSizeInBytes { get; } = 200000;
 
@@ -73,15 +71,15 @@ namespace BlazorServerApp.proccessService
         public async Task PreProcessRecipes()
         {
             Console.WriteLine("Pre-processing started ....");
-            if(GetNumberOfItemsInQueue() > 0)
+            if (GetNumberOfItemsInQueue() > 0)
             {
-                foreach(string MD5 in _recipesToProcess.GetQueueAsList())
+                foreach (string MD5 in _recipesToProcess.GetQueueAsList())
                 {
                     if (!preProcessRecipes.ContainsKey(MD5))
                     {
                         preProcessingContainer container = new();
                         container.DoccumentText = await DocxToText(MD5);
-                        container.Recipe  =  _textProcessor.CreateRecipe(container.DoccumentText);
+                        container.Recipe = _textProcessor.CreateRecipe(container.DoccumentText);
                         preProcessRecipes.TryAdd(MD5, container);
                         await Task.Run(() => container.Recipe);
                         //await Task.Delay(10);
@@ -89,7 +87,6 @@ namespace BlazorServerApp.proccessService
                 }
             }
         }
-
 
         public int GetNumberOfItemsInQueue()
         {
@@ -99,21 +96,22 @@ namespace BlazorServerApp.proccessService
         public async Task<ProcessorResult> PeekNextRecipe()
         {
             string nextItem = _recipesToProcess.PeekItem();
-            if (nextItem != default(string)) {
+            if (nextItem != default(string))
+            {
                 if (preProcessRecipes.ContainsKey(nextItem))
                 {
                     preProcessingContainer container = preProcessRecipes[nextItem];
                     Console.WriteLine("Contains key");
-                    return new ProcessorResult(await container.Recipe, nextItem,container.DoccumentText); ;
+                    return new ProcessorResult(await container.Recipe, nextItem, container.DoccumentText); ;
                 }
                 else
                 {
                     Console.WriteLine($"No key found, {nextItem}, {preProcessRecipes}");
                     string documentAsText = await DocxToText(nextItem);
-                    return new ProcessorResult(await  _textProcessor.CreateRecipe(documentAsText),nextItem,documentAsText);
+                    return new ProcessorResult(await _textProcessor.CreateRecipe(documentAsText), nextItem, documentAsText);
                 }
             }
-            return new ProcessorResult(null,null,null);
+            return new ProcessorResult(null, null, null);
         }
 
         public async Task<string> DocxToText(string MD5Hash)
@@ -123,7 +121,7 @@ namespace BlazorServerApp.proccessService
 
         public async Task DeleteFile(string MD5Hash)
         {
-            await Task.Run(()=>_fileManager.DeleteFile(MD5Hash));
+            await Task.Run(() => _fileManager.DeleteFile(MD5Hash));
         }
 
         public void Dequeue()
@@ -132,10 +130,10 @@ namespace BlazorServerApp.proccessService
             if (preProcessRecipes.ContainsKey(MD5))
             {
                 preProcessingContainer preProcessingContainer = new preProcessingContainer();
-                if(preProcessRecipes.TryGetValue(MD5,out preProcessingContainer)){
+                if (preProcessRecipes.TryGetValue(MD5, out preProcessingContainer))
+                {
                     preProcessRecipes.TryRemove(MD5, out preProcessingContainer);
                 }
-                
             }
         }
 
@@ -144,7 +142,6 @@ namespace BlazorServerApp.proccessService
             uint recipeID = await _recipeDataLoader.InsertRecipeAndRelatedFields(recipe);
             await _fileManager.CreateFileToRecipeRelationship(recipeID, MD5);
         }
-
 
         /// <summary>
         /// Used incase of catasrophic errors, to prevent the bulk uploader from ever being locked out.
@@ -156,14 +153,13 @@ namespace BlazorServerApp.proccessService
                 string MD5 = _recipesToProcess.DequeueItem();
                 _fileManager.DeleteFile(MD5);
                 uint? recipeID = await _recipeDataLoader.DeleteOnlyFile(MD5); // This seems like a very edge case, but you never know!
-                if(recipeID != null)
+                if (recipeID != null)
                 {
                     await _recipeDataLoader.DeleteRecipeAndRelatedValues((uint)recipeID);
                 }
             }
 
             _recipesToProcess = new CircularQueue<string>(maxiumumCapacity);
-
         }
     }
 
@@ -171,18 +167,20 @@ namespace BlazorServerApp.proccessService
     {
         public ProcessorResult()
         {
-
         }
+
         public ProcessorResult(Recipe recipe, string md5, string doccumentText)
         {
             MD5 = md5;
             Recipe = recipe;
             DocumentText = doccumentText;
         }
+
         public Recipe Recipe { get; set; }
         public string MD5 { get; set; }
         public string DocumentText { get; set; }
     }
+
     public interface IRecipeProcessorService
     {
         public int GetCurrentQueueCapacity();
@@ -190,14 +188,21 @@ namespace BlazorServerApp.proccessService
         public Task<ResultCode> QueueBrowserFilesForProcessing(ResultCode browserFiles);
 
         public int MaximumSingleFileSizeInBytes { get; }
+
         public bool FilesAreQueued();
+
         //public string PeekNextDocument();
         public int GetNumberOfItemsInQueue();
+
         //public Task<string> DocxToText(string MD5Hash);
-        public  Task<ProcessorResult> PeekNextRecipe();
+        public Task<ProcessorResult> PeekNextRecipe();
+
         public Task DeleteFile(string MD5Hash);
+
         public void Dequeue();
-        public  Task InsertRecipeAndFileToDB(Recipe recipe, string MD5);
+
+        public Task InsertRecipeAndFileToDB(Recipe recipe, string MD5);
+
         public void Clear();
     }
 
@@ -278,7 +283,7 @@ namespace BlazorServerApp.proccessService
                 Dictionary<int, List<IBrowserFile>>.KeyCollection keys = _dictionary.Keys;
                 foreach (int code in keys)
                 {
-                    if (code != 1 && code != 556 )
+                    if (code != 1 && code != 556)
                     {
                         return true;
                     }

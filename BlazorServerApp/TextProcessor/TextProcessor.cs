@@ -350,12 +350,12 @@ namespace BlazorServerApp.TextProcessor
                     //userDefinedIngredientInRecipes.Add(userDefinedIngredientInRecipe);
                     bag.Add(userDefinedIngredientInRecipe);
                 }
-                
+
                 // some post stuff
             });
             await Task.WhenAll(tasks);
-            List<UserDefinedIngredientInRecipe> bagResults  = new List<UserDefinedIngredientInRecipe>();
-            foreach(UserDefinedIngredientInRecipe item in bag)
+            List<UserDefinedIngredientInRecipe> bagResults = new List<UserDefinedIngredientInRecipe>();
+            foreach (UserDefinedIngredientInRecipe item in bag)
             {
                 bagResults.Add(item);
             }
@@ -413,9 +413,9 @@ namespace BlazorServerApp.TextProcessor
         }
         public string GetTitle(string input)
         {
-            foreach(string line in input.Split("\n"))
+            foreach (string line in input.Split("\n"))
             {
-                if (line != null && line.Length>2)
+                if (line != null && line.Length > 2)
                     return line;
             }
             return input.Split("\n")[0];
@@ -431,7 +431,7 @@ namespace BlazorServerApp.TextProcessor
             string description;
             Recipe newRecipe = new Recipe();
             newRecipe.RecipeName = GetTitle(inputText);
-            description = inputText.Replace(newRecipe.RecipeName,"");
+            description = inputText.Replace(newRecipe.RecipeName, "");
             //see https://regexr.com/69vg0
             newRecipe.Description = await Task.Run(() => CreateDescription(description));
             string possibleNouns = newRecipe.Description;
@@ -448,13 +448,13 @@ namespace BlazorServerApp.TextProcessor
             newRecipe.Method = await Task.Run(() => GetMethods(inputText));
 
             newRecipe.Difficulty = await Task.Run(() => GetDifficulty(newRecipe.Method));
-            Task<List<UserDefinedIngredientInRecipe>> getIngredientsWithUnits =  Task.Run(() => GetIngredientsWithUnits(inputText, true));
+            Task<List<UserDefinedIngredientInRecipe>> getIngredientsWithUnits = Task.Run(() => GetIngredientsWithUnits(inputText, true));
             Task<List<UserDefinedIngredientInRecipe>> getIngredientsWithoutUnits = Task.Run(() => GetIngredientsWithoutUnit(newRecipe.Description, true));
 
             await Task.Delay(10);
             newRecipe.Ingredients.AddRange(await getIngredientsWithoutUnits);
             newRecipe.Ingredients.AddRange(await getIngredientsWithUnits);
-            newRecipe.Equipment = await getEquipment ;
+            newRecipe.Equipment = await getEquipment;
             Console.WriteLine("Processing finished");
 
             return newRecipe;
@@ -489,16 +489,16 @@ namespace BlazorServerApp.TextProcessor
             var count = bag.Count;
             foreach (TypeOf typeOf in bag.ToArray())
             {
-                
+
                 bool insertMade = false;
-                if (typeOf != null&& typeOf.typeOf != null && (typeOf.typeOf.Contains("equipment") || typeOf.typeOf.Contains("kitchen appliance") || typeOf.typeOf.Contains("utensil") || typeOf.typeOf.Contains("electronic equipment") || typeOf.typeOf.Contains("mixer")))
+                if (typeOf != null && typeOf.typeOf != null && (typeOf.typeOf.Contains("equipment") || typeOf.typeOf.Contains("kitchen appliance") || typeOf.typeOf.Contains("utensil") || typeOf.typeOf.Contains("electronic equipment") || typeOf.typeOf.Contains("mixer")))
                 {
                     string noun = typeOf.word;
                     IEnumerable<Equipment> equipment = await _dataLoader.FindEquipmentLike(noun);
                     if (equipment.Any())
                     {
                         foreach (Equipment equipment1 in equipment)
-                            if ( noun == equipment1.EquipmentName) /*TextProcessor.LevenshteinDistance(noun, equipment1.EquipmentName) <= TextProcessor.CalculateLevenshteinThreshold(noun) && !insertMade)*/
+                            if (noun == equipment1.EquipmentName) /*TextProcessor.LevenshteinDistance(noun, equipment1.EquipmentName) <= TextProcessor.CalculateLevenshteinThreshold(noun) && !insertMade)*/
                             {
                                 if (!DoesEquipmentAreadyHaveID(EquipmentIDs, equipment1.EquipmentName))
                                 {
@@ -556,7 +556,7 @@ namespace BlazorServerApp.TextProcessor
                 Task<uint?> task = FindIngredientInDatabase(ingredientName);
                 ingredientTaskDictionary.Add(ingredientName, task);
                 await task;
-                ingredientId = task.Result ;
+                ingredientId = task.Result;
                 if (ingredientId == null && insertIngredientOnEmptyResult)
                 {
                     //The ingredient has not been found. First, find all the nouns in the text. Then call call wordsAPI to find which type the ingredient belongs to.
@@ -590,8 +590,8 @@ namespace BlazorServerApp.TextProcessor
                     return ingredientId;
                 }
             }
-            
-           
+
+
         }
     }
 

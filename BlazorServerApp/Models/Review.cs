@@ -10,6 +10,7 @@ namespace BlazorServerApp.Models
         [StringLength(50, ErrorMessage = "Review title is too long.")]
         [MinLength(2, ErrorMessage = "Review title is too short")]
         public string ReviewTitle { get; set; }
+
         [Required]
         [StringLength(DatabaseConstants.VarCharMax, ErrorMessage = "Review text is too long.")]
         [MinLength(2, ErrorMessage = "Name is too short")]

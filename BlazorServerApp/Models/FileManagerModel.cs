@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlazorServerApp.Models
 {
@@ -21,7 +18,7 @@ namespace BlazorServerApp.Models
 
         public dynamic SqlAnonymousType()
         {
-            return new{ FileID = FileID,recipeID = RecipeID,numberOfViews = NumberOfViews, lastAccessed = LastAccessed, dateUploaded = DateUploaded };
+            return new { FileID = FileID, recipeID = RecipeID, numberOfViews = NumberOfViews, lastAccessed = LastAccessed, dateUploaded = DateUploaded };
         }
     }
 }

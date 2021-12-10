@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Collections.Generic;
-using System.Collections;
 
 namespace BlazorServerApp.Models
 {
@@ -16,17 +16,16 @@ namespace BlazorServerApp.Models
             if (value != null && value.GetType().IsGenericType)
             {
                 list = value.Cast<object>().ToList();
-                if(list.Count>0)
+                if (list.Count > 0)
                 {
                     return ValidationResult.Success;
                 }
-                
             }
             return new ValidationResult($"{validationContext.DisplayName} must have more items than 0");
         }
     }
 
-        [AttributeUsage(AttributeTargets.Property |
+    [AttributeUsage(AttributeTargets.Property |
 AttributeTargets.Field, AllowMultiple = true)]
     public sealed class ValidIngredientsInRecipe : ValidationAttribute
     {
@@ -73,7 +72,7 @@ AttributeTargets.Field, AllowMultiple = true)]
 
         public static bool CustomValidation(object value, ValidationContext validationContext)
         {
-            if(double.TryParse(value.ToString() , out _))
+            if (double.TryParse(value.ToString(), out _))
             {
                 return true;
             }
@@ -158,7 +157,7 @@ AttributeTargets.Field, AllowMultiple = true)]
         public static bool ValidateMethodText(Method model)
         {
             //var model = (string ) validationContext.ObjectInstance;
-            if(model.MethodText != null && model.MethodText.Length < DatabaseConstants.VarCharMax )
+            if (model.MethodText != null && model.MethodText.Length < DatabaseConstants.VarCharMax)
             {
                 return true;
             }

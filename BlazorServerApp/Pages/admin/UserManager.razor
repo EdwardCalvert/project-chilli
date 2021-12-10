@@ -13,7 +13,7 @@
         <h3>UserManager</h3>
         <h2>Create a new Administrator</h2>
         <div class="container">
-            
+
             <EditForm Model="newUser" OnValidSubmit="@CreateUser" Context="UserCreator">
                 <DataAnnotationsValidator />
                 <div>
@@ -45,10 +45,10 @@
                 <ValidationSummary />
                 <button type="submit" class="btn btn-primary">Create User</button>
             </EditForm>
-            @if(errorsWhileCreatingUser!= null && errorsWhileCreatingUser.Length >= 0)
-                    {
+            @if (errorsWhileCreatingUser != null && errorsWhileCreatingUser.Length >= 0)
+            {
                 <p class="alert-danger">@errorsWhileCreatingUser</p>
-                    }
+            }
 
         </div>
         @code{
@@ -85,7 +85,7 @@
         <h2>Add new recovery address</h2>
         <div class="container">
             <EditForm Context="CreateRecoveryAddress" Model="recoveryEmail" OnValidSubmit="@CreateNewRecoveryEmailAddress">
-                <DataAnnotationsValidator/>
+                <DataAnnotationsValidator />
                 <div>
                     <label>Email Address</label>
                     <InputText type="email"
@@ -236,7 +236,7 @@
     bool attemptedToLogin = false;
     string BackupAccountCredentials = "";
     string Message;
-    string currentLoggedInUser ;
+    string currentLoggedInUser;
     string temporaryPassword = "";
     string temporaryUsername = "";
     string errorsWhileCreatingRecoveryAddress = "";
@@ -258,7 +258,7 @@
 
             User user = new User();
             user.Role = "Administrator";
-            string path  =Path.Combine(Directory.GetCurrentDirectory(),"RandomWords.txt");
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "RandomWords.txt");
             if (File.Exists(path))
             {
                 Console.WriteLine("Using random words to generate username and password.");
@@ -269,7 +269,7 @@
                     string fileContents = streamReadr.ReadToEnd();
                     RandomWords = fileContents.Split("\n");
                 }
-                temptUsername = "BackupAccount:"+CreatePassphrase(RandomWords, 2, "-");
+                temptUsername = "BackupAccount:" + CreatePassphrase(RandomWords, 2, "-");
                 tempPassword = CreatePassphrase(RandomWords, 3, "&");
                 user.UserName = temptUsername;
                 user.SHA512 = User.CreateSHAHash(tempPassword);
@@ -291,7 +291,7 @@
         return $"A backup account was created, username '{temptUsername}', password: '{tempPassword}' ";
     }
 
-    private string CreatePassphrase(string[] randomWords, uint itterations,string delimiter)
+    private string CreatePassphrase(string[] randomWords, uint itterations, string delimiter)
     {
         string passPhrase = "";
         for (uint i = 0; i < itterations; i++)
@@ -302,8 +302,9 @@
         return passPhrase;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender){
-        if (firstLoad )
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstLoad)
         {
             firstLoad = false;
             try
@@ -371,7 +372,7 @@
         try
         {
             RecoveryEmailAddresses addresses = await dataLoader.GetSingleAddress(recoveryEmail.EmailAddress);
-            if (addresses == null )
+            if (addresses == null)
             {
                 await dataLoader.GenericInsert<RecoveryEmailAddresses>(recoveryEmail);
                 error = false;

@@ -9,6 +9,7 @@ namespace BlazorServerApp.Models
         public string IngredientName { get; set; }
 
         public Type TypeOf { get; set; }
+
         [System.Flags]
         public enum Type : ushort
         {
@@ -22,16 +23,14 @@ namespace BlazorServerApp.Models
             Milk = 1 << 6,
             Egg = 1 << 7,
             Dairy = 1 << 8,
-            //Vegan = Vegetables | Fruit | Nuts,
-            //Vegetarian = Vegan | Dairy | Egg,
         }
 
         public const Type AllSelected = Type.Poultry | Type.Meat | Type.Fish | Type.Fruit | Type.Vegetables | Type.Nuts | Type.Milk | Type.Egg | Type.Dairy;
         public const Type Veganism = Type.Vegetables | Type.Fruit | Type.Nuts;
-        public static string[] nonVegetarianTypes = new string[] {"Poultry", "Meat", "Fish" };
-        public static string[] nonVeganTypes = new string[] { "Dairy", "Egg", "Poultry", "Meat", "Fish", "Milk" } ;
-        public static Dictionary<string, string[]> ComplexTypes = new() { { "Vegan", new string[3] { "Vegetables", "Fruit", "Nuts" } }, { "Vegetarian", new string[8] { "Vegan","Milk", "Dairy", "Egg", "Vegetables", "Fruit", "Milk", "Nuts" } } };
-        public static Dictionary<string, string[]> ExclusiveTypeBlacklist = new() { { "Vegan", nonVeganTypes  }, { "Vegetarian", nonVegetarianTypes } };
+        public static string[] nonVegetarianTypes = new string[] { "Poultry", "Meat", "Fish" };
+        public static string[] nonVeganTypes = new string[] { "Dairy", "Egg", "Poultry", "Meat", "Fish", "Milk" };
+        public static Dictionary<string, string[]> ComplexTypes = new() { { "Vegan", new string[3] { "Vegetables", "Fruit", "Nuts" } }, { "Vegetarian", new string[8] { "Vegan", "Milk", "Dairy", "Egg", "Vegetables", "Fruit", "Milk", "Nuts" } } };
+        public static Dictionary<string, string[]> ExclusiveTypeBlacklist = new() { { "Vegan", nonVeganTypes }, { "Vegetarian", nonVegetarianTypes } };
         public const Type Vegetarianism = Veganism | Type.Dairy | Type.Egg;
 
         public static Type GetTypeEnum(TypeOf typeOf)

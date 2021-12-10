@@ -9,7 +9,6 @@ namespace BlazorServerApp.Models
         public string Role { get; set; }
         public string SHA512 { get; set; }
 
-
         public string SqlInsertStatement()
         {
             return "INSERT INTO Users (UserName,SHA512,Role) VALUES(@UserName,@SHA512,@Role); ";
