@@ -10,14 +10,11 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Mvc.Rendering
 
-<h3>@(homepage? "Homepage": "Search page")</h3>
+@*<h3>@(homepage? "Homepage": "Search page")</h3>*@
 <div style="display:flex;">
     <input type="text" class="form-control" name="x" placeholder="Search term..." @bind="@searchText" @onkeyup="@Enter">
     <button class="btn btn-primary" @onclick="@SearchButtonClicked">🔍</button>
-    @if (homepage)
-    {
-        <button class="btn btn-info" @onclick="@(()=>showHelpText=true)">help</button>
-    }
+   
 </div>
 <div style="display:flex; margin-top:10px;">
     <p style="margin-bottom:0;">Order:</p>
@@ -36,17 +33,6 @@
     </select>
 </div>
 <MultiSelectDietaryCheckboxes @bind-selectedType="@dietaryType"></MultiSelectDietaryCheckboxes>
-@if (showHelpText)
-{
-
-    <br />
-    <p>Things you can search for...</p>
-    <ul>
-        <li>Ingredient, using keyword <b>ingredient</b></li>
-        <li>Equipment, using keyword <b>ingredient</b></li>
-        <li></li>
-    </ul>
-}
 <div class="row">
     @if (recipes.Count > 0)
     {
@@ -143,36 +129,44 @@
     int resultsPerQuery = 20;
     bool error = false;
     bool firstLoad = true;
-
-    UserDefinedIngredient.Type dietaryType = UserDefinedIngredient.AllSelected;
+    UserDefinedIngredient.Type dietaryType
+    {
+        get
+        {
+            return _dietaryType;
+        }
+        set
+        {
+            _dietaryType = value;
+            SearchButtonClicked();
+        }
+    }
+    UserDefinedIngredient.Type _dietaryType = UserDefinedIngredient.AllSelected;
 
     protected override async Task OnInitializedAsync()
     {
-        if (firstLoad)
+        await base.OnInitializedAsync();
+        homepage = !NavManager.ToBaseRelativePath(NavManager.Uri).Contains("search");
+        if (!homepage)
         {
-            homepage = !NavManager.ToBaseRelativePath(NavManager.Uri).Contains("search");
-            if (!homepage)
+            try
             {
-                try
+                if (orderByURL != null && sortByURL != null)
                 {
-                    if (orderByURL != null && sortByURL != null)
-                    {
-                        order = (SearchEnginge.Order)Enum.Parse(typeof(SearchEnginge.Order), orderByURL, true);
-                        sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
-                        dietaryType = (UserDefinedIngredient.Type)Enum.Parse(typeof(UserDefinedIngredient.Type), typeURL, true);
-                    }
-                }
-                catch
-                {
-                    order = SearchEnginge.Order.Descending;
-                    sortBy = SearchEnginge.SortBy.Default;
-                    dietaryType = UserDefinedIngredient.AllSelected;
-                    error = true;
+                    order = (SearchEnginge.Order)Enum.Parse(typeof(SearchEnginge.Order), orderByURL, true);
+                    sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
+                    dietaryType = (UserDefinedIngredient.Type)Enum.Parse(typeof(UserDefinedIngredient.Type), typeURL, true);
                 }
             }
-            await FindRecipes();
-            firstLoad = false;
+            catch
+            {
+                order = SearchEnginge.Order.Descending;
+                sortBy = SearchEnginge.SortBy.Default;
+                dietaryType = UserDefinedIngredient.AllSelected;
+                error = true;
+            }
         }
+        await FindRecipes(false);
     }
 
     private async Task<IEnumerable<string>> GetDieateryStyles(string text)
@@ -186,10 +180,15 @@
         return await Task.FromResult(vs);
     }
 
-    private async Task FindRecipes()
+    private async Task FindRecipes(bool overwrite)
     {
         try
         {
+            if (overwrite)
+            {
+                recipes = new List<Recipe>();
+                offset = 0;
+            }
             searchText = HttpUtility.UrlDecode(searchRoute);
             if (searchText == null)
             {
@@ -209,7 +208,7 @@
 
     private async void SearchButtonClicked()
     {
-        await Task.Run(() => MovePage());
+         UpdateURLWithParameters();
 
     }
 
@@ -242,12 +241,15 @@
         }
     }
 
-    private void MovePage()
+    private async void UpdateURLWithParameters()
     {
-        Console.WriteLine("Tags before submitt " + dietaryType);
         if (searchText != null)
         {
-            NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}/{HttpUtility.UrlEncode(order.ToString())}/{HttpUtility.UrlEncode(sortBy.ToString())}/{HttpUtility.UrlEncode(((int)dietaryType).ToString())}", forceLoad: true);
+            NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}/{HttpUtility.UrlEncode(order.ToString())}/{HttpUtility.UrlEncode(sortBy.ToString())}/{HttpUtility.UrlEncode(((int)dietaryType).ToString())}", forceLoad: false);
+
+            firstLoad = true;
+            searchRoute = searchText;
+            await FindRecipes(true);
         }
     }
 

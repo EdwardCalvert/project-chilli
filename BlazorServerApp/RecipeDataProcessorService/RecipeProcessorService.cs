@@ -14,7 +14,6 @@ namespace BlazorServerApp.proccessService
         public Task<Recipe> Recipe;
         public string DoccumentText;
     }
-
     public class RecipeProcessorService : IRecipeProcessorService
     {
         public const int maxiumumCapacity = 500;

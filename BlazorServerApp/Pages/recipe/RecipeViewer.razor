@@ -120,6 +120,8 @@ else
     <LoadingElement />
 }
 
+<ErrorNotification Show="@error" ErrorMessage="@($"An unexpected error occured while attemtpting to load recipe: {errorMessage}")"></ErrorNotification>
+
 @code{
     [Parameter]
     public long RecipeIDRequest { get; set; }
@@ -127,6 +129,8 @@ else
     private bool validIdentifier;
     private uint RecipeID;
     private bool recipeFound = false;
+    bool error = false;
+    string errorMessage = "";
     string DownloadPath;
     Recipe model;
 
@@ -145,27 +149,35 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        uint Result;
-        validIdentifier = uint.TryParse(RecipeIDRequest.ToString(), out Result);
-        if (validIdentifier)
+        try
         {
-            RecipeID = Result;
-            model = await dataLoader.GetRecipeAndTree(RecipeID);
-
-
-            if (model != null)
+            uint Result;
+            validIdentifier = uint.TryParse(RecipeIDRequest.ToString(), out Result);
+            if (validIdentifier)
             {
-                DownloadPath = await fileManager.GetURL(RecipeID);
-                recipeFound = true;
-                if (!pageRequested)
-                {
+                RecipeID = Result;
+                model = await dataLoader.GetRecipeAndTree(RecipeID);
 
-                    await dataLoader.IncrementViews(RecipeID);
-                    pageRequested = true;
+
+                if (model != null)
+                {
+                    DownloadPath = await fileManager.GetURL(RecipeID);
+                    recipeFound = true;
+                    if (!pageRequested)
+                    {
+
+                        await dataLoader.IncrementViews(RecipeID);
+                        pageRequested = true;
+                    }
+
                 }
 
             }
-
+        }
+        catch(Exception e)
+        {
+            error = true;
+            errorMessage = e.Message;
         }
     }
 }

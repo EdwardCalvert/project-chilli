@@ -79,7 +79,7 @@ namespace BlazorServerApp.proccessService
                     throw new Exception("Catastrophic error: File folder integrity lost");
                 }
             }
-            throw new Exception("It is likely that you deleted a file that was queued for processing");
+            throw new Exception("It is likely that you deleted a file that was queued for processing, or previously on disk.");
         }
 
         public async Task<List<FileInfo>> GetAllFilesStoredOnDisk()

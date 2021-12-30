@@ -32,9 +32,8 @@
 
                         <td>@recipe.ShowShortDescription(100)</td>
                         <td>@recipe.RecipeID</td>
-                        <td>@recipe.ManualUpload</td>
-                        @if (files.ContainsKey(recipe.RecipeID))
-                        {
+                        <td>@(recipe.ManualUpload? "No":"Yes")</td>
+                        @if (files.ContainsKey(recipe.RecipeID)){
                             <td>@System.Web.HttpUtility.UrlDecode(fileManager.GetFileName(files[recipe.RecipeID].FileID))</td>
                             <td><btn class="btn btn-primary" @onclick="@(() => DownloadRecipe(recipe.RecipeID))">Download</btn></td>
                             <td><btn class="btn btn-danger" @onclick="@(() => DeleteRecipe(recipe, files[recipe.RecipeID].FileID))">Delete + .docx</btn></td>
@@ -69,6 +68,8 @@
     int offset = 0;
     bool error = false;
     Dictionary<uint, FileManagerModel> files = new();
+
+
     private async void DownloadRecipe(uint recipeID)
     {
         await JSRuntime.InvokeAsync<object>("open", await fileManager.GetURL(recipeID),"_blank");
