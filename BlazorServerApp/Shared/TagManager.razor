@@ -1,0 +1,67 @@
+﻿@inject IRecipeDataLoader dataLoader
+<div class="container-fluid" style="padding-left:0;display: flex; flex-direction: row; align-items: flex-start;flex-wrap:wrap;">
+    @if (Ingredient.TypeOf != Ingredient.AllSelected)
+    {
+        <select @bind="demoType" @bind:event="onchange">
+            @foreach (Ingredient.Type flagToCheck in Enum.GetValues(typeof(Ingredient.Type)))
+            {
+                if (!Ingredient.TypeOf.HasFlag(flagToCheck) && flagToCheck != Ingredient.Type.None)
+                {
+                    <option value="@flagToCheck">@flagToCheck.ToString()</option>
+                }
+            }
+        </select>
+        <btn class="btn btn-primary" @onclick="(()=>AddTag(demoType))">Add</btn>
+    }
+    @if (Ingredient.TypeOf != Ingredient.Type.None)
+    {
+
+        @foreach (Ingredient.Type flagToCheck in Enum.GetValues(typeof(Ingredient.Type)))
+        {
+            if (Ingredient.TypeOf.HasFlag(flagToCheck) && flagToCheck != Ingredient.Type.None)
+            {
+                <div style="background-color: rgba(0,0,0,.03); margin-bottom:0;margin-left:5px; border-radius:5px;">@flagToCheck.ToString()  <i class="oi oi-tag"></i><btn class="btn btn-danger" @onclick="(()=>DeleteTag(flagToCheck))"><i class="oi oi-x"></i></btn></div>
+            }
+        }
+
+
+    }
+    else
+    {
+        <div style="background-color: rgba(0,0,0,.03); margin-bottom:0;margin-left:5px; border-radius:5px;">No tags found <i class="oi oi-tag"> </i></div>
+    }
+
+</div>
+
+@code {
+    [Parameter]
+    public Ingredient Ingredient { get; set; }
+
+    Ingredient.Type demoType;
+
+    private void DeleteTag(Ingredient.Type flag)
+    {
+        Ingredient.TypeOf &= ~flag;
+    }
+    private void AddTag(Ingredient.Type flag)
+    {
+        if (flag != Ingredient.Type.None)
+        {
+            Ingredient.TypeOf |= flag;
+        }
+        demoType = FindFirstFlag();
+    }
+
+    private Ingredient.Type FindFirstFlag()
+    {
+        foreach (Ingredient.Type flagToCheck in Enum.GetValues(typeof(Ingredient.Type)))
+        {
+            if (!Ingredient.TypeOf.HasFlag(flagToCheck) && flagToCheck != Ingredient.Type.None)
+            {
+                return flagToCheck;
+            }
+        }
+        return Ingredient.AllSelected;
+    }
+
+}

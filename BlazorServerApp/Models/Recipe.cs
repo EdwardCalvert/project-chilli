@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BlazorServerApp.TextProcessor;
+using BlazorServerApp.WordsAPI;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -9,6 +11,9 @@ namespace BlazorServerApp.Models
     /// </summary>
     public class Recipe
     {
+        public Recipe()
+        {
+        }
         public const int INGREDIENTSCAPACITY = 30;
         public const int EQUIPMENTCAPACITY = 30;
         public const int METHODCAPACITY = 30;
@@ -55,7 +60,7 @@ namespace BlazorServerApp.Models
         };
 
         [ValidateComplexType,Required, ListLengthGreaterThanZero]
-        public List<UserDefinedIngredientInRecipe> Ingredients { get; set; } = new List<UserDefinedIngredientInRecipe>();
+        public List<Ingredient> Ingredients { get; set; } = new List<Ingredient>();
 
         public bool ManualUpload { get; set; }
 
@@ -133,17 +138,17 @@ namespace BlazorServerApp.Models
             return $"UPDATE Recipe SET Servings = @servings, MealType =  @mealType, RecipeName = @recipeName, Kcal = @kcal, Saturates = @saturates, Carbohydrates = @carbohydrates, Sugar = @sugar, Fibre = @fibre, Protein = @protein, Salt = @salt, Fat = @fat, CookingTime = @cookingTime, PreperationTime = @preperationTime, Difficulty = @difficulty, PageVisits = @pageVisits,LastRequested = @lastRequested, Description = @description WHERE RecipeID = @recipeID; ";
         }
 
-        public void InsertEmptyIngredient(int quantity)
+        public void InsertEmptyIngredient(int quantity, IWordsAPIService? words = null, INounExtractor? nounExtractor = null)
         {
             for (int i = 0; i < quantity; i++)
             {
-                InsertEmptyIngredient();
+                InsertEmptyIngredient(words,nounExtractor);
             }
         }
 
-        public void InsertEmptyIngredient()
+        public void InsertEmptyIngredient(IWordsAPIService? words = null, INounExtractor? nounExtractor = null)
         {
-            Ingredients.Add(new UserDefinedIngredientInRecipe());
+            Ingredients.Add(new Ingredient(words,nounExtractor));
         }
 
         public void InsertEmptyMethod()

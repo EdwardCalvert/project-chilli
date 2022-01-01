@@ -129,7 +129,7 @@
     int resultsPerQuery = 20;
     bool error = false;
     bool firstLoad = true;
-    UserDefinedIngredient.Type dietaryType
+    Ingredient.Type dietaryType
     {
         get
         {
@@ -141,7 +141,7 @@
             SearchButtonClicked();
         }
     }
-    UserDefinedIngredient.Type _dietaryType = UserDefinedIngredient.AllSelected;
+    Ingredient.Type _dietaryType = Ingredient.AllSelected;
 
     protected override async Task OnInitializedAsync()
     {
@@ -155,14 +155,14 @@
                 {
                     order = (SearchEnginge.Order)Enum.Parse(typeof(SearchEnginge.Order), orderByURL, true);
                     sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
-                    dietaryType = (UserDefinedIngredient.Type)Enum.Parse(typeof(UserDefinedIngredient.Type), typeURL, true);
+                    dietaryType = (Ingredient.Type)Enum.Parse(typeof(Ingredient.Type), typeURL, true);
                 }
             }
             catch
             {
                 order = SearchEnginge.Order.Descending;
                 sortBy = SearchEnginge.SortBy.Default;
-                dietaryType = UserDefinedIngredient.AllSelected;
+                dietaryType = Ingredient.AllSelected;
                 error = true;
             }
         }
@@ -172,7 +172,7 @@
     private async Task<IEnumerable<string>> GetDieateryStyles(string text)
     {
         List<string> vs = new List<string>();
-        foreach (var irration in Enum.GetValues(typeof(UserDefinedIngredient.Type)))
+        foreach (var irration in Enum.GetValues(typeof(Ingredient.Type)))
         {
             Console.WriteLine(irration);
             vs.Add(irration.ToString());

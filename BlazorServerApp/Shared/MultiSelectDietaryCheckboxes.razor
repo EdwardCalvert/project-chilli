@@ -11,11 +11,11 @@
 </div>
 @code {
 
-    [Parameter] public EventCallback<UserDefinedIngredient.Type> selectedTypeChanged { get; set; }
+    [Parameter] public EventCallback<Ingredient.Type> selectedTypeChanged { get; set; }
 
-    private UserDefinedIngredient.Type _type;
+    private Ingredient.Type _type;
     [Parameter]
-    public UserDefinedIngredient.Type selectedType
+    public Ingredient.Type selectedType
     {
         get => _type; set
         {
@@ -29,7 +29,7 @@
     private void HandleCheckboxChange(string key)
     {
         selectedBoxes[key] = !selectedBoxes[key];
-        UserDefinedIngredient.Type type = (UserDefinedIngredient.Type)Enum.Parse(typeof(UserDefinedIngredient.Type), key, true);
+        Ingredient.Type type = (Ingredient.Type)Enum.Parse(typeof(Ingredient.Type), key, true);
         if (selectedBoxes[key])
         {
             selectedType |= type; //Select item
@@ -44,7 +44,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        foreach (UserDefinedIngredient.Type flagToCheck in Enum.GetValues(typeof(UserDefinedIngredient.Type)))
+        foreach (Ingredient.Type flagToCheck in Enum.GetValues(typeof(Ingredient.Type)))
         {
             if (selectedType.HasFlag(flagToCheck) )
             {
@@ -65,7 +65,7 @@
             selectedBoxes[key]= false;
         }
         selectedBoxes["None"] = true;
-        selectedType = UserDefinedIngredient.Type.None;
+        selectedType = Ingredient.Type.None;
         await selectedTypeChanged.InvokeAsync(selectedType);
     }
     private async void SetAllTrue()
@@ -75,7 +75,7 @@
             selectedBoxes[key] = true;
         }
         selectedBoxes["None"] = true;
-        selectedType = UserDefinedIngredient.AllSelected;
+        selectedType = Ingredient.AllSelected;
         await selectedTypeChanged.InvokeAsync(selectedType);
     }
 }

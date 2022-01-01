@@ -82,14 +82,9 @@ namespace BlazorServerApp.Models
         {
             await _data.SaveData("DELETE FROM EquipmentInRecipe WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
         }
-
-        public async Task<UserDefinedIngredient> GetUserDefinedIngredient(UserDefinedIngredientInRecipe ingredient)
-        {
-            return OneOrNull<UserDefinedIngredient>(await _data.LoadData<UserDefinedIngredient, dynamic>("SELECT * FROM UserDefinedIngredients WHERE IngredientID = @ingredientID", new { ingredientID = ingredient.IngredientID }, _config.GetConnectionString("recipeDatabase")));
-        }
         private async Task DeleteIngredientInRecipe(uint RecipeID)
         {
-            await _data.SaveData("DELETE FROM UserDefinedIngredientsInRecipe WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+            await _data.SaveData("DELETE FROM Ingredient WHERE RecipeID = @recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task<uint?> DeleteOnlyFile(string MD5Hash)
@@ -185,9 +180,9 @@ namespace BlazorServerApp.Models
             return autoIncrementResult[0];
         }
 
-        public async Task<List<UserDefinedIngredientInRecipe>> GetIngredientsInRecipe(uint RecipeID)
+        public async Task<List<Ingredient>> GetIngredientsInRecipe(uint RecipeID)
         {
-            return await _data.LoadData<UserDefinedIngredientInRecipe, dynamic>($"SELECT * FROM UserDefinedIngredientsInRecipe WHERE RecipeID =@recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
+            return await _data.LoadData<Ingredient, dynamic>($"SELECT * FROM Ingredient WHERE RecipeID =@recipeID", new { recipeID = RecipeID }, _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task<List<uint>> GetRecipeIDFromIngredientID(int quantity, string unit, uint userDefinedIngredientID)
@@ -279,20 +274,17 @@ namespace BlazorServerApp.Models
 
             if (displayModel.Ingredients != null)
             {
-                foreach (UserDefinedIngredientInRecipe model in displayModel.Ingredients)
+                foreach (Ingredient model in displayModel.Ingredients)
                 {
-                    if (model.IngredientID != default(uint))
-                    {
-                        await _data.SaveData(model.SqlInsertStatement(), model.SqlAnonymousType((uint)model.IngredientID, displayModel.RecipeID), _config.GetConnectionString("recipeDatabase"));
-                    }
+                    model.RecipeID = displayModel.RecipeID;
+                    await _data.SaveData(model.SqlInsertStatement(), model.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
                 }
             }
         }
 
-        public async Task<uint> InsertIngredient(UserDefinedIngredient model)
+        public async Task InsertIngredient(Ingredient model)
         {
-            List<uint> autoIncrementResult = await _data.LoadData<uint, dynamic>(model.SqlInsertStatement() + "SELECT LAST_INSERT_ID();", model.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
-            return autoIncrementResult[0];
+            await _data.LoadData<uint, dynamic>(model.SqlInsertStatement() , model.SqlAnonymousType(), _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task<IEnumerable<Equipment>> FindEquipmentLike(string text)
@@ -306,7 +298,7 @@ namespace BlazorServerApp.Models
             return resulsts[0];
         }
 
-        public async Task<IEnumerable<UserDefinedIngredient>> FindIngredients(string text)
+        public async Task<IEnumerable<Ingredient>> FindIngredients(string text)
         {
             int lowerBound;
             if (text.Length < 5)
@@ -318,7 +310,7 @@ namespace BlazorServerApp.Models
                 lowerBound = text.Length - 4;
             }
             int upperbound = text.Length * 2 + 3;
-            return await _data.LoadData<UserDefinedIngredient, dynamic>(@"SELECT IngredientName, IngredientID FROM UserDefinedIngredients WHERE MATCH(IngredientName) AGAINST(@Text IN NATURAL LANGUAGE MODE) > 0 AND CHAR_LENGTH(IngredientName) <= @upperBound AND CHAR_LENGTH(IngredientName) >= @lowerBound LIMIT 10;", new { Text = text, lowerBound = lowerBound, upperBound = upperbound }, _config.GetConnectionString("recipeDatabase")); ;
+            return await _data.LoadData<Ingredient, dynamic>(@"SELECT IngredientName, IngredientID FROM UserDefinedIngredients WHERE MATCH(IngredientName) AGAINST(@Text IN NATURAL LANGUAGE MODE) > 0 AND CHAR_LENGTH(IngredientName) <= @upperBound AND CHAR_LENGTH(IngredientName) >= @lowerBound LIMIT 10;", new { Text = text, lowerBound = lowerBound, upperBound = upperbound }, _config.GetConnectionString("recipeDatabase")); ;
         }
 
         public async Task<string> GetIngredientName(uint ingredientID)

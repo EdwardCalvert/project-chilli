@@ -58,7 +58,7 @@ else if (model != null)
         <p style="margin-bottom:0;">Difficulty: @model.Difficulty</p>
     }
     <hr />
-    <IngredientsTag userDefinedIngredients="model.Ingredients"></IngredientsTag>
+    <IngredientsTag ingredients="model.Ingredients"></IngredientsTag>
     <div>
         @if (model.Description != null)
         {
@@ -79,9 +79,9 @@ else if (model != null)
             }
             <div class="IngredientsList">
                 <ul>
-                    @foreach (UserDefinedIngredientInRecipe ingredient in model.Ingredients)
+                    @foreach (Ingredient ingredient in model.Ingredients)
                     {
-                        <li><em>@ingredient.Quantity@ingredient.Unit</em> @( dataLoader.GetIngredientName((uint)ingredient.IngredientID).Result) </li>
+                        <li>@ingredient.IngredientName</li>
                     }
                 </ul>
             </div>

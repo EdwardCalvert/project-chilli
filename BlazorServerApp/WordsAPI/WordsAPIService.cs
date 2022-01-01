@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using BlazorServerApp.Extensions;
 using BlazorServerApp.Models;
+using System.Collections.Concurrent;
 
 namespace BlazorServerApp.WordsAPI
 {
@@ -18,8 +19,10 @@ namespace BlazorServerApp.WordsAPI
         private readonly IConfiguration _config;
         private readonly IRecipeDataLoader _dataLoader;
         private int remainingCallouts = 2000;
+        private int deleteSchedulle = 90000;
+        private int deleteAttempts = 5;
         private bool serviceEnabled = true;
-        private Dictionary<string, Task<TypeOf>> taskDictionary = new();
+        private ConcurrentDictionary<string, Task<TypeOf>> taskDictionary = new();
         public WordsAPIService(IHttpClientFactory httpClientFactory, IConfiguration config,IRecipeDataLoader dataAccess)
         {
             _httpClientFactory = httpClientFactory;
@@ -30,35 +33,65 @@ namespace BlazorServerApp.WordsAPI
         public async Task<TypeOf> CallCachedAPI(string searchTerm)
         {
             searchTerm = searchTerm.ToLower();
-            if (!await _dataLoader.ContainsStopWord(searchTerm) && searchTerm.Length>1)
+            if (searchTerm.Length>1)
             {
                 List<SearchQuery> queries = await _dataLoader.FindWordsAPISearch(searchTerm); 
-                if (queries.Count == 1)
+                if (queries.Count>= 1)
                 {
                     return JsonConvert.DeserializeObject<TypeOf>(queries[0].ResultAsJSON);
                 }
                 else
                 {
-
-                    TypeOf type;
+                    
                     if (taskDictionary.ContainsKey(searchTerm))
                     {
-                        type = await taskDictionary[searchTerm];
+                        try
+                        {
+                            return await taskDictionary[searchTerm];
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine($"Error {e.Message} encountered for \"{searchTerm}\". Null being returned consequently");
+                            return null;
+                        }
+
                     }
                     else
                     {
-                        Task<TypeOf> task = CallAPI(searchTerm);
-                        taskDictionary.Add(searchTerm, task);
-                        await task;
-                        type = task.Result;
-                        taskDictionary.Remove(searchTerm);
-                    }
 
+                        Task<TypeOf> task = CallAPI(searchTerm);
+                        bool succsessfulAdding = taskDictionary.TryAdd(searchTerm, task);
+
+                        if (!succsessfulAdding)
+                        {
+                            Console.WriteLine($"error while adding \"{searchTerm}\" to dictionary. Most likely already there: {taskDictionary.ContainsKey(searchTerm)}");
+
+                        }
+                        Task.Run(()=>ScheduleDeletionOfTaskItem(searchTerm, 1));
+                        return await task;
+                    }
                     
-                    return type;
                 }
             }
             return null;
+        }
+
+        private async Task ScheduleDeletionOfTaskItem(string searchTerm,int count)
+        {
+            await Task.Delay(deleteSchedulle);
+            if (taskDictionary.ContainsKey(searchTerm) && count<deleteAttempts)
+            {
+                bool suucess = taskDictionary.TryRemove(searchTerm,out _);
+                if (!suucess)
+                {
+                    Console.WriteLine($"Error while attempting to remove item from dictionary. Attempt: {count} for search term \"{searchTerm}\"");
+                    ScheduleDeletionOfTaskItem(searchTerm, count++);
+                }
+                else
+                {
+                    Console.WriteLine($"Scheduled deletion of \"{searchTerm}\" complete. {taskDictionary.Count} items remain in task dictionary");
+                }
+            }
         }
 
         private async Task<TypeOf> CallAPI(string word)
@@ -85,9 +118,6 @@ namespace BlazorServerApp.WordsAPI
                 {
                     string jsonResult = await response.Content.ReadAsStringAsync();
                      remainingCallouts =int.Parse(response.Headers.GetValues("x-ratelimit-requests-remaining").FirstOrDefault())-1;
-                        
-
-
                     if (response.IsSuccessStatusCode)
                     {
                         SearchQuery searchQuery = new();
@@ -96,7 +126,14 @@ namespace BlazorServerApp.WordsAPI
                         List<SearchQuery> queries  = await _dataLoader.FindWordsAPISearch(word);
                         if (queries == null || queries.Count == 0)
                         {
-                            await _dataLoader.InsertSearchQuery(searchQuery);
+                            try
+                            {
+                                await _dataLoader.InsertSearchQuery(searchQuery);
+                            }
+                            catch
+                            {
+                                Console.WriteLine($"Error while inserting {searchQuery.SearchTerm} into database. Likely that it was allready in there!");
+                            }
                             return JsonConvert.DeserializeObject<TypeOf>(jsonResult);
                         }
                         else

@@ -1,7 +1,6 @@
 using BlazorServerApp.DocxReader;
 using BlazorServerApp.Models;
 using BlazorServerApp.proccessService;
-using BlazorServerApp.RecipeDataProcessorService;
 using BlazorServerApp.STMPMailer;
 using BlazorServerApp.TextProcessor;
 using BlazorServerApp.WordsAPI;
@@ -58,9 +57,8 @@ namespace BlazorServerApp
             services.AddSingleton<IFileManger, FileManager>();
             services.AddSingleton<IRecipeProcessorService, RecipeProcessorService>();
             services.AddSingleton<IWordsAPIService, WordsAPIService>();
-            services.AddTransient<INounExtractor, NounExtractor>();
+            services.AddTransient<INounExtractor, BasicNounExtractor>();
             services.AddTransient<ITextProcessor, TextProcessor.TextProcessor>();
-            services.AddSingleton<IDietaryProcessor, DietaryProcessor>();
             services.AddTransient<IEmailSender, EmailSender>();
             //    services.AddPredictionEnginePool<ModelInput, ModelOutput>()
             //.FromFile(_modelPath);

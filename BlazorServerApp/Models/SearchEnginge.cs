@@ -37,39 +37,29 @@ namespace BlazorServerApp.Models
             Descending,
         }
 
-        public static async Task<List<Recipe>> SearchForRecipes(IRecipeDataLoader dataLoader, string searchTerm, IWordsAPIService wordsAPIService, int offset, UserDefinedIngredient.Type type)
+        public static async Task<List<Recipe>> SearchForRecipes(IRecipeDataLoader dataLoader, string searchTerm, IWordsAPIService wordsAPIService, int offset, Ingredient.Type type)
         {
             List<Recipe> searchResults = new List<Recipe>();
             List<uint> recipeIDs = new();
             searchTerm = searchTerm.ToLower();
-            //TextProcessor.TextProcessor.
-            //UserDefinedIngredient.Type  type=UserDefinedIngredient.GetTypeEnum(searchTerm);
             TextProcessor.TextProcessor textProcessor = new TextProcessor.TextProcessor(new NounExtractor(), wordsAPIService, dataLoader);
 
-            if (searchTerm.Contains("vegan"))
-            {
-                type = UserDefinedIngredient.Veganism;
-            }
-            else if (searchTerm.Contains("vegetarian"))
-            {
-                type = UserDefinedIngredient.Vegetarianism;
-            }
 
-            if (type != UserDefinedIngredient.Type.None)
+            if (type != Ingredient.Type.None)
             {
                 recipeIDs.AddRange(await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset, (ushort)~(ushort)type)); //
             }
             else
             {
-                List<UserDefinedIngredientInRecipe> ingredientsInRecipes = await textProcessor.GetIngredientsWithUnits(searchTerm, false);
+                //List<UserDefinedIngredientInRecipe> ingredientsInRecipes = await textProcessor.GetIngredientsWithUnits(searchTerm, false);
 
-                if (ingredientsInRecipes.Count > 0)
-                {
-                    foreach (UserDefinedIngredientInRecipe ingredient in ingredientsInRecipes)
-                    {
-                        recipeIDs.Add((uint)ingredient.IngredientID);
-                    }
-                }
+                //if (ingredientsInRecipes.Count > 0)
+                //{
+                //    foreach (UserDefinedIngredientInRecipe ingredient in ingredientsInRecipes)
+                //    {
+                //        recipeIDs.Add((uint)ingredient.IngredientID);
+                //    }
+                //}
                 recipeIDs.AddRange(await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset));
             }
 

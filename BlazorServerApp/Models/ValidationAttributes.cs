@@ -25,36 +25,7 @@ namespace BlazorServerApp.Models
         }
     }
 
-    [AttributeUsage(AttributeTargets.Property |
-AttributeTargets.Field, AllowMultiple = true)]
-    public sealed class ValidIngredientsInRecipe : ValidationAttribute
-    {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
-        {
-            if (ValidIngredientsInRecipe.CustomValidation(value, validationContext))
-            {
-                return ValidationResult.Success;
-            }
-            else
-            {
-                return new ValidationResult("Ingredients are invalid");
-            }
-        }
 
-        public static bool CustomValidation(object value, ValidationContext validationContext)
-        {
-            var model = (Recipe)validationContext.ObjectInstance;
-
-            foreach (UserDefinedIngredientInRecipe ingredient in model.Ingredients)
-            {
-                if (!ValidRecipeID.Validate(ingredient.IngredientID) || ingredient.Quantity is default(double) || !ValidUnit.Validate(ingredient.Unit))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
 
     public sealed class ValidNutritionalElement : ValidationAttribute
     {

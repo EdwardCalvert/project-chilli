@@ -41,6 +41,19 @@ namespace BlazorServerApp.TextProcessor
         }
     }
 
+    public class BasicNounExtractor : INounExtractor
+    {
+        public async Task<List<string>> ExtractNouns(string wallOfText)
+        {
+            List<string> nouns = new();
+            foreach(string possibleNoun in wallOfText.Split(" "))
+            {
+                nouns.Add(possibleNoun);
+            }
+            return nouns;
+        }
+    }
+
     public interface INounExtractor
     {
         public Task<List<string>> ExtractNouns(string wallOfText);

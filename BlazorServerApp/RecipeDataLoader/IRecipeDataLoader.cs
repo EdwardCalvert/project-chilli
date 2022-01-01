@@ -20,11 +20,11 @@ namespace BlazorServerApp.Models
         public Task<int> SumRecords(string tableName);
         public Task<uint> InsertRecipeAndRelatedFields(Recipe displayModel);
         public Task InsertRelatedFields(Recipe displayModel);
-        public  Task<uint> InsertIngredient(UserDefinedIngredient model);
+        public  Task InsertIngredient(Ingredient model);
         public Task RunSql(string sql);
         public  Task<Recipe> GetRecipeAndTree(uint RecipeID);
         public  Task<string> GetIngredientName(uint ingredientID);
-        public  Task<IEnumerable<UserDefinedIngredient>> FindIngredients(string text);
+        public  Task<IEnumerable<Ingredient>> FindIngredients(string text);
         public  Task<uint> EquipmentCount(Equipment equipment);
         public  Task<IEnumerable<Equipment>> FindEquipmentLike(string text);
         public Task<List<Review>> GetReviews(uint RecipeID);
@@ -33,9 +33,8 @@ namespace BlazorServerApp.Models
         public  Task<List<Recipe>> BuildRecipeTreeFromDataModel(List<Recipe> recipes);
         public  Task<List<uint>> GetSearchDatabaseTextFields(string searchText,int offset);
         public Task<List<uint>> GetSearchDatabaseTextFields(string searchText, int offset, ushort invertedTypeOfBitPattern);
-        public Task<List<uint>> GetRecipeIDFromIngredientID(int quantity, string unit, uint userDefinedIngredientID);
-        public Task<List<UserDefinedIngredientInRecipe>> GetIngredientsInRecipe(uint RecipeID);
-
+        //public Task<List<uint>> GetRecipeIDFromIngredientID(int quantity, string unit, uint userDefinedIngredientID);
+        public Task<List<Ingredient>> GetIngredientsInRecipe(uint RecipeID);
         public  Task SaveUser(User user);
         public  Task<User> GetUserFromDatabase(string userName);
         public  Task<List<Recipe>> BulkImportRecipes(int offset);
@@ -55,6 +54,5 @@ namespace BlazorServerApp.Models
         public  Task<List<RecoveryEmailAddresses>> GetEmailAddresses();
         public  Task UpdateRecoveryEmailAddress(string oldEmailAddress, string newEmailAddress, string userName);
         public  Task<RecoveryEmailAddresses> GetSingleAddress(string email);
-        public Task<UserDefinedIngredient> GetUserDefinedIngredient(UserDefinedIngredientInRecipe ingredientInRecipe);
     }
 }

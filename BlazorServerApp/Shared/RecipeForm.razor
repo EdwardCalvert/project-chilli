@@ -1,8 +1,10 @@
 ﻿@inject IRecipeDataLoader dataLoader
 @inject NavigationManager NavManager
 @inject IWordsAPIService wordsAPI
+@inject INounExtractor nounExtractor
 @using BlazorServerApp.TextProcessor
 @using BlazorServerApp.WordsAPI
+@using System.Timers
 
 @if (mode == MODES.Create)
 {
@@ -37,59 +39,31 @@
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipeDescriptionLabel">Recipe Description*</label></div>
-                        <div class="FieldData"><InputTextArea style="width: 100%;" id="recipeDescriptionInput" @bind-Value="RecipeModel.Description" rows="@lines" /></div>
+                        <div class="FieldData"><InputTextArea style="width: 100%;" id="recipeDescriptionInput" @bind-Value="RecipeModel.Description" rows="@(RecipeModel.Description.Split('\n').Length)" /></div>
                     </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="recipeIngredientsLabel">Ingredients* </label></div>
-                        <div class="row row-cols-1">
+                          <div class="col" style="flex-basis: unset;">
+                        
 
                             @for (int i = 0; i < RecipeModel.Ingredients.Count; i++)
                             {
-                                UserDefinedIngredientInRecipe copyOfIngredient = RecipeModel.Ingredients[i];
-                                <div class="col" style="flex-basis: unset;">
-                                    <div class="FieldData">
-                                        <InputNumber id="@("recipePreparationTimeInput" + i)" class="TimeInputField" @bind-Value="@copyOfIngredient.Quantity" style="padding-left: 5px; margin-right: 5px;" />
-                                        <InputSelect id="@("recipieIngredientsQuanity" + i)" @bind-Value="copyOfIngredient.Unit" style="padding-left: 5px; margin-right: 5px;">
-                                            <option></option>
-                                            @foreach (var value in Recipe.SUPPORTEDUNITS)
-                                                {
+                                 Ingredient ing = RecipeModel.Ingredients[i];
 
-                                                <option>@value</option>
-                                                }
-                                        </InputSelect>
-                                        <BlazorServerApp.Blazored_Typeahead.BlazoredTypeahead SearchMethod="dataLoader.FindIngredients"
-                                                                                              @bind-Value="copyOfIngredient.IngredientID"
-                                                                                              EnableDropDown="true"
-                                                                                              MinimumLength="3"
-                                                                                              ConvertMethod="ConvertIngredientToID"
-                                                                                              MaximumSuggestions="5"
-                                                                                              Disabled="false"
-                                                                                              AddItemOnEmptyResultMethod="ItemAddedMethod"
-                                                                                              placeholder="Search by ingredient name..."
-                                                                                              style="padding-right: 5px; margin-right: 5px;">
-                                            <SelectedTemplate Context="ingredient">
-                                                @dataLoader.GetIngredientName((uint)ingredient).Result
-                                            </SelectedTemplate>
-                                            <NotFoundTemplate Context="searchText">
-                                                Add "@searchText" as a new ingredient <br />
-                                                The newly added ingredient will be selected after being added.
-                                            </NotFoundTemplate>
-                                            <HelpTemplate>
-                                                Please enter at least 3 character to perform a search.<hr />
-                                            </HelpTemplate>
-                                            <ResultTemplate Context="ingredient">
-                                                @ingredient.IngredientName
-                                            </ResultTemplate>
-                                        </BlazorServerApp.Blazored_Typeahead.BlazoredTypeahead>
-                                        <ValidationMessage For="@(() => copyOfIngredient)" />
+                                    <div class="FieldData">
+
+                                        <InputText  style="width: 100%;" @bind-Value="ing.IngredientName"  placeholder="Enter one ingredient here..." ></InputText>
+                                        <TagManager Ingredient="ing"></TagManager>
+                                        
                                         <ValidationMessage For="() =>RecipeModel.Ingredients" />
                                         <div class="FieldLine">
                                             <button type="button" style="margin-right:5px" class="btn btn-danger" @onclick="@(e => DeleteIngredient(i - 1))">✕</button>
-                                        </div>
                                     </div>
-                                </div>
+                                    </div>
+
 
                             }
+                            </div>
                             <div>
                                 <ValidationMessage For="@(() => RecipeModel.Ingredients)" />
                             </div>
@@ -105,7 +79,6 @@
                                 </div>
                             }
                         </div>
-                    </div>
                     <div class="FieldLine">
                         <div class="FieldHeader"><label id="EquipmentLable">Equipment used in recipe </label></div>
                         <div class="row row-cols-1">
@@ -232,6 +205,7 @@
 
     [Parameter]
     public MODES mode { get; set; }
+    private Timer _debounceTimer;
 
     [Parameter] public RenderFragment ChildContent { get; set; }
     [Parameter] public EventCallback OnClick { get; set; }
@@ -312,23 +286,15 @@
                 RecipeModel.Method.Remove(method);
             }
         }
-        foreach (UserDefinedIngredientInRecipe ingredient in RecipeModel.Ingredients)
+        foreach (Ingredient ingredient in RecipeModel.Ingredients)
         {
-            if (ingredient.IngredientID == default(int) || ingredient.Quantity == default(double) || ingredient.Unit == null || ingredient.Unit.Length < 0)
+            if (ingredient.IngredientName == null || ingredient.IngredientName.Length == 0 )
             {
                 RecipeModel.Ingredients.Remove(ingredient);
             }
         }
     }
 
-    private async Task<UserDefinedIngredient> ItemAddedMethod(string searchText)
-    {
-        UserDefinedIngredient newIngredient = new UserDefinedIngredient();
-        newIngredient.IngredientName = searchText;
-        uint ingredientID = await dataLoader.InsertIngredient(newIngredient); // Because Ingredient ID is null, no text is shown
-        newIngredient.IngredientID = ingredientID;
-        return newIngredient;
-    }
 
     private async Task<Equipment> AddEquipmentOnEmptyResult(string searchText)
     {
@@ -339,7 +305,7 @@
         return newEquipment;
     }
 
-    private uint? ConvertIngredientToID(UserDefinedIngredient ingredient)
+    private uint? ConvertIngredientToID(Ingredient ingredient)
     {
         return ingredient?.IngredientID;
     }
@@ -349,10 +315,13 @@
         if (mode == MODES.Create)
         {
             RecipeModel = new();
-            RecipeModel.InsertEmptyIngredient(3);
+            RecipeModel.InsertEmptyIngredient(3,wordsAPI,nounExtractor);
             RecipeModel.InsertEmptyMethod(5);
+            RecipeModel.Description = "";
         }
+        
         return base.OnInitializedAsync();
+
     }
 
     private void DeleteIngredient(int index)
@@ -369,7 +338,7 @@
     {
         if (RecipeModel.Ingredients.Count != Recipe.INGREDIENTSCAPACITY)
         {
-            RecipeModel.InsertEmptyIngredient(2);
+            RecipeModel.InsertEmptyIngredient(wordsAPI,nounExtractor);
         }
     }
 
