@@ -39,7 +39,7 @@ namespace BlazorServerApp
             services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
+                options.MinimumSameSitePolicy = SameSiteMode.Strict;
             });
             services.AddAuthentication(
                 CookieAuthenticationDefaults.AuthenticationScheme)

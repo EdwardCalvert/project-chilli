@@ -37,7 +37,7 @@ namespace BlazorServerApp.Models
 
         public static List<string> GetCurrentRoles()
         {
-            return new List<string>() { "Administrator" };
+            return new List<string>() { "Administrator","User" };
         }
     }
 }

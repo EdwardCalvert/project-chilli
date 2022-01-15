@@ -10,7 +10,6 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Mvc.Rendering
 
-@*<h3>@(homepage? "Homepage": "Search page")</h3>*@
 <div style="display:flex;">
     <input type="text" class="form-control" name="x" placeholder="Search term..." @bind="@searchText" @onkeyup="@Enter">
     <button class="btn btn-primary" @onclick="@SearchButtonClicked">🔍</button>

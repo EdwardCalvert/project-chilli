@@ -46,11 +46,14 @@
                 string sha512 = BlazorServerApp.Models.User.CreateSHAHash(loginForm.Password);
                 if (user != null && user.SHA512 == sha512)
                 {
+                    
                     error = false;
-                    navMangaer.NavigateTo($"/Login?paramUsername={@encode(loginForm.Username)}&paramPassword={@encode(loginForm.Password)}", true);
+                    var uri = navMangaer.ToAbsoluteUri(navMangaer.Uri);
+                    navMangaer.NavigateTo($"/Login?paramUsername={@encode(loginForm.Username)}&paramPassword={@encode(loginForm.Password)}&paramReturnURL={uri.AbsolutePath}", true);
                 }
                 else
                 {
+
                     error = true;
                     this.StateHasChanged();
                 }

@@ -190,9 +190,11 @@ namespace BlazorServerApp.Models
             return await _data.LoadData<uint, dynamic>($"SELECT RecipeID FROM UserDefinedIngredientsInRecipe WHERE  Quanity=@quantity AND Unit=@unit AND IngredientID = @ingredientID", new { Quantity = quantity, Unit = unit, IngredientID = userDefinedIngredientID }, _config.GetConnectionString("recipeDatabase"));
         }
 
-        public async Task SaveNewReview(Review review)
+        public async Task<uint> SaveNewReview(Review review)
         {
-            await _data.SaveData(review.SQLInsertStatement(), review.SQLAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+                List<uint> autoIncrementResult = await _data.LoadData<uint, dynamic>(review.SQLInsertStatement() + " SELECT LAST_INSERT_ID();", review.SQLAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+            return autoIncrementResult[0];
+
         }
 
         public async Task<List<Review>> GetReviews(uint RecipeID)
@@ -488,6 +490,13 @@ GROUP BY s.RecipeID
         public async Task<RecoveryEmailAddresses> GetSingleAddress(string email)
         {
             return OneOrNull<RecoveryEmailAddresses>(await _data.LoadData<RecoveryEmailAddresses, dynamic>("SELECT * FROM RecoveryEmailAddress WHERE EmailAddress=@email", new { email = email }, _config.GetConnectionString("recipeDatabase")));
+        }
+
+        public async Task<uint> UpdateReview(Review review)
+        {
+            List<uint> autoIncrementResult = await _data.LoadData<uint, dynamic>(review.SQLUpdateStatement() + " SELECT LAST_INSERT_ID();", review.SQLAnonymousType(), _config.GetConnectionString("recipeDatabase"));
+            return autoIncrementResult[0];
+
         }
 
 

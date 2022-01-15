@@ -6,7 +6,7 @@
 </div>
 
 @code {
-    [Parameter] public EventCallback<bool> OnToggle { get; set; }
+    [Parameter] public EventCallback<bool> SetAsCheckedChanged { get; set; }
     [Parameter] public string Id { get; set; }
     [Parameter] public string Class { get; set; }
     [Parameter] public bool SetAsChecked { get; set; }
@@ -28,7 +28,7 @@
             _isOn = value;
             if (!_isSettingUp)
             {
-                OnToggle.InvokeAsync(value);
+                SetAsCheckedChanged.InvokeAsync(value);
             }
             _isSettingUp = false;
         }

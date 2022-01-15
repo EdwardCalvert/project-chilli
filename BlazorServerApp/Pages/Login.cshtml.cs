@@ -23,14 +23,13 @@ namespace BlazorCookieAuth.Server.Pages
         public async Task<IActionResult> OnGetAsync(string paramUsername, string paramPassword,string paramReturnURL)
         {
             string returnUrl;
-            if (paramReturnURL == null)
+            if (paramReturnURL != null && Url.IsLocalUrl(paramReturnURL))
             {
-                returnUrl= Url.Content("~/");
-
+                returnUrl = paramReturnURL;
             }
             else
             {
-                returnUrl = paramReturnURL;
+                returnUrl = Url.Content("~/");
             }
            
 
@@ -50,13 +49,15 @@ namespace BlazorCookieAuth.Server.Pages
                     var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, paramUsername),
-                new Claim(ClaimTypes.Role, "Administrator"),
+                new Claim(ClaimTypes.Role, user.Role),
             };
                     var claimsIdentity = new ClaimsIdentity(
                         claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var authProperties = new AuthenticationProperties
                     {
                         IsPersistent = true,
+                        IssuedUtc = DateTime.Now,
+                        ExpiresUtc = DateTime.Now.AddMinutes(60),
                         RedirectUri = this.Request.Host.Value
                     };
  await HttpContext.SignInAsync(

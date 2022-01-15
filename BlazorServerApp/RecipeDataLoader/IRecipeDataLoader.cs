@@ -28,7 +28,7 @@ namespace BlazorServerApp.Models
         public  Task<uint> EquipmentCount(Equipment equipment);
         public  Task<IEnumerable<Equipment>> FindEquipmentLike(string text);
         public Task<List<Review>> GetReviews(uint RecipeID);
-        public Task SaveNewReview(Review newReview);
+        public Task<uint> SaveNewReview(Review newReview);
         public Task<uint> InsertEquipment(Equipment equipment);
         public  Task<List<Recipe>> BuildRecipeTreeFromDataModel(List<Recipe> recipes);
         public  Task<List<uint>> GetSearchDatabaseTextFields(string searchText,int offset);
@@ -54,5 +54,6 @@ namespace BlazorServerApp.Models
         public  Task<List<RecoveryEmailAddresses>> GetEmailAddresses();
         public  Task UpdateRecoveryEmailAddress(string oldEmailAddress, string newEmailAddress, string userName);
         public  Task<RecoveryEmailAddresses> GetSingleAddress(string email);
+        public Task<uint> UpdateReview(Review review);
     }
 }

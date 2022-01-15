@@ -3,8 +3,12 @@
 <div class="ReviewCard">
     @if (Reviews.Count > 0)
     {<ReviewSummary DisplayReviewModel="Reviews" TitleText="Average review:" />
-        @foreach (Review displayReviewModel in Reviews)
+        @for (int i = 0; i<Reviews.Count; i++)
         {
+            Review displayReviewModel = Reviews[i];
+            if (displayReviewModel.InappropriateContent)
+            {
+        <AuthorizeView Roles="Administrator">
             <div class="card m-3">
                 <div class="card-header No-Decoration ColourBlack">
                     <p>@displayReviewModel.ReviewersName on the @displayReviewModel.DateSubmitted.ToString("d") said : </p><h3>@displayReviewModel.ReviewTitle (@displayReviewModel.Star.GetStarsForUI())</h3>
@@ -12,11 +16,31 @@
                 <div class="card-body No-Decoration ColourBlack">
                     @displayReviewModel.ReviewText
                 </div>
-                <AuthorizeView Roles="Administrator">
-                    <div class="card-footer"><btn class="btn btn-danger" @onclick="(()=>DeleteReview(displayReviewModel.ReviewID,displayReviewModel))">Delete</btn></div>
-                </AuthorizeView>
+                <div class="card-footer">
+                    <btn class="btn btn-danger" @onclick="(() => DeleteReview(displayReviewModel.ReviewID, displayReviewModel))">Delete</btn>  Tick to hide:  
+                    <input type="checkbox" @onclick="(()=>ChangeVisibility(displayReviewModel))" @bind="displayReviewModel.InappropriateContent"/>
+                </div>
+                
             </div>
-        }
+    </AuthorizeView>
+    }
+    else
+    {
+    <div class="card m-3">
+        <div class="card-header No-Decoration ColourBlack">
+            <p>@displayReviewModel.ReviewersName on the @displayReviewModel.DateSubmitted.ToString("d") said : </p><h3>@displayReviewModel.ReviewTitle (@displayReviewModel.Star.GetStarsForUI())</h3>
+        </div>
+        <div class="card-body No-Decoration ColourBlack">
+            @displayReviewModel.ReviewText
+        </div>
+        <AuthorizeView Roles="Administrator">
+            <div class="card-footer"><btn class="btn btn-danger" @onclick="(() => DeleteReview(displayReviewModel.ReviewID, displayReviewModel))">Delete</btn>  Tick to hide:   
+                                     <input type="checkbox" @onclick="(()=>ChangeVisibility(displayReviewModel))" @bind="displayReviewModel.InappropriateContent" /></div>
+            
+        </AuthorizeView>
+    </div>
+    }
+    }
     }
     <EditForm Model="@newReview" OnValidSubmit="@InsertNewRecipe">
 
@@ -38,9 +62,9 @@
                 <div class="InputFieldContainer">
                     <InputSelect id="reviewRatingSelector" @bind-Value="StarCount">
                         @foreach (var value in Star.Stars)
-                        {
+                                    {
                             <option value="@value.Key">@value.Value</option>
-                        }
+                                    }
                     </InputSelect>
                 </div>
             </div>
@@ -81,6 +105,15 @@
     private bool error = false;
     private string errorMessage = "";
 
+    private async void ChangeVisibility(Review review)
+    {
+        review.InappropriateContent = !review.InappropriateContent;
+        Console.WriteLine(review.InappropriateContent);
+        Console.WriteLine("need to change visibility");
+        await dataLoader.UpdateReview(review);
+
+    }
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -104,8 +137,8 @@
             newReview.Star = Star.CreateStar(StarCount);
             newReview.DateSubmitted = DateTime.Now;
             newReview.RecipeID = RecipeID;
+
             
-            Reviews.Add(newReview);
 
 
             //Load sample data
@@ -116,24 +149,25 @@
             };
 
             //Load model and predict output
-            var result = SentimentAnalysis.Predict(sampleData);
+            var result = await Task.Run(()=> SentimentAnalysis.Predict(sampleData));
             @if (result.Prediction == 1)
-                {
-                    //errorMessage = "The review comment was flagged as inappropriate, so has not been submitted!";
-                    //error = true;
-                    Console.WriteLine("The review comment was flagged as inappropriate, so has not been submitted!");
-                }
-                else
-                {
-                    await dataLoader.SaveNewReview(newReview);
-
-
-                    newReview = new Review();
-                    error = false;
-                }
-
+            {
+                Console.WriteLine("The review comment was flagged as inappropriate, so has not been submitted!");
+                newReview.InappropriateContent = true;
+            }
+            else
+            {
+                newReview.InappropriateContent = false;
+                
 
             }
+            newReview.ReviewID =  await dataLoader.SaveNewReview(newReview);
+            Reviews.Add(newReview);
+            newReview = new Review();
+
+
+
+        }
         catch (Exception e)
         {
             errorMessage = e.Message;
