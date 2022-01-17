@@ -1,7 +1,7 @@
 # prRecipieDatabase (now known as Project Chili)
-```
-If you want to build this server, create a appsettings.json file in Blazor Server App, replacing the bracketed text where appropriate
 
+If you want to build this server, create a appsettings.json file in Blazor Server App, replacing the bracketed text where appropriate
+```
 {
   "Logging": {
     "LogLevel": {
