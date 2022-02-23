@@ -10,22 +10,26 @@
                target="_top">Logout</a>
         </Authorized>
         <NotAuthorized>
-            @if (error) { 
-            <p class="alert-danger"> Unable to sign you in.</p> <p><a href="/userStuck/passwordReset">Forgot your password?</a></p>
-            }
-        <EditForm OnValidSubmit="Authenticate" Context="LoginComponent" Model="loginForm">
-            <DataAnnotationsValidator />
-            <InputText type="text"
-                       placeholder="User Name"
-                       @bind-Value="@loginForm.Username" />
-            &nbsp;&nbsp;
-            <InputText type="password"
-                   placeholder="Password"
-                   @bind-Value="@loginForm.Password" />
-            <button type="submit" style="margin-left:5px;" class="btn btn-primary">Login</button>
+            @*@if (error)
+            {
+                <p class="alert alert-danger"> Unable to sign you in.</p> <p><a href="/userStuck/passwordReset" class="btn btn-danger">Forgot your password?</a></p>
+            }*@
+
+            <EditForm OnValidSubmit="Authenticate" Context="LoginComponent" Model="loginForm" style =" display: flex; flex-direction: column; align-content: stretch; flex-wrap: nowrap; align-items: center; }">
+
+                <DataAnnotationsValidator />
+                <InputText type="text"
+                           placeholder="User Name"
+                           @bind-Value="@loginForm.Username" style="width:100%"/>
+                &nbsp;&nbsp;
+                <InputText type="password"
+                           placeholder="Password"
+                           @bind-Value="@loginForm.Password"  style="width:100%"/>
+                <button style="width:100%;margin:5px" type="submit" class="btn btn-primary">Login</button> @*style="margin-left:5px;"*@
 
 
-        </EditForm>
+
+            </EditForm>
         </NotAuthorized>
     </AuthorizeView>
 <ErrorNotification Show="@error" ErrorMessage="Unable to log you in."> </ErrorNotification>

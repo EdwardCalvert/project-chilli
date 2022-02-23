@@ -22,51 +22,7 @@ namespace BlazorServerApp.TextProcessor
             _wordsAPIService = wordsAPIService;
         }
 
-        public static int LevenshteinDistance(string source1, string source2)
-        {
-            var source1Length = source1.Length;
-            var source2Length = source2.Length;
 
-            var matrix = new int[source1Length + 1, source2Length + 1];
-
-            // First calculation, if one entry is empty return full length
-            if (source1Length == 0)
-                return source2Length;
-
-            if (source2Length == 0)
-                return source1Length;
-
-            // Initialization of matrix with row size source1Length and columns size source2Length
-            for (var i = 0; i <= source1Length; matrix[i, 0] = i++) { }
-            for (var j = 0; j <= source2Length; matrix[0, j] = j++) { }
-
-            // Calculate rows and collumns distances
-            for (var i = 1; i <= source1Length; i++)
-            {
-                for (var j = 1; j <= source2Length; j++)
-                {
-                    var cost = (source2[j - 1] == source1[i - 1]) ? 0 : 1;
-
-                    matrix[i, j] = Math.Min(
-                        Math.Min(matrix[i - 1, j] + 1, matrix[i, j - 1] + 1),
-                        matrix[i - 1, j - 1] + cost);
-                }
-            }
-            // return result
-            return matrix[source1Length, source2Length];
-        }
-
-        public static int CalculateLevenshteinThreshold(string input)
-        {
-            if (input.Length <= 4)
-                return 0; //i.e. egg would go to eggs etc.
-            else if (input.Length >= 20)
-                return 3; //Longer words may have more spelling inaccuracies, but we wouldn't want totally irrevivant results
-            else if (input.Length >= 10)
-                return 1; //thiis is the range 5<=input.Length<=10 This may be too high.
-            else
-                return 1;//thiis is the range 5<=input.Length<=10 This may be too high.
-        }
 
         private static int extractMaximumNumber(String str)
         {
@@ -94,27 +50,6 @@ namespace BlazorServerApp.TextProcessor
 
             // Return maximum value
             return Math.Max(res, num);
-        }
-
-        private static int FindFirstInteger(string input)
-        {
-            int number = 0;
-
-            for (int i = 0; i < input.Length; i++) // loop over the complete input
-            {
-                if (Char.IsDigit(input[i])) //check if the current char is digit
-                    number = number * 10 + (input[i] - '0');
-                else
-                    return number; //Stop the loop after the first character
-            }
-            return -1;
-        }
-
-        private static double ConvertComplexFractionToDouble(string input)
-        {
-            input = input.Trim();
-            string[] wholeNumber = input.Split(" ");
-            return TextProcessor.extractMaximumNumber(wholeNumber[0]) + ConvertSimpleFractionToDouble(input);
         }
 
         private static double ConvertSimpleFractionToDouble(string input)
@@ -384,58 +319,6 @@ namespace BlazorServerApp.TextProcessor
             return null;
         }
 
-        private Dictionary<string, Task<uint?>> ingredientTaskDictionary = new();
-
-        //public async Task<uint?> GetIngredientID(string ingredientName, bool insertIngredientOnEmptyResult)
-        //{
-        //    ingredientName = ingredientName.Replace("•	", "");
-        //    uint? ingredientId;
-        //    if (ingredientTaskDictionary.ContainsKey(ingredientName))
-        //    {
-        //        return await ingredientTaskDictionary[ingredientName];
-        //    }
-        //    else
-        //    {
-        //        Task<uint?> task = FindIngredientInDatabase(ingredientName);
-        //        ingredientTaskDictionary.Add(ingredientName, task);
-        //        await task;
-        //        ingredientId = task.Result;
-        //        if (ingredientId == null && insertIngredientOnEmptyResult)
-        //        {
-        //            //The ingredient has not been found. First, find all the nouns in the text. Then call call wordsAPI to find which type the ingredient belongs to.
-        //            Ingredient.Type type = Ingredient.Type.None;
-        //            List<string> nouns = ingredientName.Split(" ").ToList();// await _nounExtractor.ExtractNouns(ingredientName);
-        //            if (nouns != null)
-        //            {
-
-        //                var bag = new ConcurrentBag<object>();
-        //                var tasks = nouns.Select(async noun =>
-        //                {
-        //                    // some pre stuff
-        //                    TypeOf response = await _wordsAPIService.CallCachedAPI(noun);
-        //                    bag.Add(response);
-        //                    // some post stuff
-        //                });
-        //                await Task.WhenAll(tasks);
-        //                var count = bag.Count;
-        //                foreach (TypeOf item in bag.ToArray())
-        //                {
-        //                    type |= Ingredient.GetTypeEnum(item);
-        //                }
-        //            }
-        //            Ingredient userDefined = new();
-        //            userDefined.IngredientName = ingredientName;
-        //            userDefined.TypeOf = type;
-        //            return await _dataLoader.InsertIngredient(userDefined);
-        //        }
-        //        else
-        //        {
-        //            return ingredientId;
-        //        }
-        //    }
-
-
-        //}
     }
 
     public interface ITextProcessor

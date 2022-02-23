@@ -1,0 +1,95 @@
+﻿@inject IRecipeDataLoader recipeDataLoader
+@inject IFileManger fileManager
+
+<div class="card ">
+    <div class="card-header">Files</div>
+    <div class="card-body">
+        @if(fileUrl != null && fileName != null)
+            {
+            <p>@fileName</p><a class="btn btn-primary" target="=_top"  href="@fileUrl">Download</a>
+            }
+            else
+            {
+                <p> @message</p>
+            }
+    </div>
+    <div class="card-body text-danger">
+        <h5 class="card-title">Overwrite file</h5>
+            <InputFile OnChange="@LoadFiles" />
+</div>
+</div>
+
+    @code {
+            [CascadingParameter]
+            public uint? RecipeID { get { return _recipeID; } set {
+                    _recipeID = value; RecipeIDProvided();} }
+        private uint? _recipeID;
+        IBrowserFile currentFile;
+        string fileUrl = "";
+        string fileName = "";
+        string message = "No file is currently stored on disk.";
+        string md5 = "";
+        bool fileChanged = false;
+
+        protected async override Task OnInitializedAsync()
+        {
+            if(RecipeID != null)
+            {
+                fileUrl = await fileManager.GetURL((uint)RecipeID);
+                md5 = await fileManager.GetMD5FromRecipeID((uint)RecipeID);
+                if (md5 != null)
+                {
+                    fileName =  fileManager.GetFileName(md5);
+                }
+            }
+
+        }
+
+
+        private async Task LoadFiles(InputFileChangeEventArgs e)
+        {
+            currentFile = e.File;
+            fileChanged = true;
+            await ProcessCurrentFile();
+        }
+
+        private async Task ProcessCurrentFile()
+        {
+            if (RecipeID != null && RecipeID != 0)
+            {
+                (int code, string newMd5) = await fileManager.InsertFile(currentFile, 200000);
+                if (code == 1)
+                {
+
+                    if (md5 != null)
+                    {
+                        fileManager.DeleteFile(md5);
+                    }
+                    await fileManager.CreateFileToRecipeRelationship((uint)RecipeID, newMd5);
+                    message = "file saved successfully";
+                    md5 = newMd5;
+                    OnInitializedAsync();
+                }
+                else
+                {
+                    message = "Saving to disk failed. - The most likley cause is this document already exists.";
+                }
+
+            }
+            else
+            {
+                message = "The file will be stored when the recipe is saved.";
+            }
+        }
+
+        private void RecipeIDProvided()
+        {
+            //Need to insert file and add relationship. 
+            Console.WriteLine($"Will add file to {RecipeID}");
+            if( fileChanged &&(md5 == null || md5.Length==0) && RecipeID !=0)
+            {
+                Console.WriteLine("Need to insert file");
+                ProcessCurrentFile();
+            }
+        }
+    }

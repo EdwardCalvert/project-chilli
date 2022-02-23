@@ -2,8 +2,15 @@
 @inject IRecipeDataLoader dataLoader
 @inject NavigationManager NavManager
 @inject IFileManger fileManager
+
+@using Append.Blazor.Printing
+@inject IPrintingService PrintingService
 @using BlazorServerApp.proccessService
 @using BlazorServerApp.Extensions
+@using GemBox.Document
+@using Spire.Doc;
+@using Spire.Doc.Documents;
+
 @if (!recipeFound)
 {
     <h1>Sorry pal, no recipe found with the ID @RecipeID.</h1>
@@ -21,19 +28,24 @@ else if (model != null)
     if (DownloadPath != null)
     {
         <a href="@DownloadPath" target="=_top" class="btn btn-primary" style="margin:5px;">Download as .Docx</a>
+        <btn class="btn btn-primary" @onclick="AltPrint">Print 🖨</btn>
     }
-    <AuthorizeView Roles="Administrator">
-        <div style="margin: 5px;background-color: rgba(0,0,0,.03);">
-            <p>Admin features</p>
+<AuthorizeView Roles="Administrator">
+
+    <div class="card bg-light" style="max-width: 18rem;">
+        <div class="card-header">Admin Features</div>
+        <div class="card-body">
             @if (model != null) // THis should  check if there is a document affiliated.
             {
                 <div>
                     <a href="/Recipe/@RecipeID/Edit" class="btn btn-primary">Edit Recipe</a>
-                    <a @onclick="@(() =>DeleteRecipe())" class="btn btn-danger">⚠ Delete Recipe</a>
+                    <a @onclick="@(() =>DeleteRecipe())" class="btn btn-danger text-white">⚠ Delete Recipe</a>
                 </div>
             }
         </div>
-    </AuthorizeView>
+
+    </div>
+</AuthorizeView>
     <FoodLabel nutritionLabel="@model.DisplayNutritionModel" StyleParameters="font-size: 12px; overflow-wrap: anywhere;
     width: 100px;" ShowTitle="false" />
 
@@ -74,8 +86,7 @@ else if (model != null)
             <hr />
             @if (DownloadPath != null)
             {
-            <h3>Ingredients</h3>
-            <p>For best results, <a href="@DownloadPath" target="=_top" class="btn btn-primary" style="margin:5px;">Download as .Docx</a></p>
+                <h3>Ingredients</h3>
             }
             <div class="IngredientsList">
                 <ul>
@@ -132,6 +143,7 @@ else
     bool error = false;
     string errorMessage = "";
     string DownloadPath;
+    string MD5Hash;
     Recipe model;
 
     private async Task DeleteRecipe()
@@ -147,37 +159,77 @@ else
         NavManager.NavigateTo($"/");
     }
 
-    protected override async Task OnInitializedAsync()
+    private async void Print()
     {
-        try
-        {
-            uint Result;
-            validIdentifier = uint.TryParse(RecipeIDRequest.ToString(), out Result);
-            if (validIdentifier)
-            {
-                RecipeID = Result;
-                model = await dataLoader.GetRecipeAndTree(RecipeID);
 
+        //https://www.e-iceblue.com/Introduce/pdf-for-net-introduce.html
+        FileManagerModel managerModel = dataLoader.GetFile(RecipeID).Result;
+        //Load Document
+        //document.LoadFromFile(fileManager.GetFilePath(managerModel.FileID));
 
-                if (model != null)
-                {
-                    DownloadPath = await fileManager.GetURL(RecipeID);
-                    recipeFound = true;
-                    if (!pageRequested)
-                    {
+        //Convert Word to PDF
+        //document.SaveToFile("toPDF.PDF", FileFormat.PDF);
+        //await PrintingService.Print("toPDF.PDF");
 
-                        await dataLoader.IncrementViews(RecipeID);
-                        pageRequested = true;
-                    }
+        ComponentInfo.SetLicense("FREE-LIMITED-KEY");
 
-                }
+        // Create a new empty Word file.
+        var document = DocumentModel.Load(fileManager.GetFilePath(managerModel.FileID));
+        // Add a new document content.
 
-            }
-        }
-        catch(Exception e)
-        {
-            error = true;
-            errorMessage = e.Message;
-        }
+        // Save to DOCX and PDF files.
+        document.Save("Document.docx");
     }
+
+    private void AltPrint()
+    {
+
+        Document document = new Document();
+
+        FileManagerModel managerModel = dataLoader.GetFile(RecipeID).Result;
+        //Load Document
+        document.LoadFromFile(fileManager.GetFilePath(managerModel.FileID));
+
+        //Convert Word to PDF
+        document.SaveToFile("toPDF2.PDF", FileFormat.PDF);
+
+        ////Launch Document
+        //System.Diagnostics.Process.Start("toPDF.PDF");
+
+    }
+
+
+protected override async Task OnInitializedAsync()
+{
+try
+{
+    uint Result;
+    validIdentifier = uint.TryParse(RecipeIDRequest.ToString(), out Result);
+    if (validIdentifier)
+    {
+        RecipeID = Result;
+        model = await dataLoader.GetRecipeAndTree(RecipeID);
+
+
+        if (model != null)
+        {
+            DownloadPath = await fileManager.GetURL(RecipeID);
+            recipeFound = true;
+            if (!pageRequested)
+            {
+
+                await dataLoader.IncrementViews(RecipeID);
+                pageRequested = true;
+            }
+
+        }
+
+    }
+}
+catch (Exception e)
+{
+    error = true;
+    errorMessage = e.Message;
+}
+}
 }

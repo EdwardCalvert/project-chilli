@@ -32,39 +32,35 @@
     </select>
 </div>
 <MultiSelectDietaryCheckboxes @bind-selectedType="@dietaryType"></MultiSelectDietaryCheckboxes>
-<div class="row">
+<div class="card-deck">
     @if (recipes.Count > 0)
     {
         @foreach (Recipe model in recipes)
         {
-            <div class="col-12 col-lg-6">
-
-                <div class="RecipeCard">
-                    <a href="/Recipe/@model.RecipeID" class="No-Decoration ">
+                <div class="card">
+                    <a href="/Recipe/@model.RecipeID" class="No-Decoration " style="color:black;">
                         <div class="card m-3">
-                            <div class="card-header No-Decoration ColourBlack">
+                            <div class="card-title ">
                                 <h1>@model.RecipeName.SentenceCase()  </h1><ReviewSummary DisplayReviewModel="@model.Reviews" />
 
                             </div>
-                            <div class="card-body No-Decoration ColourBlack">
-                                <p>Cooking time: @model.CookingTime minutes </p>
 
-                                <p>Preperation time: @model.PreperationTime mintues</p>
-
-
-
-                                <FoodLabel nutritionLabel="model.DisplayNutritionModel" StyleParameters="font-size: 9px; overflow-wrap: anywhere;" ShowTitle="false" />
-                                @if (model.Description != null)
-                                {
-                                    <p>Descritption: @model.ShowShortDescription()</p>
-                                }
-                            </div>
-                            <div class="card-footer No-Decoration ColourBlack"><p>Difficulty: @(model.Difficulty == null? "unknown":model.Difficulty);     Serves: @(model.Servings == 0?"unkown":model.Servings)</p></div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Cooking time: @model.CookingTime minutes</li>
+                                <li class="list-group-item">Preperation time: @model.PreperationTime mintues</li>
+                                <li class="list-group-item">Serves: @(model.Servings == 0?"unkown":model.Servings)</li>
+                                <li class="list-group-item">Difficulty: @(model.Difficulty == null? "unknown":model.Difficulty);</li>
+                                <li class="list-group-item">
+                                    @if (model.Description != null)
+                                    {
+                                        <p>Descritption: @model.ShowShortDescription()</p>
+                                    }
+                                </li>
+                            </ul>
                         </div>
                     </a>
                 </div>
 
-            </div>
 
         }
 

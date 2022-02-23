@@ -1,3 +1,4 @@
+using Append.Blazor.Printing;
 using BlazorServerApp.DocxReader;
 using BlazorServerApp.Models;
 using BlazorServerApp.proccessService;
@@ -60,6 +61,7 @@ namespace BlazorServerApp
             services.AddTransient<INounExtractor, BasicNounExtractor>();
             services.AddTransient<ITextProcessor, TextProcessor.TextProcessor>();
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddScoped<IPrintingService, PrintingService>();
             //    services.AddPredictionEnginePool<ModelInput, ModelOutput>()
             //.FromFile(_modelPath);
             services.AddHttpClient();

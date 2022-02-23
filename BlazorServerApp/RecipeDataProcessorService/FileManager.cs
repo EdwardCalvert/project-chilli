@@ -110,6 +110,15 @@ namespace BlazorServerApp.proccessService
             FileInfo info = new FileInfo(absoulutePath);
             return info.Name;
         }
+        public async Task<string> GetMD5FromRecipeID(uint RecipeID)
+        {
+            FileManagerModel model = await _dataLoader.GetFile(RecipeID);
+            if (model != null)
+            {
+                return model.FileID;
+            }
+            else { return null; }
+        }
 
         public async Task<string> GetURL(uint recipeID)
         {
@@ -150,7 +159,12 @@ namespace BlazorServerApp.proccessService
     public interface IFileManger
     {
         public string GetFilePath(string MD5Hash);
-        public Task<(int,string)> InsertFile(IBrowserFile browserFiles, int maxFileSizeInBytes);
+        /// <summary>
+        /// </summary>
+        /// <param name="browserFile"></param>
+        /// <param name="maxFileSizeInBytes"></param>
+        /// <returns>A tuple of integer, and MD5 Hash indicating the success of the insert</returns>
+        public Task<(int,string)> InsertFile(IBrowserFile browserFile, int maxFileSizeInBytes);
         public const long MAXFILESIZE = 1024 * 15;
         public const int MAXALLOWEDFILES = 3;
         public void DeleteFile(string MD5Hash);
@@ -159,5 +173,6 @@ namespace BlazorServerApp.proccessService
         public string GetFileName(string MD5Hash);
         public  Task<List<FileInfo>> GetAllFilesStoredOnDisk();
         public string GetURLFromAbsolutePath(string absoulutePath);
+        public Task<string> GetMD5FromRecipeID(uint RecipeID);
     }
 }

@@ -7,10 +7,14 @@
 
     <div class="main">
         <div class="top-row px-4">
-            <!-- BLAZOR COOKIE Auth Code (begin) -->
-            <LoginControl />
-          
-            <!-- BLAZOR COOKIE Auth Code (end) -->
+            <AuthorizeView>
+                <Authorized>
+                    <b>Hello, @context.User.Identity.Name!</b>
+                    <a class="btn btn-primary"
+                       href="/logout?returnUrl=/"
+                       target="_top">Logout</a>
+                </Authorized>
+            </AuthorizeView>
         </div>
 
         <div class="content px-4">

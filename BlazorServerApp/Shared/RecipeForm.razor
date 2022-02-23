@@ -6,7 +6,7 @@
 @using BlazorServerApp.WordsAPI
 @using System.Timers
 
-@if (mode == MODES.Create)
+@*@if (mode == MODES.Create)
 {
     <h3>Paste text and auotmatically insert into the recipe</h3>
     <p>(this will override the current text of the form)</p>
@@ -19,6 +19,12 @@
     {
         <textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput" readonly="@PreventTextboxEdit"></textarea>
     }
+}*@
+@if (mode != MODES.BulkUpload)
+{
+<CascadingValue Value="@RecipeModel.RecipeID">
+    <FileUploadWidget ></FileUploadWidget>
+</CascadingValue>
 }
 
 <ErrorNotification ErrorMessage="@ErrorMessage" Show="@error" />
@@ -256,8 +262,8 @@
             {
                 RecipeModel.ManualUpload = true;
                 uint recipeID = await dataLoader.InsertRecipeAndRelatedFields(RecipeModel);
-                await OnInitializedAsync();
-                await Task.Delay(25);
+                RecipeModel.RecipeID = recipeID;
+                StateHasChanged();
                 NavManager.NavigateTo($"/Recipe/{recipeID}");
             }
             else if (mode == MODES.Edit)
@@ -319,7 +325,7 @@
             RecipeModel.InsertEmptyMethod(5);
             RecipeModel.Description = "";
         }
-        
+
         return base.OnInitializedAsync();
 
     }

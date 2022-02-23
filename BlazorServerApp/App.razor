@@ -4,18 +4,23 @@
             <AuthorizeView>
 
                 <NotAuthorized>
-                    <div style="place-content: center; display: flex; align-items: center; justify-content: center; flex-direction: column; width:300px " class="card m-3 ">
-                        <h2>Sign-in</h2>
-                        <div>
-                            <LoginControl />
+                    <div style="place-content: center; display: flex; align-items: center; justify-content: center; flex-direction: column; ">
+                        <div style="width: 300px; padding: 10px " class="card m-3 ">
+                            <h2>Sign-in</h2>
+                            <div>
+                                <LoginControl />
+                            </div>
+                            <hr />
+                            <btn class="btn btn-primary" @onclick="(()=>passwordReset = true)" style="font-size:8px">Forgotten Password?</btn>
+                            @code{
+                                bool passwordReset = false;
+                            }
+                            @if (passwordReset)
+                            {
+                                <BlazorServerApp.Pages.admin.PasswordReset></BlazorServerApp.Pages.admin.PasswordReset>
+
+                            }
                         </div>
-                        <btn class="btn btn-primary" @onclick="(()=>passwordReset = true)">Forgotten Password?</btn>
-                        @code{
-                            bool passwordReset = false;
-                        }
-                        @if (passwordReset) {
-                        <BlazorServerApp.Pages.admin.PasswordReset></BlazorServerApp.Pages.admin.PasswordReset>
-                        }
                     </div>
                 </NotAuthorized>
                 <Authorized>

@@ -51,6 +51,7 @@ namespace BlazorServerApp.Models
                 }
             } }
         private string _ingredientName;
+        public EventCallback<Ingredient> nameChanged { get; set; }
 
         private async void InvokeNameChange(Object source, ElapsedEventArgs e)
         {
@@ -60,6 +61,8 @@ namespace BlazorServerApp.Models
                 TypeOf response = await _wordsAPIService.CallCachedAPI(noun);
                 TypeOf |= GetTypeEnum(response);
             }
+            nameChanged.InvokeAsync();
+
         }
         public Type TypeOf { get; set; }
 

@@ -30,7 +30,7 @@ namespace BlazorServerApp.Models
         [ValidateComplexType,Required,ListLengthGreaterThanZero]
         public List<Method> Method { get; set; } = new List<Method>();
 
-        [ValidateComplexType,Required]
+        [ValidateComplexType]
         public IList<Equipment> Equipment { get; set; }
 
         [Range(1, 100),Required]
