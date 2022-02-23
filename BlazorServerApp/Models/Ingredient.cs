@@ -61,9 +61,13 @@ namespace BlazorServerApp.Models
                 TypeOf response = await _wordsAPIService.CallCachedAPI(noun);
                 TypeOf |= GetTypeEnum(response);
             }
-            nameChanged.InvokeAsync();
+            await nameChanged.InvokeAsync();
+
+            ReRender.Invoke();
 
         }
+
+        public Action ReRender { get; set; }
         public Type TypeOf { get; set; }
 
         [System.Flags]

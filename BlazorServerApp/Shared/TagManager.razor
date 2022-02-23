@@ -37,7 +37,21 @@
     [Parameter]
     public Ingredient Ingredient { get; set; }
 
+
+
     Ingredient.Type demoType;
+
+    protected override Task OnInitializedAsync()
+    {
+        Ingredient.ReRender = ()=> CallReRender();
+
+        return base.OnInitializedAsync();
+    }
+
+    private void CallReRender()
+    {
+        InvokeAsync(() => StateHasChanged());
+    }
 
     private void DeleteTag(Ingredient.Type flag)
     {
