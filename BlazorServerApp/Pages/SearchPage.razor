@@ -32,226 +32,230 @@
     </select>
 </div>
 <MultiSelectDietaryCheckboxes @bind-selectedType="@dietaryType"></MultiSelectDietaryCheckboxes>
-<div class="card-deck">
-    @if (recipes.Count > 0)
-    {
-        @foreach (Recipe model in recipes)
+
+<div class=" row card-deck ">
+
+        @if (recipes.Count > 0)
         {
-                <div class="card">
-                    <a href="/Recipe/@model.RecipeID" class="No-Decoration " style="color:black;">
-                        <div class="card m-3">
-                            <div class="card-title ">
-                                <h1>@model.RecipeName.SentenceCase()  </h1><ReviewSummary DisplayReviewModel="@model.Reviews" />
+            @foreach (Recipe model in recipes)
+            {
+                <div class="col-12 col-lg-6">
+                    <div class="card RecipeCard">
+                        <a href="/Recipe/@model.RecipeID" class="No-Decoration " style="color:black;">
+                            <div class="card m-3">
+                                <div class="card-title ">
+                                    <h1>@model.RecipeName.SentenceCase()  </h1><ReviewSummary DisplayReviewModel="@model.Reviews" />
 
+                                </div>
+
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Cooking time: @model.CookingTime minutes</li>
+                                    <li class="list-group-item">Preperation time: @model.PreperationTime mintues</li>
+                                    <li class="list-group-item">Serves: @(model.Servings == 0?"unkown":model.Servings)</li>
+                                    <li class="list-group-item">Difficulty: @(model.Difficulty == null? "unknown":model.Difficulty);</li>
+                                    <li class="list-group-item">
+                                        @if (model.Description != null)
+                                        {
+                                            <p>Descritption: @model.ShowShortDescription()</p>
+                                        }
+                                    </li>
+                                </ul>
                             </div>
-
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item">Cooking time: @model.CookingTime minutes</li>
-                                <li class="list-group-item">Preperation time: @model.PreperationTime mintues</li>
-                                <li class="list-group-item">Serves: @(model.Servings == 0?"unkown":model.Servings)</li>
-                                <li class="list-group-item">Difficulty: @(model.Difficulty == null? "unknown":model.Difficulty);</li>
-                                <li class="list-group-item">
-                                    @if (model.Description != null)
-                                    {
-                                        <p>Descritption: @model.ShowShortDescription()</p>
-                                    }
-                                </li>
-                            </ul>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
                 </div>
 
+            }
 
+            @if (recipes.Count % resultsPerQuery == 0)
+            {
+                <btn class="btn btn-primary" @onclick="@LoadMoreRecipesOnRequest">Load more recipes</btn>
+            }
         }
 
-        @if (recipes.Count % resultsPerQuery == 0)
+        else
         {
-            <btn class="btn btn-primary" @onclick="@LoadMoreRecipesOnRequest">Load more recipes</btn>
+            <p>Sorry- no recipes were found.</p>
         }
-    }
-
-    else
-    {
-        <p>Sorry- no recipes were found.</p>
-    }
-</div>
-
-<ErrorNotification ErrorMessage="An unexpected error occured while connecting to the database." Show="@error"></ErrorNotification>
-@code {
-
-    string searchText { get; set; }
-    List<Recipe> recipes = new List<Recipe>();
+    </div>
 
 
-    SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
-    SearchEnginge.Order order
-    {
-        get
+            <ErrorNotification ErrorMessage="An unexpected error occured while connecting to the database." Show="@error"></ErrorNotification>
+            @code {
+
+                string searchText { get; set; }
+                List<Recipe> recipes = new List<Recipe>();
+
+
+                SearchEnginge.Order _oder = SearchEnginge.Order.Descending;
+                SearchEnginge.Order order
+           {
+                    get
         {
-            return _oder;
-        }
-        set
+                        return _oder;
+                    }
+                    set
         {
-            _oder = value;
-            ReOrderResults();
-        }
-    }
-    SearchEnginge.SortBy _sortBy = SearchEnginge.SortBy.Default;
-    SearchEnginge.SortBy sortBy
-    {
-        get { return _sortBy; }
-        set
+                        _oder = value;
+                        ReOrderResults();
+                    }
+                }
+                SearchEnginge.SortBy _sortBy = SearchEnginge.SortBy.Default;
+                SearchEnginge.SortBy sortBy
+           {
+                    get { return _sortBy; }
+                    set
         {
-            _sortBy = value;
-            ReOrderResults();
-        }
-    }
+                        _sortBy = value;
+                        ReOrderResults();
+                    }
+                }
 
-    [Parameter]
-    public string searchRoute { get; set; }
+                [Parameter]
+                public string searchRoute { get; set; }
 
-    [Parameter]
-    public string orderByURL { get; set; }
+                [Parameter]
+                public string orderByURL { get; set; }
 
-    [Parameter]
-    public string sortByURL { get; set; }
-    [Parameter]
-    public string typeURL { get; set; }
+                [Parameter]
+                public string sortByURL { get; set; }
+                [Parameter]
+                public string typeURL { get; set; }
 
-    bool showHelpText = false;
-    bool homepage = true;
-    int offset = 0;
-    int resultsPerQuery = 20;
-    bool error = false;
-    bool firstLoad = true;
-    Ingredient.Type dietaryType
-    {
-        get
+                bool showHelpText = false;
+                bool homepage = true;
+                int offset = 0;
+                int resultsPerQuery = 20;
+                bool error = false;
+                bool firstLoad = true;
+                Ingredient.Type dietaryType
+           {
+                    get
         {
-            return _dietaryType;
-        }
-        set
+                        return _dietaryType;
+                    }
+                    set
         {
-            _dietaryType = value;
-            SearchButtonClicked();
-        }
-    }
-    Ingredient.Type _dietaryType = Ingredient.AllSelected;
+                        _dietaryType = value;
+                        SearchButtonClicked();
+                    }
+                }
+                Ingredient.Type _dietaryType = Ingredient.AllSelected;
 
     protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        homepage = !NavManager.ToBaseRelativePath(NavManager.Uri).Contains("search");
-        if (!homepage)
+        {
+            await base.OnInitializedAsync();
+            homepage = !NavManager.ToBaseRelativePath(NavManager.Uri).Contains("search");
+            if (!homepage)
+            {
+                try
+                {
+                    if (orderByURL != null && sortByURL != null)
+                    {
+                        order = (SearchEnginge.Order)Enum.Parse(typeof(SearchEnginge.Order), orderByURL, true);
+                        sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
+                        dietaryType = (Ingredient.Type)Enum.Parse(typeof(Ingredient.Type), typeURL, true);
+                    }
+                }
+                catch
+                {
+                    order = SearchEnginge.Order.Descending;
+                    sortBy = SearchEnginge.SortBy.Default;
+                    dietaryType = Ingredient.AllSelected;
+                    error = true;
+                }
+            }
+            await FindRecipes(false);
+        }
+
+        private async Task<IEnumerable<string>> GetDieateryStyles(string text)
+        {
+            List<string> vs = new List<string>();
+            foreach (var irration in Enum.GetValues(typeof(Ingredient.Type)))
+            {
+                Console.WriteLine(irration);
+                vs.Add(irration.ToString());
+            }
+            return await Task.FromResult(vs);
+        }
+
+        private async Task FindRecipes(bool overwrite)
         {
             try
             {
-                if (orderByURL != null && sortByURL != null)
+                if (overwrite)
                 {
-                    order = (SearchEnginge.Order)Enum.Parse(typeof(SearchEnginge.Order), orderByURL, true);
-                    sortBy = (SearchEnginge.SortBy)Enum.Parse(typeof(SearchEnginge.SortBy), sortByURL, true);
-                    dietaryType = (Ingredient.Type)Enum.Parse(typeof(Ingredient.Type), typeURL, true);
+                    recipes = new List<Recipe>();
+                    offset = 0;
+                }
+                searchText = HttpUtility.UrlDecode(searchRoute);
+                if (searchText == null)
+                {
+                    await GetHomepageRecipes();
+                }
+                else if (searchText.Length > 0)
+                {
+                    recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText, wordsAPIservice, offset, dietaryType));
+                    ReOrderResults();
                 }
             }
             catch
             {
-                order = SearchEnginge.Order.Descending;
-                sortBy = SearchEnginge.SortBy.Default;
-                dietaryType = Ingredient.AllSelected;
                 error = true;
             }
         }
-        await FindRecipes(false);
-    }
 
-    private async Task<IEnumerable<string>> GetDieateryStyles(string text)
-    {
-        List<string> vs = new List<string>();
-        foreach (var irration in Enum.GetValues(typeof(Ingredient.Type)))
+        private async void SearchButtonClicked()
         {
-            Console.WriteLine(irration);
-            vs.Add(irration.ToString());
+            UpdateURLWithParameters();
+
         }
-        return await Task.FromResult(vs);
-    }
 
-    private async Task FindRecipes(bool overwrite)
-    {
-        try
+        public void Enter(KeyboardEventArgs e)
         {
-            if (overwrite)
+            if (e.Code == "Enter" || e.Code == "NumpadEnter")
             {
-                recipes = new List<Recipe>();
-                offset = 0;
-            }
-            searchText = HttpUtility.UrlDecode(searchRoute);
-            if (searchText == null)
-            {
-                await GetHomepageRecipes();
-            }
-            else if (searchText.Length > 0)
-            {
-                recipes.AddRange(await SearchEnginge.SearchForRecipes(dataLoader, searchText, wordsAPIservice, offset,dietaryType));
-                ReOrderResults();
+                SearchButtonClicked();
             }
         }
-        catch
+
+        private async Task GetHomepageRecipes()
         {
-            error = true;
+            List<Recipe> resultsFromDB = await dataLoader.GetHomepageRecipes(offset);
+            offset += resultsFromDB.Count;
+            recipes.AddRange(resultsFromDB);
+            ReOrderResults();
+            error = false;
         }
-    }
 
-    private async void SearchButtonClicked()
-    {
-         UpdateURLWithParameters();
-
-    }
-
-    public void Enter(KeyboardEventArgs e)
-    {
-        if (e.Code == "Enter" || e.Code == "NumpadEnter")
+        private async Task LoadMoreRecipesOnRequest()
         {
-            SearchButtonClicked();
+            try
+            {
+                await Task.Run(() => GetHomepageRecipes());
+            }
+            catch
+            {
+                error = true;
+            }
         }
-    }
 
-    private async Task GetHomepageRecipes()
-    {
-        List<Recipe> resultsFromDB = await dataLoader.GetHomepageRecipes(offset);
-        offset += resultsFromDB.Count;
-        recipes.AddRange(resultsFromDB);
-        ReOrderResults();
-        error = false;
-    }
-
-    private async Task LoadMoreRecipesOnRequest()
-    {
-        try
+        private async void UpdateURLWithParameters()
         {
-            await Task.Run(() => GetHomepageRecipes());
+            if (searchText != null)
+            {
+                NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}/{HttpUtility.UrlEncode(order.ToString())}/{HttpUtility.UrlEncode(sortBy.ToString())}/{HttpUtility.UrlEncode(((int)dietaryType).ToString())}", forceLoad: false);
+
+                firstLoad = true;
+                searchRoute = searchText;
+                await FindRecipes(true);
+            }
         }
-        catch
+
+        private void ReOrderResults()
         {
-            error = true;
+            recipes = MergeSort.RecipeMergeSort(recipes, sortBy, order);
         }
-    }
 
-    private async void UpdateURLWithParameters()
-    {
-        if (searchText != null)
-        {
-            NavManager.NavigateTo($"/search/{HttpUtility.UrlEncode(searchText)}/{HttpUtility.UrlEncode(order.ToString())}/{HttpUtility.UrlEncode(sortBy.ToString())}/{HttpUtility.UrlEncode(((int)dietaryType).ToString())}", forceLoad: false);
-
-            firstLoad = true;
-            searchRoute = searchText;
-            await FindRecipes(true);
-        }
-    }
-
-    private void ReOrderResults()
-    {
-        recipes = MergeSort.RecipeMergeSort(recipes, sortBy, order);
-    }
-
-}
+            }
 

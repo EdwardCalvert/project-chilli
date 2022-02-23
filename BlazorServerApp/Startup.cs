@@ -49,6 +49,7 @@ namespace BlazorServerApp
             // ******
 
             services.AddConfiguration<EmailSettings>(Configuration, "EmailSettings");
+            services.AddConfiguration<ILovePDFSettings>(Configuration, "ILovePDFSettings");
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<IDataAccess, MySqlDataAccess>(); //Inject the mysql data access- could be changed to any data layer implementing IDataAcess. This launches it in memory- the overhead is worth it as data layer is vital.

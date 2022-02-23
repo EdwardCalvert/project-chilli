@@ -16,6 +16,7 @@ namespace BlazorServerApp.proccessService
     {
         private IWebHostEnvironment _environment;
         private IRecipeDataLoader _dataLoader;
+        private const string pdfName = "print.pdf";
         public FileManager(IWebHostEnvironment Environment, IRecipeDataLoader dataLoader)
         {
             _environment = Environment;
@@ -59,20 +60,55 @@ namespace BlazorServerApp.proccessService
             return Path.Combine(AbsoluteRoot(), MD5Hash);
         }
 
+        public string RelativeFolderURL(string MD5)
+        {
+            return AbsolutFilePathFromHash( MD5);
+        }
+
         private string AbsoluteRoot()
         {
             return Path.Combine(_environment.ContentRootPath, "wwwroot", "unsafe_uploads");
         }
 
+
+        public string GetPdfPath(string MD5Hash)
+        {
+            return GetURLFromAbsolutePath(getPdfOrDocx(MD5Hash,false));
+        }
+
         public string GetFilePath(string MD5Hash)
         {
+            return getPdfOrDocx(MD5Hash, true);
+        }
+
+        private string getPdfOrDocx(string MD5Hash, bool docx)
+        {
+            string ending = docx ? ".docx" : ".pdf";
             string path = AbsolutFilePathFromHash(MD5Hash);
             if (Directory.Exists(path))
             {
                 string[] files = Directory.GetFiles(path);
-                if (files.Length == 1)
+                if (files.Length == 1 )
                 {
-                    return files[0];
+                    if(files[0].EndsWith(ending))
+                        return files[0];
+                    else
+                    {
+                        throw new Exception($"A {ending} could not be found in the given directory. (out of 1 file)");
+                    }
+                }
+                else if(files.Length == 2)
+                {
+                    if (files[0].EndsWith(ending))
+                        return files[0];
+                    else if (files[1].EndsWith(ending))
+                    {
+                        return files[1];
+                    }
+                    else
+                    {
+                        throw new Exception($"A {ending} could not be found in the given directory. (out of 2 file)");
+                    }
                 }
                 else
                 {
@@ -88,7 +124,7 @@ namespace BlazorServerApp.proccessService
             foreach(string path in Directory.GetDirectories(AbsoluteRoot()))
             {
                 string[] file = Directory.GetFiles(path);
-                if(file.Length == 1)
+                if(file.Length >= 1)
                 {
                     FileInfo fileInfo = new FileInfo(file[0]);
                     files.Add(fileInfo);
@@ -174,5 +210,7 @@ namespace BlazorServerApp.proccessService
         public  Task<List<FileInfo>> GetAllFilesStoredOnDisk();
         public string GetURLFromAbsolutePath(string absoulutePath);
         public Task<string> GetMD5FromRecipeID(uint RecipeID);
+        public string GetPdfPath(string MD5Hash);
+        public string RelativeFolderURL(string MD5);
     }
 }

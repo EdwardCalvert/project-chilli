@@ -183,7 +183,7 @@ input:checked + .slider {
 .RecipeCard {
     background-color: #f1f1f1;
     border: 1px solid #f1f1f1 !important;
-    margin-bottom: 30px;
+    margin-bottom: 30px !important;
     height: calc(100% - 30px);
 }
 
