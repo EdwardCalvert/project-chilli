@@ -25,122 +25,105 @@ else if (!validIdentifier)
 }
 else if (model != null)
 {
-    <h2>@model.RecipeName</h2>
-    <h5>@model.MealType</h5>
+<div class="card">
+    <h4 class="card-header">@model.RecipeName.SentenceCase() @(model.MealType == null? "unknown": $"({model.MealType})")</h4>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item"><ReviewSummary DisplayReviewModel="@model.Reviews" /></li>
+        <li class="list-group-item">Cooking time: @model.CookingTime minutes</li>
+        <li class="list-group-item">Preperation time: @model.PreperationTime mintues</li>
+        <li class="list-group-item">Serves: @(model.Servings == 0?"unkown":model.Servings)</li>
+        <li class="list-group-item">Difficulty: @(model.Difficulty == null? "unknown":model.Difficulty)</li>
+        <li class="list-group-item">
+            <IngredientsTag @bind-ingredients="model.Ingredients"></IngredientsTag>
+        </li>
 
-    if (DownloadPath != null)
-    {
+    </ul>
+    <div class="card-body">
         <a href="@DownloadPath" target="=_top" class="btn btn-primary" style="margin:5px;">Download as .Docx</a>
         <btn class="btn btn-primary" @onclick="AltPrint">Print 🖨</btn>
-    }
+    </div>
     <AuthorizeView Roles="Administrator">
-
-        <div class="card bg-light" style="max-width: 18rem;">
-            <div class="card-header">Admin Features</div>
-            <div class="card-body">
-                @if (model != null) // THis should  check if there is a document affiliated.
-                {
-                    <div>
-                        <a href="/Recipe/@RecipeID/Edit" class="btn btn-primary">Edit Recipe</a>
-                        <a @onclick="@(() =>DeleteRecipe())" class="btn btn-danger text-white">⚠ Delete Recipe</a>
-                    </div>
-                }
-            </div>
-
+        <div class="card-header">Admin Features</div>
+        <div class="card-body" style="display:flex;">
+            <a href="/Recipe/@RecipeID/Edit" class="btn btn-primary">Edit Recipe</a>
+            <a @onclick="@(() => DeleteRecipe())" class="btn btn-danger text-white">⚠ Delete Recipe</a>
         </div>
     </AuthorizeView>
-    <FoodLabel nutritionLabel="@model.DisplayNutritionModel" StyleParameters="font-size: 12px; overflow-wrap: anywhere;
-    width: 100px;" ShowTitle="false" />
-
-    if (model.Servings != 0)
-    {
-        <p style="margin-bottom:0;">Serves: @model.Servings @(model.Servings == 1? "person" : "people")</p>
-    }
-    if (model.PreperationTime != 0)
-    {
-        <p style="margin-bottom:0;">Preparation time: @model.PreperationTime @(model.PreperationTime == 1? "min" :"mins")</p>
-    }
-    if (model.CookingTime != 0)
-    {
-        <p style="margin-bottom:0;">Cooking time: @model.CookingTime @(model.CookingTime == 1? "min" : "mins")</p>
-    }
-    if (model.CookingTime != 0 && model.PreperationTime != 0)
-    {
-        <p style="margin-bottom:0;">Total time: @(model.PreperationTime + model.CookingTime) mins</p>
-    }
-    if (model.Difficulty != null)
-    {
-        <p style="margin-bottom:0;">Difficulty: @model.Difficulty</p>
-    }
-    <hr />
-    <IngredientsTag ingredients="model.Ingredients"></IngredientsTag>
-    <div>
+    <ul class="list-group list-group-flush">
         @if (model.Description != null)
         {
-            <hr />
-            <h3>Description</h3>
-            foreach (string line in model.Description.Split("\n"))
-            {
+            <li class="list-group-item">
+                <h3>Description</h3>
+                @foreach (string line in model.Description.Split("\n"))
+                {
                 <p style="margin-bottom:0;">@line</p>
+                }
+                </li>
+                }
+                @if (model.Ingredients != null && model.Ingredients.Count > 0)
+                {
+                <li class="list-group-item">
+
+                    @if (DownloadPath != null)
+                    {
+                        <h3>Ingredients</h3>
+                    }
+                    <div class="IngredientsList">
+                        <ul>
+                            @foreach (Ingredient ingredient in model.Ingredients)
+                            {
+                                <li>@ingredient.IngredientName</li>
+                            }
+                        </ul>
+                    </div>
+                </li>
             }
-        }
-        @if (model.Ingredients != null && model.Ingredients.Count > 0)
-        {
-            <hr />
-            @if (DownloadPath != null)
-            {
-                <h3>Ingredients</h3>
-            }
-            <div class="IngredientsList">
-                <ul>
-                    @foreach (Ingredient ingredient in model.Ingredients)
-                    {
-                        <li>@ingredient.IngredientName</li>
-                    }
-                </ul>
-            </div>
-        }
-        @if (model.Equipment != null && model.Equipment.Count() > 0)
-        {
-            <hr />
-            <h3>Equipment</h3>
-            <div class="EquipmentList">
-                <ul>
-                    @foreach (Equipment equipmentModel in model.Equipment)
-                    {
-                        <li>@equipmentModel.EquipmentName </li>
-                    }
-                </ul>
-            </div>}
-        @if (model.Method != null && model.Method.Count > 0)
-        {
-            <hr />
-            <h3>Method</h3>
-            <div class="MethodList">
-                <ol>
-                    @foreach (Method step in model.Method)
-                    {
-                        <li>@step.MethodText</li>
-                    }
-                </ol>
-            </div>
-        }
+                @if (model.Equipment != null && model.Equipment.Count() > 0)
+                {
+                    <li class="list-group-item">
+                        <h3>Equipment</h3>
+                        <div class="EquipmentList">
+                            <ul>
+                                @foreach (Equipment equipmentModel in model.Equipment)
+                                {
+                                    <li>@equipmentModel.EquipmentName </li>
+                                }
+                            </ul>
+                        </div>
+                    </li>
+                }
+                @if (model.Method != null && model.Method.Count > 0)
+                {
+                    <li class="list-group-item">
+                        <h3>Method</h3>
+                        <div class="MethodList">
+                            <ol>
+                                @foreach (Method step in model.Method)
+                                {
+                                    <li>@step.MethodText</li>
+                                }
+                            </ol>
+                        </div>
+                    </li>
+                }
+
+            </ul>
         <ReviewSectionWithSentiment RecipeID="@RecipeID" />
-    </div>
+</div>
 
-}
-else
-{
-    <LoadingElement />
-}
+    }
+    else
+    {
+        <LoadingElement />
+    }
 
 
-<ErrorNotification Show="@error" ErrorMessage="@($"An unexpected error occured while attemtpting to load recipe: {errorMessage}")"></ErrorNotification>
+    <ErrorNotification Show="@error" ErrorMessage="@($"An unexpected error occured while attemtpting to load recipe: {errorMessage}")"></ErrorNotification>
 
-@code{
-    [Parameter]
-    public long RecipeIDRequest { get; set; }
-    private bool pageRequested = false;
+    @code{
+        [Parameter]
+        public long RecipeIDRequest { get; set; }
+private bool pageRequested = false;
     private bool validIdentifier;
     private uint RecipeID;
     private bool recipeFound = false;
@@ -173,7 +156,7 @@ else
 
         try
         {
-            string pdfUrl =  fileManager.GetPdfPath(managerModel.FileID);
+            string pdfUrl = fileManager.GetPdfPath(managerModel.FileID);
             PrintingService.Print(pdfUrl);
         }
         catch
@@ -239,4 +222,4 @@ else
             errorMessage = e.Message;
         }
     }
-}
+    }

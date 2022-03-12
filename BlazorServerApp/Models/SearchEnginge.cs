@@ -41,25 +41,18 @@ namespace BlazorServerApp.Models
         {
             List<Recipe> searchResults = new List<Recipe>();
             List<uint> recipeIDs = new();
-            searchTerm = searchTerm.ToLower();
-            TextProcessor.TextProcessor textProcessor = new TextProcessor.TextProcessor(new NounExtractor(), wordsAPIService, dataLoader);
+           
 
-
-            if (type != Ingredient.Type.None)
+            if (searchTerm == "all")
+            {
+                recipeIDs.AddRange(await dataLoader.FullSearch( offset, (ushort)~(ushort)type));
+            }
+            else if (type != Ingredient.Type.None)
             {
                 recipeIDs.AddRange(await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset, (ushort)~(ushort)type)); //
             }
             else
             {
-                //List<UserDefinedIngredientInRecipe> ingredientsInRecipes = await textProcessor.GetIngredientsWithUnits(searchTerm, false);
-
-                //if (ingredientsInRecipes.Count > 0)
-                //{
-                //    foreach (UserDefinedIngredientInRecipe ingredient in ingredientsInRecipes)
-                //    {
-                //        recipeIDs.Add((uint)ingredient.IngredientID);
-                //    }
-                //}
                 recipeIDs.AddRange(await dataLoader.GetSearchDatabaseTextFields(searchTerm, offset));
             }
 

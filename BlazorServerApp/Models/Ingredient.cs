@@ -60,7 +60,10 @@ namespace BlazorServerApp.Models
                 TypeOf response = await _wordsAPIService.CallCachedAPI(noun);
                 TypeOf |= GetTypeEnum(response);
             }
-            ReRender.Invoke();
+            if (ReRender != null)
+            {
+                ReRender.Invoke();
+            }
         }
 
         public Action ReRender { get; set; }

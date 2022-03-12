@@ -66,25 +66,25 @@ namespace BlazorServerApp.Models
 
         public DateTime LastRequested { get; set; }
 
-        public static readonly List<string> SUPPORTEDUNITS = new List<string>{
-            "x",
-            "Grams",
-            "Cup",
-            "Litre",
-            "Mililetres",
-            "Fluid Ounces",
-            "Gallon",
-            "Quart",
-            "Pint",
-            "Tsp",
-            "Tbsp",
-            "Dessert spoon",
-            "Gallon",
-            "Kilograms",
-            "Pound",
-            "Ounce",
-            "Fluid Ounces",
-            };
+        //public static readonly List<string> SUPPORTEDUNITS = new List<string>{
+        //    "x",
+        //    "Grams",
+        //    "Cup",
+        //    "Litre",
+        //    "Mililetres",
+        //    "Fluid Ounces",
+        //    "Gallon",
+        //    "Quart",
+        //    "Pint",
+        //    "Tsp",
+        //    "Tbsp",
+        //    "Dessert spoon",
+        //    "Gallon",
+        //    "Kilograms",
+        //    "Pound",
+        //    "Ounce",
+        //    "Fluid Ounces",
+        //    };
 
         public double Kcal { get; set; }
         public double Fat { get; set; }
@@ -104,7 +104,7 @@ namespace BlazorServerApp.Models
         };
 
         [ValidDifficulty]
-        public static readonly List<string> DIFICULTY = new List<string>(Recipe.DifficultyEnum.Keys);
+        public static readonly List<string> DIFICULTY = new List<string>(DifficultyEnum.Keys);
 
         public static RecomendedIntake RecomendedIntake = new RecomendedIntake(2000, 70, 20, 260, 90, 50, 6);
 

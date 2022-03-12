@@ -164,16 +164,16 @@ AttributeTargets.Field, AllowMultiple = true)]
         }
     }
 
-    public class ValidUnit : ValidationAttribute
-    {
-        public override bool IsValid(object value)
-        {
-            return ValidUnit.Validate(value);
-        }
+    //public class ValidUnit : ValidationAttribute
+    //{
+    //    public override bool IsValid(object value)
+    //    {
+    //        return ValidUnit.Validate(value);
+    //    }
 
-        public static bool Validate(object value)
-        {
-            return Recipe.SUPPORTEDUNITS.Contains(value);
-        }
-    }
+    //    public static bool Validate(object value)
+    //    {
+    //        return Recipe.SUPPORTEDUNITS.Contains(value);
+    //    }
+    //}
 }

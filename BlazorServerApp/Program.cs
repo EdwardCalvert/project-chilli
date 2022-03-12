@@ -17,7 +17,7 @@ namespace BlazorServerApp
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>().UseUrls(urls: new String[] { "https://*:5001" }); //  "http://*:5000"
+                    webBuilder.UseStartup<Startup>();/*.UseUrls(urls: new String[] { "https://*:5001", "http://*:5000" }); //  "http://*:5000"*/
                 });
     }
 }

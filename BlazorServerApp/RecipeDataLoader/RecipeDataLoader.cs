@@ -346,25 +346,28 @@ namespace BlazorServerApp.Models
 
         private const string FullTextSearchWithoutLimit = @"
 SELECT  RecipeID FROM Recipe
-WHERE MATCH(RecipeName) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
+WHERE MATCH(RecipeName) AGAINST(@searchText IN NATURAL LANGUAGE MODE) 
 UNION DISTINCT
 SELECT  RecipeID FROM Method
-WHERE MATCH(MethodText) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
+WHERE MATCH(MethodText) AGAINST(@searchText IN NATURAL LANGUAGE MODE) 
 UNION DISTINCT
 SELECT RecipeID FROM Recipe
-WHERE MATCH(Description) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
+WHERE MATCH(Description) AGAINST(@searchText IN NATURAL LANGUAGE MODE) 
 UNION DISTINCT
-SELECT RecipeID FROM UserDefinedIngredientsInRecipe
-INNER JOIN(
-SELECT IngredientID FROM UserDefinedIngredients
-WHERE MATCH(IngredientName) AGAINST (@searchText IN NATURAL LANGUAGE MODE)> 0
-) AS T2 ON UserDefinedIngredientsInRecipe.IngredientID = T2.IngredientID
+
+
+SELECT RecipeID FROM Ingredient
+WHERE MATCH(IngredientName) AGAINST (@searchText IN NATURAL LANGUAGE MODE)
+
+
 UNION DISTINCT
+
+
 SELECT RecipeID FROM EquipmentInRecipe
 INNER JOIN(
 SELECT EquipmentID
 FROM Equipment
-WHERE MATCH(EquipmentName) AGAINST (@searchText IN NATURAL LANGUAGE MODE)> 0
+WHERE MATCH(EquipmentName) AGAINST (@searchText IN NATURAL LANGUAGE MODE)
 ) AS T2 ON EquipmentInRecipe.EquipmentID = T2.EquipmentID"; //Removed natural expansion  WITH QUERY EXPANSION
 
         private const string RecipeSearch = @"SELECT RecipeID FROM Recipe
@@ -373,25 +376,32 @@ WHERE MATCH(RecipeName) AGAINST(@searchText IN NATURAL LANGUAGE MODE) > 0
         private const string Union = @" UNION DISTINCT ";
 
         private const string UnTaggedRecipes = @"SELECT RecipeID
-FROM UserDefinedIngredients a LEFT JOIN UserDefinedIngredientsInRecipe i
-   ON a.IngredientID = i.IngredientID
+FROM Ingredient i
 GROUP BY i.RecipeID
 HAVING  SUM(TypeOf) = 0";
 
         private const string QueryLimit = " LIMIT 20 OFFSET @offset";
 
-        private const string BitwiseDieaterySearch = @"SELECT s.RecipeID
-FROM   UserDefinedIngredientsInRecipe s
-WHERE  s.IngredientID IN (SELECT IngredientID FROM UserDefinedIngredients WHERE TypeOf & @bitPattern = 0  AND TypeOf != 0) AND s.RecipeID IN (" + FullTextSearchWithoutLimit + @") 
+        private const string BitwiseDieaterySearchStart = @"SELECT RecipeID
+FROM   Ingredient s
+WHERE  s.IngredientID IN (SELECT IngredientID FROM Ingredient WHERE TypeOf & @bitPattern = 0  AND TypeOf != 0)";//XOR TypeOf = 0
+
+        private const string BitwiseDieaterySearch = BitwiseDieaterySearchStart + @" AND s.RecipeID IN (" +FullTextSearchWithoutLimit + @") 
 GROUP BY s.RecipeID
-" + " UNION DISTINCT  " + UnTaggedRecipes + " " + QueryLimit + Terminator; //XOR TypeOf = 0
+" + " UNION DISTINCT  " + UnTaggedRecipes + " " + QueryLimit + Terminator;
+
+        private const string FullEmptySearch = BitwiseDieaterySearchStart + " UNION DISTINCT  " + UnTaggedRecipes + " " + QueryLimit + Terminator;
 
         private const string Terminator = ";";
 
         public async Task<List<uint>> GetSearchDatabaseTextFields(string searchText, int offset, ushort invertedTypeOfBitPattern)
         {
-            Console.WriteLine(invertedTypeOfBitPattern);
             return await _data.LoadData<uint, dynamic>(BitwiseDieaterySearch + Terminator, new { searchText = searchText, offset = offset, bitPattern = invertedTypeOfBitPattern }, _config.GetConnectionString("recipeDatabase"));
+        }
+
+        public async Task<List<uint>> FullSearch( int offset, ushort invertedTypeOfBitPattern)
+        {
+            return await _data.LoadData<uint, dynamic>(FullEmptySearch , new {  offset = offset, bitPattern = invertedTypeOfBitPattern }, _config.GetConnectionString("recipeDatabase"));
         }
 
         public async Task RunSql(string sql)

@@ -39,6 +39,7 @@
 
 
 
+
     Ingredient.Type demoType;
 
     protected override Task OnInitializedAsync()
@@ -48,7 +49,9 @@
         return base.OnInitializedAsync();
     }
 
-    private void CallReRender()
+  
+
+    public void CallReRender()
     {
         InvokeAsync(() => StateHasChanged());
     }

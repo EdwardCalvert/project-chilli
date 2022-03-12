@@ -1,0 +1,93 @@
+﻿<div>
+    <h6>Filter</h6>
+    <div class="container-fluid" style="padding-left:0;display: flex; flex-direction: row; align-items: flex-start;flex-wrap: wrap;">
+        @foreach (string key in selectedBoxes.Keys)
+        {
+
+            <div style="background-color: rgba(0,0,0,.03); margin-bottom:0;margin-left:5px; border-radius:5px;"> <p style="margin-bottom: 0px;"><input type="checkbox" @bind="selectedBoxes[key]" @onclick="(()=>HandleCheckboxChange(key))" />&nbsp;@key  &nbsp;</p></div>
+        }
+        @*<btn class="btn btn-primary" @onclick="SetAllFalse">Clear tags</btn><btn class="btn btn-primary" @onclick="SetAllTrue">Activate all tags</btn>*@
+    </div>
+</div>
+@code {
+
+    [Parameter] public EventCallback<List<string>> selectedTypeChanged { get; set; }
+    [Parameter] public EventCallback OnChange { get; set; }
+    [Parameter] public bool ValuesChanged {get;set;}
+
+    private List<string> _type;
+    [Parameter]
+    public List<string> selectedType
+    {
+        get => _type; set
+        {
+            _type = value;
+            StateHasChanged();
+        }
+    }
+    Dictionary<string, bool> selectedBoxes = new Dictionary<string, bool>();
+
+
+    private void HandleCheckboxChange(string key)
+    {
+        selectedBoxes[key] = !selectedBoxes[key];
+        if (selectedBoxes[key])
+        {
+            selectedType.Add(key); //Select item
+
+        }
+        else
+        {
+            selectedType.Remove(key); //Deselect item
+        }
+        selectedTypeChanged.InvokeAsync(selectedType);
+        OnChange.InvokeAsync();
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        foreach(string item in selectedType)
+        {
+            selectedBoxes.Add(item, true);
+        }
+
+        //foreach (string flagToCheck in Enum.GetValues(typeof(Ingredient.Type)))
+        //{
+        //    if (selectedType.HasFlag(flagToCheck))
+        //    {
+        //        selectedBoxes.Add(flagToCheck.ToString(), true);
+        //    }
+        //    else
+        //    {
+        //        selectedBoxes.Add(flagToCheck.ToString(), false);
+        //    }
+        //}
+        await selectedTypeChanged.InvokeAsync(selectedType);
+        //await OnChange.InvokeAsync();
+    }
+
+    //private async void SetAllFalse()
+    //{
+    //    foreach (string key in selectedBoxes.Keys)
+    //    {
+    //        selectedBoxes[key] = false;
+    //    }
+    //    selectedBoxes["None"] = true;
+    //    selectedType = Ingredient.Type.None;
+    //    await selectedTypeChanged.InvokeAsync(selectedType);
+    //    await OnChange.InvokeAsync();
+    //}
+    //private async void SetAllTrue()
+    //{
+    //    foreach (string key in selectedBoxes.Keys)
+    //    {
+    //        selectedBoxes[key] = true;
+    //    }
+    //    selectedBoxes["None"] = true;
+    //    selectedType = Ingredient.AllSelected;
+    //    await selectedTypeChanged.InvokeAsync(selectedType);
+    //    await OnChange.InvokeAsync();
+    //}
+}

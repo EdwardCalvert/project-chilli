@@ -12,6 +12,7 @@
 @code {
 
     [Parameter] public EventCallback<Ingredient.Type> selectedTypeChanged { get; set; }
+    [Parameter] public EventCallback OnChange { get; set; }
 
     private Ingredient.Type _type;
     [Parameter]
@@ -39,6 +40,7 @@
             selectedType &= ~type; //Deselect item
         }
         selectedTypeChanged.InvokeAsync(selectedType);
+        OnChange.InvokeAsync();
     }
 
 
@@ -56,6 +58,7 @@
             }
         }
         await selectedTypeChanged.InvokeAsync(selectedType);
+        //await OnChange.InvokeAsync();
     }
 
     private async void SetAllFalse()
@@ -67,6 +70,7 @@
         selectedBoxes["None"] = true;
         selectedType = Ingredient.Type.None;
         await selectedTypeChanged.InvokeAsync(selectedType);
+        await OnChange.InvokeAsync();
     }
     private async void SetAllTrue()
     {
@@ -77,5 +81,6 @@
         selectedBoxes["None"] = true;
         selectedType = Ingredient.AllSelected;
         await selectedTypeChanged.InvokeAsync(selectedType);
+        await OnChange.InvokeAsync();
     }
 }

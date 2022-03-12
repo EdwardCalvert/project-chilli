@@ -55,5 +55,6 @@ namespace BlazorServerApp.Models
         public  Task UpdateRecoveryEmailAddress(string oldEmailAddress, string newEmailAddress, string userName);
         public  Task<RecoveryEmailAddresses> GetSingleAddress(string email);
         public Task<uint> UpdateReview(Review review);
+        public  Task<List<uint>> FullSearch(int offset, ushort invertedTypeOfBitPattern);
     }
 }

@@ -25,19 +25,32 @@ else
     [Parameter]
     public List<Ingredient> ingredients { get; set; }
 
+    [Parameter]
+    public EventCallback<List<Ingredient>> ingredientsChanged { get; set; }
 
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+         OnInitializedAsync();
+        StateHasChanged();
+        return base.SetParametersAsync(parameters);
+    }
 
     Ingredient.Type type;
 
+
     protected override async Task OnInitializedAsync()
     {
-        await base.OnInitializedAsync();
 
+        type = Ingredient.Type.None;
+        if (ingredients != null)
+        {
             foreach (Ingredient ingredient in ingredients)
             {
                 type |= ingredient.TypeOf;
 
             }
+        }
+        await base.OnInitializedAsync();
 
 
     }
