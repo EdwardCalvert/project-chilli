@@ -15,21 +15,30 @@
             }
             else
             {
-                <div class="row" style="max-width: 100% !important; width: 100% !important; flex-direction: row; flex-wrap: nowrap; ">
+                <DragDropContainer textBeingDragged="@textBeingDragged" Checkboxes="@Checkboxes">
+                <div class="row" style="max-width: 100% !important; width: 100% !important; flex-direction: row; flex-wrap: nowrap; "  >
                     <div class="col-8">
+
                         <RecipeForm RecipeModel="@recipeModel" mode="RecipeForm.MODES.BulkUpload" OnClick="SubmitRecipe" />
                     </div>
-                    <div class="co-4" style="margin-left:10px;">
-                        @foreach (string line in documentTextPreview.Split("\n"))
+                    <div class="col-4 " >
+                        
+                        <div style= " top: 0;
+    bottom: 0;
+    position: fixed;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    margin-left: 10px;" @onkeydown="HandleKeyDown" tabindex="0" @onkeyup="HandleKeyUp" >
+                        <ToggleSwitch SetAsChecked="true" ></ToggleSwitch>
+                        @foreach (string line in Checkboxes.Keys)
                         {
-                            <p>@line</p>
+                                    string displayText = line.Split(LineSeparator)[1];
+                                    <p draggable="true" @ondragstart="()=>HandleDragStart(displayText)" > <input type="checkbox" @bind-value="@Checkboxes[line]"></input>@displayText</p>
                         }
+                        </div>
                     </div>
                 </div>
-            }
-            @if (numberOfItemsInitiallyInQueue != 0) //Prevent divide by 0
-            {
-            <ProgressBar Percent="@(((recipeProcessorService.GetNumberOfItemsInQueue() - numberOfItemsInitiallyInQueue) / numberOfItemsInitiallyInQueue) * 100)"></ProgressBar>
+                </DragDropContainer>
             }
             <btn class="btn btn-danger" @onclick="(()=>DeleteRecipe())">Delete</btn>
             <btn class="btn btn-danger" @onclick="(()=>ClearQueue())">Delete all files queued for processing</btn>
@@ -53,11 +62,25 @@
     bool undergoingProccessing = false;
     bool error = false;
     string errorMessage = "";
+    bool replaceText = false;
+    string? textBeingDragged;
     Recipe recipeModel = new();
+    const string LineSeparator = "$$$$start$$$";
+
+    private ElementReference testRef;
+    private bool shiftModifier;
+
+
+    Dictionary<string, bool> Checkboxes = new Dictionary<string, bool>();
 
     private void ClearQueue()
     {
         recipeProcessorService.Clear();
+    }
+
+    private void HandleDragStart(string line)
+    {
+        textBeingDragged = line;
     }
 
     private async Task SubmitRecipe()
@@ -75,6 +98,22 @@
         }
     }
 
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.ShiftKey)
+        {
+            shiftModifier = true;
+        }
+    }
+    private void HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.ShiftKey)
+        {
+            shiftModifier = false;   
+        }
+        Console.WriteLine("shift end");
+    }
+
     protected override async Task OnInitializedAsync()
     {
         try {
@@ -90,6 +129,8 @@
             error = true;
         }
     }
+
+
     public async Task FindNextRecipeForProcessing()
     {
         if(currentMD5Hash != null)
@@ -105,6 +146,18 @@
         await Task.Delay(2);
         undergoingProccessing = false;
         this.StateHasChanged();
+        TextToCheckboxes();
+    }
+
+    public void TextToCheckboxes()
+    {
+        Checkboxes.Clear(); //Empty any existing contents. 
+        foreach(string line in documentTextPreview.Split("\n"))
+        {
+            if(line.Length >0)
+            //Dictionary key must be unique. 
+            Checkboxes.Add(Guid.NewGuid().ToString() + LineSeparator + line,false);
+        }
     }
 
     public async void DeleteRecipe()

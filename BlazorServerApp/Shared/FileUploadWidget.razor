@@ -19,42 +19,45 @@
 </div>
 </div>
 
-    @code {
-            [CascadingParameter]
-            public uint? RecipeID { get { return _recipeID; } set {
-                    _recipeID = value; RecipeIDProvided();} }
-        private uint? _recipeID;
-        IBrowserFile currentFile;
-        string fileUrl = "";
-        string fileName = "";
-        string message = "No file is currently stored on disk.";
-        string md5 = "";
-        bool fileChanged = false;
+@code {
+    [CascadingParameter]
+    public uint? RecipeID { get { return _recipeID; } set {
+            _recipeID = value; RecipeIDProvided();} }
+    private uint? _recipeID;
+    IBrowserFile currentFile;
+    string fileUrl = "";
+    string fileName = "";
+    string message = "No file is currently stored on disk.";
+    string md5 = "";
+    bool fileChanged = false;
+    [Parameter]
+    public bool error { get; set; } =  true;
 
-        protected async override Task OnInitializedAsync()
+    protected async override Task OnInitializedAsync()
+    {
+        if(RecipeID != null)
         {
-            if(RecipeID != null)
+            fileUrl = await fileManager.GetURL((uint)RecipeID);
+            md5 = await fileManager.GetMD5FromRecipeID((uint)RecipeID);
+            if (md5 != null)
             {
-                fileUrl = await fileManager.GetURL((uint)RecipeID);
-                md5 = await fileManager.GetMD5FromRecipeID((uint)RecipeID);
-                if (md5 != null)
-                {
-                    fileName =  fileManager.GetFileName(md5);
-                }
+                fileName =  fileManager.GetFileName(md5);
             }
-
         }
 
+    }
 
-        private async Task LoadFiles(InputFileChangeEventArgs e)
-        {
-            currentFile = e.File;
-            fileChanged = true;
-            await ProcessCurrentFile();
-        }
 
-        private async Task ProcessCurrentFile()
-        {
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        currentFile = e.File;
+        fileChanged = true;
+        await ProcessCurrentFile();
+    }
+
+    private async Task ProcessCurrentFile()
+    {
+        try{
             if (RecipeID != null && RecipeID != 0)
             {
                 (int code, string newMd5) = await fileManager.InsertFile(currentFile, 200000);
@@ -79,7 +82,13 @@
             else
             {
                 message = "The file will be stored when the recipe is saved.";
+
             }
+        }
+        catch
+        {
+            error = true;
+        }
         }
 
         private void RecipeIDProvided()

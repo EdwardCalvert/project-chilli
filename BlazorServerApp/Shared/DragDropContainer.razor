@@ -1,0 +1,20 @@
+﻿<div>
+    <CascadingValue Value="this">
+        @ChildContent
+    </CascadingValue>
+</div>
+
+@code {
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+
+
+    [Parameter] public string? textBeingDragged { get; set; }
+    [Parameter] public Dictionary<string, bool> Checkboxes { get; set; }
+
+    //return Checkboxes.Where(x => x.Value).Select(x=>x.Key).ToList();
+
+
+
+}

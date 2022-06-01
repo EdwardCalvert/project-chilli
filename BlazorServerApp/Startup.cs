@@ -58,7 +58,7 @@ namespace BlazorServerApp
             services.AddSingleton<IRecipeDataLoader, RecipeDataLoader>();
             services.AddSingleton<IFileManger, FileManager>();
             services.AddSingleton<IRecipeProcessorService, RecipeProcessorService>();
-            services.AddSingleton<IWordsAPIService, WordsAPIService>();
+            services.AddSingleton<IWordsAPIService, WordsAPIService>(); 
             services.AddTransient<INounExtractor, BasicNounExtractor>();
             services.AddTransient<ITextProcessor, TextProcessor.TextProcessor>();
             services.AddTransient<IEmailSender, EmailSender>();

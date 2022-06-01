@@ -6,29 +6,16 @@
 @using BlazorServerApp.WordsAPI
 @using System.Timers
 
-@*@if (mode == MODES.Create)
-{
-    <h3>Paste text and auotmatically insert into the recipe</h3>
-    <p>(this will override the current text of the form)</p>
-
-    @if (runningPatternRecognition)
-    {
-        <LoadingElement></LoadingElement>
-    }
-    else
-    {
-        <textarea type="text" class="form-control" name="x" placeholder="Enter text" @bind-value="@textArea" @bind-value:event="oninput" readonly="@PreventTextboxEdit"></textarea>
-    }
-}*@
 @if (mode != MODES.BulkUpload)
 {
 <CascadingValue Value="@RecipeModel.RecipeID">
-    <FileUploadWidget ></FileUploadWidget>
+    <FileUploadWidge error="@error" ></FileUploadWidge>
 </CascadingValue>
 }
 
 <ErrorNotification ErrorMessage="@ErrorMessage" Show="@error" />
-<table cellspacing="0" id="NewRecipeForm" style="width:100%;border-collapse:collapse;">
+<table cellspacing="0" id="NewRecipeForm" style="width:100%;border-collapse:collapse;" ondragover="event.preventDefault();"
+	ondragstart="event.dataTransfer.setData('', event.target.id);">
     <tbody>
         <tr>
             <td colspan="2">
@@ -58,7 +45,7 @@
 
                                     <div class="FieldData">
 
-                                        <InputText  style="width: 100%;" @bind-Value="ing.IngredientName"  placeholder="Enter one ingredient here..." ></InputText>
+                                        <InputText  style="width: 100%;" @bind-Value="ing.IngredientName"  placeholder="Enter one ingredient here..." @ondrop="(()=> HandleIngredientDrop(ing))" ></InputText>
                                         <TagManager Ingredient="ing"></TagManager>
                                         
                                         <ValidationMessage For="() =>RecipeModel.Ingredients" />
@@ -209,6 +196,9 @@
     [Parameter]
     public Recipe RecipeModel { get; set; }
 
+    [CascadingParameter] 
+    public DragDropContainer? dragDropContainer { get; set; }
+
     [Parameter]
     public MODES mode { get; set; }
     private Timer _debounceTimer;
@@ -224,7 +214,7 @@
     string ErrorMessage = "";
 
     string _textAre = "";
-    string textArea { get { return _textAre; } set { _textAre = value; ProcessRecipeFromText(); } }
+    string textArea { get { return _textAre; } set { _textAre = value;  ProcessRecipeFromText(); } }
 
     Equipment addEquipmentModel { get; set; } = new();
 
@@ -237,6 +227,26 @@
         Edit,
         Create,
         BulkUpload
+    }
+
+    private void HandleIngredientDrop(Ingredient i)
+    {
+        if (dragDropContainer != null && dragDropContainer.textBeingDragged != null)
+        {
+
+            i.IngredientName = dragDropContainer.textBeingDragged;
+            DeselectCheckboxes();
+        }
+        else{
+            Console.WriteLine("Can't drop");
+        }
+    }
+    private void DeselectCheckboxes()
+    {
+        foreach(string key in dragDropContainer.Checkboxes.Keys)
+        {
+            dragDropContainer.Checkboxes[key] = false;
+        }
     }
 
     private async Task HandleEquipmentSubmit()
@@ -264,12 +274,18 @@
                 uint recipeID = await dataLoader.InsertRecipeAndRelatedFields(RecipeModel);
                 RecipeModel.RecipeID = recipeID;
                 StateHasChanged();
-                NavManager.NavigateTo($"/Recipe/{recipeID}");
+                if (!error)
+                {
+                    NavManager.NavigateTo($"/Recipe/{recipeID}");
+                }
             }
             else if (mode == MODES.Edit)
             {
                 await dataLoader.UpdateRecipe(RecipeModel);
-                NavManager.NavigateTo($"/Recipe/{RecipeModel.RecipeID}");
+                if (!error)
+                {
+                    NavManager.NavigateTo($"/Recipe/{RecipeModel.RecipeID}");
+                }
             }
             else if (mode == MODES.BulkUpload)
             {
