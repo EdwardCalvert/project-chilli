@@ -1,0 +1,31 @@
+﻿<div class="col-12 col-lg-6">
+                    <a href="/Recipe/@model.RecipeID" class="No-Decoration " style="color:black;">
+                        <div class="card m-3 RecipeCard">
+                            <h4 class="card-header">@model.RecipeName.SentenceCase() @(model.MealType == null? "unknown": $"({model.MealType})")</h4>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><ReviewSummary DisplayReviewModel="@model.Reviews" /></li>
+                                <li class="list-group-item">
+                                    @if (model.Description != null)
+                                    {
+                                        <p>Descritption: @model.ShowShortDescription()</p>
+                                    }
+                                </li>
+                                <li class="list-group-item">Cooking time: @model.CookingTime minutes</li>
+                                <li class="list-group-item">Preperation time: @model.PreperationTime mintues</li>
+                                <li class="list-group-item">Serves: @(model.Servings == 0?"unkown":model.Servings)</li>
+                                <li class="list-group-item">Difficulty: @(model.Difficulty == null? "unknown":model.Difficulty)</li>
+                                <li class="list-group-item">
+                                    <IngredientsTag @bind-ingredients="model.Ingredients"></IngredientsTag>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </a>
+                </div>
+
+                <td></td>
+@code{
+    [Parameter] public Recipe model { get; set; }
+            
+
+}
